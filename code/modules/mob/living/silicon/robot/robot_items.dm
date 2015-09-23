@@ -138,3 +138,31 @@ exhausted their entire supply of. Also forms a handy base item for a recharging 
 	else
 		stack = new stacktype(src, min(count, refill_cap))
 	stack.update_icon()
+
+/* A handy stack handler for items that should replenish while in a cyborg's grasp
+I intend for this to only be for items without a severe effect on the world.
+Things this would be used for:
+* Nanopaste
+* Trauma/burn kits
+
+Things this would NOT be used for:
+* Material sheets
+
+*/
+/obj/item/borg/robot_stack/recharging
+    name = "A recharging stack"
+    desc = "If you're seeing this, something went very, very wronger."
+    var/charge_tick = 0
+    var/charge_cost
+    var/recharge_time
+    
+/obj/item/borg/robot_stack/recharging/process()
+    charge_tick++
+    if (charge_tick < recharge_time) return
+    charge_tick = 0
+    
+    if (isrobot(src.loc))
+        var/mob/living/silicon/robot = src.loc
+        if (R && R.cell)
+            if (stack.amount < refill_cap && R.cell.use(charge_cost))
+                replenish(1)
