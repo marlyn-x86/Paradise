@@ -99,7 +99,7 @@ A general-purpose stack item that can be used to let cyborgs and drones pick up 
 exhausted their entire supply of. Also forms a handy base item for a recharging stack.
 */
 /obj/item/borg/robot_stack
-    var/obj/item/stack/stack
+    var/obj/item/stack/stack = null
     var/stacktype = ""
     var/refill_cap // This is the limit for standard cyborg recharging. Collecting extra items can bring you above this.
     
@@ -138,6 +138,9 @@ exhausted their entire supply of. Also forms a handy base item for a recharging 
 	else
 		stack = new stacktype(src, min(count, refill_cap))
 	stack.update_icon()
+	if (stack.amount == refill_cap)
+		// There should probably be a better message here
+		M << "<span class='notics'>\System notice: [stack.name] fully restocked.</span>"
 
 /* A handy stack handler for items that should replenish while in a cyborg's grasp
 I intend for this to only be for items without a severe effect on the world.
@@ -166,3 +169,33 @@ Things this would NOT be used for:
         if (R && R.cell)
             if (stack.amount < refill_cap && R.cell.use(charge_cost))
                 replenish(1)
+
+// Special item stacks for the medical borg
+/obj/item/stack/nanopaste/mediborg
+    name = "medical nanopaste"
+    desc = "A tube of paste containing swarms of repair nanites. Very effective in repairing robotic machinery. This particular tube is engineered specifically for medical situations."
+    origin_tech = null
+    
+/obj/item/stack/nanopaste/mediborg/attack(mob/living/M as mob, mob/usr as mob)
+    if (istype(M, /mob/living/silicon/robot))
+        user << "<span class='danger'>This tube doesn't work on cyborgs!</span>"
+        return 1
+    return ..()
+    
+/obj/item/robot_stack/recharging/mediborg_nanopaste
+	stacktype = /obj/item/stack/nanopaste/mediborg
+    charge_cost = 150 // A fuzzy value for now.
+    recharge_time = 150
+    refill_cap = 5
+
+/obj/item/robot_stack/recharging/mediborg_trauma
+	stacktype = /obj/item/stack/medical/advanced/bruise_pack
+	charge_cost = 150
+	recharge_time = 150
+	refill_cap = 5	
+
+/obj/item/robot_stack/recharging/mediborg_burn
+	stacktype = /obj/item/stack/medical/advanced/ointment
+	charge_cost = 150
+	recharge_time = 150
+	refill_cap = 5
