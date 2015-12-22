@@ -105,6 +105,15 @@
 /obj/machinery/power/apc/noalarm
 	report_power_alarm = 0
 
+/obj/item/weapon/apc_electronics
+	name = "power control module"
+	desc = "Heavy-duty switching circuits for power control."
+	icon = 'icons/obj/module.dmi'
+	icon_state = "power_mod"
+	w_class = 2.0
+	item_state = "electronic"
+	flags = CONDUCT
+
 /obj/machinery/power/apc/connect_to_network()
 	//Override because the APC does not directly connect to the network; it goes through a terminal.
 	//The terminal is what the power computer looks for anyway.
@@ -160,6 +169,7 @@
 	wires = null
 	if(cell)
 		qdel(cell) // qdel
+		cell = null
 	if(terminal)
 		disconnect_terminal()
 	return ..()
@@ -420,7 +430,7 @@
 						user.visible_message(\
 							"<span class='warning'>[user.name] has removed the power control board from [src.name]!</span>",\
 							"<span class='notice'>You remove the power control board.</span>")
-						new /obj/item/weapon/module/power_control(loc)
+						new /obj/item/weapon/apc_electronics(loc)
 		else if (opened!=2) //cover isn't removed
 			opened = 0
 			update_icon()
@@ -505,7 +515,7 @@
 				var/turf/T = get_turf(src)
 				var/obj/structure/cable/N = T.get_cable_node()
 				if (prob(50) && electrocute_mob(usr, N, N))
-					var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+					var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 					s.set_up(5, 1, src)
 					s.start()
 					return
@@ -524,14 +534,14 @@
 		if(do_after(user, 50, target = src))
 			if(terminal && opened && has_electronics!=2)
 				if (prob(50) && electrocute_mob(usr, terminal.powernet, terminal))
-					var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+					var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 					s.set_up(5, 1, src)
 					s.start()
 					return
 				new /obj/item/stack/cable_coil(loc,10)
 				user << "<span class='notice'>You cut the cables and dismantle the power terminal.</span>"
 				qdel(terminal) // qdel
-	else if (istype(W, /obj/item/weapon/module/power_control) && opened && has_electronics==0 && !((stat & BROKEN) || malfhack))
+	else if (istype(W, /obj/item/weapon/apc_electronics) && opened && has_electronics==0 && !((stat & BROKEN) || malfhack))
 		user << "You trying to insert the power control board into the frame..."
 		playsound(src.loc, 'sound/items/Deconstruct.ogg', 50, 1)
 		if(do_after(user, 10, target = src))
@@ -539,7 +549,7 @@
 				has_electronics = 1
 				user << "<span class='notice'>You place the power control board inside the frame.</span>"
 				qdel(W) // qdel
-	else if (istype(W, /obj/item/weapon/module/power_control) && opened && has_electronics==0 && ((stat & BROKEN) || malfhack))
+	else if (istype(W, /obj/item/weapon/apc_electronics) && opened && has_electronics==0 && ((stat & BROKEN) || malfhack))
 		user << "<span class='warning'>You cannot put the board inside, the frame is damaged.</span>"
 		return
 	else if (istype(W, /obj/item/weapon/weldingtool) && opened && has_electronics==0 && !terminal)
@@ -644,7 +654,7 @@
 		var/mob/living/carbon/human/H = user
 		if(!isnull(H.internal_organs_by_name["cell"]) && H.a_intent == I_GRAB)
 			if(emagged || stat & BROKEN)
-				var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+				var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 				s.set_up(3, 1, src)
 				s.start()
 				H << "<span class='warning'>The APC power currents surge erratically, damaging your chassis!</span>"
@@ -1045,7 +1055,7 @@
 		src.occupier.mind.transfer_to(src.occupier.parent)
 		src.occupier.parent.adjustOxyLoss(src.occupier.getOxyLoss())
 		src.occupier.parent.cancel_camera()
-		del(src.occupier) // qdel
+		qdel(src.occupier) // qdel
 		if (seclevel2num(get_security_level()) == SEC_LEVEL_DELTA)
 			for(var/obj/item/weapon/pinpointer/point in world)
 				for(var/datum/mind/AI_mind in ticker.mode.malf_ai)
@@ -1074,11 +1084,11 @@
 				cell.corrupt()
 				src.malfhack = 1
 				update_icon()
-				var/datum/effect/effect/system/harmless_smoke_spread/smoke = new /datum/effect/effect/system/harmless_smoke_spread()
+				var/datum/effect/system/harmless_smoke_spread/smoke = new /datum/effect/system/harmless_smoke_spread()
 				smoke.set_up(3, 0, src.loc)
 				smoke.attach(src)
 				smoke.start()
-				var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+				var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 				s.set_up(3, 1, src)
 				s.start()
 				for(var/mob/M in viewers(src))
@@ -1113,9 +1123,12 @@
 	if(!area.requires_power)
 		return
 
-	lastused_light = area.usage(LIGHT)
+	lastused_light = area.usage(STATIC_LIGHT)
+	lastused_light += area.usage(LIGHT)
 	lastused_equip = area.usage(EQUIP)
+	lastused_equip += area.usage(STATIC_EQUIP)
 	lastused_environ = area.usage(ENVIRON)
+	lastused_environ += area.usage(STATIC_ENVIRON)
 	area.clear_usage()
 
 	lastused_total = lastused_light + lastused_equip + lastused_environ

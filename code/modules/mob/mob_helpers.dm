@@ -137,7 +137,17 @@ proc/isembryo(A)
 		return 1
 	return 0
 
-proc/isobserver(A)
+/proc/isswarmer(A)
+	if(istype(A, /mob/living/simple_animal/hostile/swarmer))
+		return 1
+	return 0
+
+/proc/isguardian(A)
+	if(istype(A, /mob/living/simple_animal/hostile/guardian))
+		return 1
+	return 0
+
+/proc/isobserver(A)
 	if(istype(A, /mob/dead/observer))
 		return 1
 	return 0
@@ -505,18 +515,18 @@ var/list/intents = list(I_HELP,I_DISARM,I_GRAB,I_HARM)
 				name = realname
 
 	for(var/mob/M in player_list)
-		if(M.client && ((!istype(M, /mob/new_player) && M.stat == DEAD) || check_rights(R_MOD,0,M)) && (M.client.prefs.toggles & CHAT_DEAD))
+		if(M.client && ((!istype(M, /mob/new_player) && M.stat == DEAD) || check_rights(R_ADMIN|R_MOD,0,M)) && (M.client.prefs.toggles & CHAT_DEAD))
 			var/follow
 			var/lname
 			if(subject)
 				if(subject != M)
 					follow = "([ghost_follow_link(subject, ghost=M)]) "
-				if(M.stat != DEAD && M.client.holder)
+				if(M.stat != DEAD && check_rights(R_ADMIN|R_MOD,0,M))
 					follow = "([admin_jump_link(subject, M.client.holder)]) "
 				var/mob/dead/observer/DM
 				if(istype(subject, /mob/dead/observer))
 					DM = subject
-				if(check_rights(R_MOD,0,M)) 							// What admins see
+				if(check_rights(R_ADMIN|R_MOD,0,M)) 							// What admins see
 					lname = "[keyname][(DM && DM.anonsay) ? "*" : (DM ? "" : "^")] ([name])"
 				else
 					if(DM && DM.anonsay)						// If the person is actually observer they have the option to be anonymous

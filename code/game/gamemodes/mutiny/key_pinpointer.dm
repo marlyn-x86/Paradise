@@ -13,7 +13,7 @@
 			mode = 1
 			active = 1
 			target = mutiny.captains_key
-			workobj()
+			point_at(target)
 			usr << "\blue You calibrate \the [src] to locate the Captain's Authentication Key."
 		if (1)
 			mode = 2
@@ -33,17 +33,3 @@
 			user << "It is calibrated for the Emergency Secondary Authentication Key."
 		else
 			user << "It is switched off."
-
-/datum/supply_packs/key_pinpointer
-	name = "Authentication Key Pinpointer crate"
-	contains = list(/obj/item/weapon/pinpointer/advpinpointer/auth_key)
-	cost = 250
-	containertype = /obj/structure/closet/crate
-	containername = "Authentication Key Pinpointer crate"
-	access = access_heads
-	group = "Operations"
-
-	New()
-		// This crate is only accessible during mutiny rounds
-		if (istype(ticker.mode,/datum/game_mode/mutiny))
-			..()

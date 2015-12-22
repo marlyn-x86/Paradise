@@ -8,9 +8,9 @@ var/global/list/side_effects = list()				//list of all medical sideeffects types
 var/global/list/mechas_list = list()				//list of all mechs. Used by hostile mobs target tracking.
 var/global/list/spacepods_list = list()				//list of all space pods. Used by hostile mobs target tracking.
 var/global/list/joblist = list()					//list of all jobstypes, minus borg and AI
-var/global/list/flag_list = list()					//list of flags during Nations gamemode
 var/global/list/airlocks = list()					//list of all airlocks
 var/global/list/singularities = list()				//list of all singularities
+var/global/list/janitorial_equipment = list()		//list of janitorial equipment
 
 var/global/list/aibots = list() // AI controlled bots
 var/global/list/table_recipes = list() //list of all table craft recipes
@@ -26,3 +26,4 @@ var/global/list/power_monitors = list()
 
 var/global/list/tracking_implants = list()			//list of all tracking implants to work out what treks everyone are on. Sadly not on lavaworld not implemented...
 var/global/list/beacons = list()
+var/global/list/shuttle_caller_list = list()  		//list of all communication consoles and AIs, for automatic shuttle calls when there are none.

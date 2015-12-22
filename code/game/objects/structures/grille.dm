@@ -36,10 +36,6 @@
 	//height=42
 	icon='icons/fence-ns.dmi'
 
-/obj/structure/grille/Destroy()
-	..()
-	return QDEL_HINT_PUTINPOOL //pool grilles
-
 /obj/structure/grille/ex_act(severity)
 	qdel(src)
 
@@ -220,11 +216,11 @@
 			icon_state = "brokengrille"
 			density = 0
 			destroyed = 1
-			PoolOrNew(/obj/item/stack/rods,loc)
+			new /obj/item/stack/rods(loc)
 
 		else
 			if(health <= -6)
-				PoolOrNew(/obj/item/stack/rods,loc)
+				new /obj/item/stack/rods(loc)
 				qdel(src)
 				return
 	return
@@ -243,7 +239,7 @@
 	var/obj/structure/cable/C = T.get_cable_node()
 	if(C)
 		if(electrocute_mob(user, C, src))
-			var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+			var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 			s.set_up(3, 1, src)
 			s.start()
 			return 1

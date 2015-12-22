@@ -258,8 +258,8 @@
 		new /obj/item/weapon/implantcase/death_alarm(src)
 		new /obj/item/weapon/implantcase/death_alarm(src)
 		new /obj/item/weapon/implantcase/death_alarm(src)
+		new /obj/item/weapon/implantcase/death_alarm(src)
 		new /obj/item/weapon/implanter(src)
-		new /obj/item/weapon/implantpad(src)
 
 
 /obj/item/weapon/storage/box/rxglasses
@@ -644,3 +644,33 @@
 		new /obj/item/weapon/light/tube(src)
 	for(var/i = 0; i < 7; i++)
 		new /obj/item/weapon/light/bulb(src)
+
+/obj/item/weapon/storage/box/barber
+	name = "Barber Starter Kit"
+	desc = "For all hairstyling needs."
+	icon_state = "implant"
+
+/obj/item/weapon/storage/box/barber/New()
+	..()
+	new /obj/item/weapon/scissors/barber(src)
+	new /obj/item/hair_dye_bottle(src)
+	new /obj/item/weapon/reagent_containers/glass/bottle/reagent/hairgrownium(src)
+	new /obj/item/weapon/reagent_containers/glass/bottle/reagent/hair_dye(src)
+	new /obj/item/weapon/reagent_containers/glass/bottle/reagent(src)
+	new /obj/item/weapon/reagent_containers/dropper(src)
+	new /obj/item/clothing/mask/fakemoustache(src) //totally necessary for successful barbering -Fox
+
+/obj/item/weapon/storage/box/lip_stick
+	name = "Lipstick Kit"
+	desc = "For all your lip coloring needs."
+	icon_state = "implant"
+
+/obj/item/weapon/storage/box/lip_stick/New()
+	..()
+	new /obj/item/weapon/lipstick(src)
+	new /obj/item/weapon/lipstick/purple(src)
+	new /obj/item/weapon/lipstick/jade(src)
+	new /obj/item/weapon/lipstick/black(src)
+	new /obj/item/weapon/lipstick/green(src)
+	new /obj/item/weapon/lipstick/blue(src)
+	new /obj/item/weapon/lipstick/white(src)

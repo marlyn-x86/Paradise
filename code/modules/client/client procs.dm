@@ -1,6 +1,9 @@
 	////////////
 	//SECURITY//
 	////////////
+//debugging, uncomment for viewing topic calls
+//#define TOPIC_DEBUGGING 1
+
 #define TOPIC_SPAM_DELAY	2		//2 ticks is about 2/10ths of a second; it was 4 ticks, but that caused too many clicks to be lost due to lag
 #define UPLOAD_LIMIT		10485760	//Restricts client uploads to the server to 10MB //Boosted this thing. What's the worst that can happen?
 #define MIN_CLIENT_VERSION	0		//Just an ambiguously low version for now, I don't want to suddenly stop people playing.
@@ -22,6 +25,20 @@
 	*/
 /client/Topic(href, href_list, hsrc)
 	if(!usr || usr != mob)	//stops us calling Topic for somebody else's client. Also helps prevent usr=null
+		return
+
+	#if defined(TOPIC_DEBUGGING)
+	world << "[src]'s Topic: [href] destined for [hsrc]."
+
+	if(href_list["nano_err"]) //nano throwing errors
+		world << "## NanoUI, Subject [src]: " + html_decode(href_list["nano_err"]) //NANO DEBUG HOOK
+
+	#endif
+
+	if(href_list["asset_cache_confirm_arrival"])
+		//src << "ASSET JOB [href_list["asset_cache_confirm_arrival"]] ARRIVED."
+		var/job = text2num(href_list["asset_cache_confirm_arrival"])
+		completed_asset_jobs += job
 		return
 
 	//Reduces spamming of links by dropping calls that happen during the delay period
@@ -220,8 +237,6 @@
 	///////////
 /client/New(TopicData)
 	TopicData = null							//Prevent calls to client.Topic from connect
-	client_cache += src
-	client_cache[src] = list()
 
 	if(connection != "seeker")					//Invalid connection type.
 		return null
@@ -272,7 +287,7 @@
 
 	if(holder)
 		add_admin_verbs()
-		admin_memo_show()
+		admin_memo_output("Show", 0, 1)
 
 	// Forcibly enable hardware-accelerated graphics, as we need them for the lighting overlays.
 	// (but turn them off first, since sometimes BYOND doesn't turn them on properly otherwise)
@@ -283,14 +298,29 @@
 
 	log_client_to_db()
 
+	if (ckey in clientmessages)
+		for (var/message in clientmessages[ckey])
+			src << message
+		clientmessages.Remove(ckey)
+
 	if (config && config.autoconvert_notes)
-		convert_notes_sql(ckey)	
-	
+		convert_notes_sql(ckey)
+
+
 	send_resources()
 
-	//////////////
-	//DISCONNECT//
-	//////////////
+	if(!void)
+		void = new()
+
+	screen += void
+
+	if(!winexists(src, "asset_cache_browser")) // The client is using a custom skin, tell them.
+		src << "<span class='warning'>Unable to access asset cache browser, if you are using a custom skin file, please allow DS to download the updated version, if you are not, then make a bug report. This is not a critical issue but can cause issues with resource downloading, as it is impossible to know when extra resources arrived to you.</span>"
+
+
+//////////////
+//DISCONNECT//
+//////////////
 /client/Del()
 	if(holder)
 		holder.owner = null
@@ -392,9 +422,9 @@
 		'html/search.js', // Used in various non-NanoUI HTML windows for search functionality
 		'html/panels.css' // Used for styling certain panels, such as in the new player panel
 	)
-
-	// Send NanoUI resources to this client
-	spawn nanomanager.send_resources(src)
+	spawn (10)
+		//Precache the client with all other assets slowly, so as to not block other browse() calls
+		getFilesSlow(src, asset_cache, register_asset = FALSE)
 
 //For debugging purposes
 /client/proc/list_all_languages()

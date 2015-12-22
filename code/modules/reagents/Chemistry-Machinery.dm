@@ -191,7 +191,7 @@
 	if(href_list["ejectBeaker"])
 		if(beaker)
 			var/obj/item/weapon/reagent_containers/glass/B = beaker
-			B.loc = loc
+			B.forceMove(loc)
 			beaker = null
 			overlays.Cut()
 	add_fingerprint(usr)
@@ -202,25 +202,29 @@
 		return
 
 	if(broken_requirements.len && B.type == broken_requirements[1])
-		broken_requirements -= broken_requirements[1]
-		user << "<span class='notice'>You fix [src].</span>"
 		if(istype(B,/obj/item/stack))
 			var/obj/item/stack/S = B
 			S.use(1)
 		else
-			user.drop_item()
+			if(!user.drop_item())
+				user << "<span class='warning'>\The [B] is stuck to you!</span>"
+				return
 			qdel(B)
+		broken_requirements -= broken_requirements[1]
+		user << "<span class='notice'>You fix [src].</span>"
 		return
 
 	if(src.beaker)
-		user << "Something is already loaded into the machine."
+		user << "<span class='warning'>Something is already loaded into the machine.</span>"
 		return
 
 	if(istype(B, /obj/item/weapon/reagent_containers/glass) || istype(B, /obj/item/weapon/reagent_containers/food/drinks))
 		src.beaker =  B
-		user.drop_item()
-		B.loc = src
-		user << "You set [B] on the machine."
+		if(!user.drop_item())
+			user << "<span class='warning'>\The [B] is stuck to you!</span>"
+			return
+		B.forceMove(src)
+		user << "<span class='notice'>You set [B] on the machine.</span>"
 		nanomanager.update_uis(src) // update all UIs attached to src
 		if(!icon_beaker)
 			icon_beaker = image('icons/obj/chemical.dmi', src, "disp_beaker") //randomize beaker overlay position.
@@ -356,16 +360,16 @@
 		playsound(src, 'sound/items/Ratchet.ogg', 50, 1)
 		if(anchored)
 			anchored = 0
-			user << "<span class='caution'>The [src] can now be moved.</span>"
+			user << "<span class='caution'>\The [src] can now be moved.</span>"
 		else if(!anchored)
 			anchored = 1
-			user << "<span class='caution'>The [src] is now secured.</span>"
+			user << "<span class='caution'>\The [src] is now secured.</span>"
 
 	if(panel_open)
 		if(istype(I, /obj/item/weapon/crowbar))
 			if(beaker)
 				var/obj/item/weapon/reagent_containers/glass/B = beaker
-				B.loc = loc
+				B.forceMove(loc)
 				beaker = null
 			default_deconstruction_crowbar(I)
 			return 1
@@ -374,7 +378,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /obj/machinery/chem_master
-	name = "ChemMaster 3000"
+	name = "\improper ChemMaster 3000"
 	density = 1
 	anchored = 1
 	icon = 'icons/obj/chemical.dmi'
@@ -425,25 +429,29 @@
 	if(istype(B, /obj/item/weapon/reagent_containers/glass) || istype(B, /obj/item/weapon/reagent_containers/food/drinks/drinkingglass))
 
 		if(src.beaker)
-			user << "A beaker is already loaded into the machine."
+			user << "<span class='warning'>A beaker is already loaded into the machine.</span>"
+			return
+		if(!user.drop_item())
+			user << "<span class='warning'>\The [B] is stuck to you!</span>"
 			return
 		src.beaker = B
-		user.drop_item()
-		B.loc = src
-		user << "You add the beaker to the machine!"
+		B.forceMove(src)
+		user << "<span class='notice'>You add the beaker to the machine!</span>"
 		src.updateUsrDialog()
 		icon_state = "mixer1"
 
 	else if(istype(B, /obj/item/weapon/storage/pill_bottle))
 
 		if(src.loaded_pill_bottle)
-			user << "A pill bottle is already loaded into the machine."
+			user << "<span class='warning'>A pill bottle is already loaded into the machine.</span>"
 			return
 
+		if(!user.drop_item())
+			user << "<span class='warning'>\The [B] is stuck to you!</span>"
+			return
 		src.loaded_pill_bottle = B
-		user.drop_item()
-		B.loc = src
-		user << "You add the pill bottle into the dispenser slot!"
+		B.forceMove(src)
+		user << "<span class='notice'>You add the pill bottle into the dispenser slot!</span>"
 		src.updateUsrDialog()
 	return
 
@@ -457,7 +465,7 @@
 
 	if (href_list["ejectp"])
 		if(loaded_pill_bottle)
-			loaded_pill_bottle.loc = src.loc
+			loaded_pill_bottle.forceMove(src.loc)
 			loaded_pill_bottle = null
 	else if(href_list["close"])
 		usr << browse(null, "window=chem_master")
@@ -561,12 +569,19 @@
 		else if (href_list["createpill"] || href_list["createpill_multiple"])
 			if(!condi)
 				var/count = 1
-				if (href_list["createpill_multiple"]) count = isgoodnumber(input("Select the number of pills to make.", 10, pillamount) as num)
+				if (href_list["createpill_multiple"])
+					count = input("Select the number of pills to make.", 10, pillamount) as num|null
+					if(count == null)
+						return
+					count = isgoodnumber(count)
 				if (count > 20) count = 20	//Pevent people from creating huge stacks of pills easily. Maybe move the number to defines?
 				if (count <= 0) return
 				var/amount_per_pill = reagents.total_volume/count
 				if (amount_per_pill > 50) amount_per_pill = 50
-				var/name = reject_bad_text(input(usr,"Name:","Name your pill!","[reagents.get_master_reagent_name()] ([amount_per_pill] units)"))
+				var/name = input(usr,"Name:","Name your pill!","[reagents.get_master_reagent_name()] ([amount_per_pill] units)") as text|null
+				if(!name)
+					return
+				name = reject_bad_text(name)
 				while (count--)
 					var/obj/item/weapon/reagent_containers/pill/P = new/obj/item/weapon/reagent_containers/pill(src.loc)
 					if(!name) name = reagents.get_master_reagent_name()
@@ -577,10 +592,13 @@
 					reagents.trans_to(P,amount_per_pill)
 					if(src.loaded_pill_bottle)
 						if(loaded_pill_bottle.contents.len < loaded_pill_bottle.storage_slots)
-							P.loc = loaded_pill_bottle
+							P.forceMove(loaded_pill_bottle)
 							src.updateUsrDialog()
 			else
-				var/name = reject_bad_text(input(usr,"Name:","Name your bag!",reagents.get_master_reagent_name()))
+				var/name = input(usr,"Name:","Name your bag!",reagents.get_master_reagent_name()) as text|null
+				if(!name)
+					return
+				name = reject_bad_text(name)
 				var/obj/item/weapon/reagent_containers/food/condiment/pack/P = new/obj/item/weapon/reagent_containers/food/condiment/pack(src.loc)
 				if(!name) name = reagents.get_master_reagent_name()
 				P.originalname = name
@@ -590,11 +608,20 @@
 		else if (href_list["createpatch"] || href_list["createpatch_multiple"])
 			if(!condi)
 				var/count = 1
-				if (href_list["createpatch_multiple"]) count = isgoodnumber(input("Select the number of patches to make.", 10, patchamount) as num)
+				if (href_list["createpatch_multiple"])
+					count = input("Select the number of patches to make.", 10, patchamount) as num|null
+					if(count == null)
+						return
+					count = isgoodnumber(count)
+				if(!count || count <= 0)
+					return
 				if (count > 20) count = 20	//Pevent people from creating huge stacks of patches easily. Maybe move the number to defines?
 				var/amount_per_patch = reagents.total_volume/count
 				if (amount_per_patch > 40) amount_per_patch = 40
-				var/name = reject_bad_text(input(usr,"Name:","Name your patch!","[reagents.get_master_reagent_name()] ([amount_per_patch] units)"))
+				var/name = input(usr,"Name:","Name your patch!","[reagents.get_master_reagent_name()] ([amount_per_patch] units)") as text|null
+				if(!name)
+					return
+				name = reject_bad_text(name)
 				while (count--)
 					var/obj/item/weapon/reagent_containers/pill/patch/P = new/obj/item/weapon/reagent_containers/pill/patch(src.loc)
 					if(!name) name = reagents.get_master_reagent_name()
@@ -604,7 +631,10 @@
 					reagents.trans_to(P,amount_per_patch)
 		else if (href_list["createbottle"])
 			if(!condi)
-				var/name = reject_bad_text(input(usr,"Name:","Name your bottle!",reagents.get_master_reagent_name()))
+				var/name = input(usr,"Name:","Name your bottle!",reagents.get_master_reagent_name()) as text|null
+				if(!name)
+					return
+				name = reject_bad_text(name)
 				var/obj/item/weapon/reagent_containers/glass/bottle/P = new/obj/item/weapon/reagent_containers/glass/bottle(src.loc)
 				if(!name) name = reagents.get_master_reagent_name()
 				P.name = "[name] bottle"
@@ -726,12 +756,12 @@
 
 
 /obj/machinery/chem_master/condimaster
-	name = "CondiMaster 3000"
+	name = "\improper CondiMaster 3000"
 	condi = 1
 
 /obj/machinery/reagentgrinder
 
-	name = "All-In-One Grinder"
+	name = "\improper All-In-One Grinder"
 	icon = 'icons/obj/kitchen.dmi'
 	icon_state = "juicer1"
 	layer = 2.9
@@ -769,7 +799,7 @@
 		"deathnettle" = list("facid" = 0),
 		"soybeans" = list("soymilk" = 0),
 		"tomato" = list("ketchup" = 0),
-		///obj/item/weapon/reagent_containers/food/snacks/grown/wheat = list("flour" = -5),
+		"wheat" = list("flour" = -5),
 		"rice" = list("rice" = -5),
 		"cherries" = list("cherryjelly" = 0),
 	)
@@ -812,15 +842,17 @@
 		if (beaker)
 			return 1
 		else
+			if(!user.drop_item())
+				user << "<span class='warning'>\The [O] is stuck to you!</span>"
+				return
 			src.beaker =  O
-			user.drop_item()
-			O.loc = src
+			O.forceMove(src)
 			update_icon()
 			src.updateUsrDialog()
 			return 0
 
 	if(holdingitems && holdingitems.len >= limit)
-		usr << "The machine cannot hold anymore items."
+		usr << "<span class='warning'>The machine cannot hold anymore items.</span>"
 		return 1
 
 	//Fill machine with the plantbag!
@@ -828,25 +860,25 @@
 
 		for (var/obj/item/weapon/reagent_containers/food/snacks/grown/G in O.contents)
 			O.contents -= G
-			G.loc = src
+			G.forceMove(src)
 			holdingitems += G
 			if(holdingitems && holdingitems.len >= limit) //Sanity checking so the blender doesn't overfill
-				user << "You fill the All-In-One grinder to the brim."
+				user << "<span class='notice>You fill the All-In-One grinder to the brim.</span>"
 				break
 
 		if(!O.contents.len)
-			user << "You empty the plant bag into the All-In-One grinder."
+			user << "<span class='notice'>You empty the plant bag into the All-In-One grinder.</span>"
 
 		src.updateUsrDialog()
 		return 0
 
 
 	if (!is_type_in_list(O, blend_items) && !is_type_in_list(O, juice_items))
-		user << "Cannot refine into a reagent."
+		user << "<span class='warning'>Cannot refine into a reagent.</span>"
 		return 1
 
 	user.unEquip(O)
-	O.loc = src
+	O.forceMove(src)
 	holdingitems += O
 	src.updateUsrDialog()
 	return 0
@@ -925,7 +957,7 @@
 		return
 	if (!beaker)
 		return
-	beaker.loc = src.loc
+	beaker.forceMove(src.loc)
 	beaker = null
 	update_icon()
 
@@ -937,7 +969,7 @@
 		return
 
 	for(var/obj/item/O in holdingitems)
-		O.loc = src.loc
+		O.forceMove(src.loc)
 		holdingitems -= O
 	holdingitems = list()
 

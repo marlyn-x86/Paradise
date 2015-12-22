@@ -1,12 +1,12 @@
 //This file was auto-corrected by findeclaration.exe on 25.5.2012 20:42:31
 
 /obj/machinery/computer/prisoner
-	name = "Prisoner Management"
+	name = "prisoner management console"
 	icon = 'icons/obj/computer.dmi'
 	icon_keyboard = "security_key"
 	icon_screen = "explosive"
 	req_access = list(access_armory)
-	circuit = "/obj/item/weapon/circuitboard/prisoner"
+	circuit = /obj/item/weapon/circuitboard/prisoner
 	var/id = 0.0
 	var/temp = null
 	var/status = 0
@@ -82,7 +82,7 @@
 /obj/machinery/computer/prisoner/Topic(href, href_list)
 	if(..())
 		return 1
-		
+
 	usr.set_machine(src)
 
 	if(href_list["id"])

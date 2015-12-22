@@ -1,5 +1,6 @@
 var/global/obj/effect/overlay/plmaster = null
 var/global/obj/effect/overlay/slmaster = null
+var/global/obj/effect/overlay/icemaster = null
 
 // nanomanager, the manager for Nano UIs
 var/datum/nanomanager/nanomanager = new()
@@ -48,6 +49,7 @@ var/score_allarrested = 0 // did the crew catch all the enemies alive?
 var/score_opkilled = 0 // used during nuke mode, how many operatives died?
 var/score_disc = 0 // is the disc safe and secure?
 var/score_nuked = 0 // was the station blown into little bits?
+var/score_nuked_penalty = 0 //penalty for getting blown to bits
 
 	// these ones are mainly for the stat panel
 var/score_powerbonus = 0 // if all APCs on the station are running optimally, big bonus
@@ -67,3 +69,7 @@ var/score_dmgestkey = null
 var/TAB = "&nbsp;&nbsp;&nbsp;&nbsp;"
 
 var/timezoneOffset = 0 // The difference betwen midnight (of the host computer) and 0 world.ticks.
+
+// For FTP requests. (i.e. downloading runtime logs.)
+// However it'd be ok to use for accessing attack logs and such too, which are even laggier.
+var/fileaccess_timer = 0

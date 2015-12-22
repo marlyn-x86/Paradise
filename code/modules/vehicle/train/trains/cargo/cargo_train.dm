@@ -41,23 +41,10 @@
 /obj/vehicle/train/cargo/engine/New()
 	..()
 	cell = new /obj/item/weapon/stock_parts/cell/high
-	verbs -= /atom/movable/verb/pull
 	key = new()
 	var/image/I = new(icon = 'icons/obj/vehicles.dmi', icon_state = "cargo_engine_overlay", layer = src.layer + 0.2) //over mobs
 	overlays += I
 	turn_off()	//so engine verbs are correctly set
-
-/obj/vehicle/train/cargo/engine/Move()
-	if(on && cell.charge < charge_use)
-		turn_off()
-		update_stats()
-		if(load && is_train_head())
-			load << "The drive motor briefly whines, then drones to a stop."
-
-	if(is_train_head() && !on)
-		return 0
-
-	return ..()
 
 /obj/vehicle/train/cargo/trolley/attackby(obj/item/weapon/W as obj, mob/user as mob, params)
 	if(open && istype(W, /obj/item/weapon/wirecutters))
@@ -291,10 +278,5 @@
 
 	if(!lead && !tow)
 		anchored = 0
-		if(verbs.Find(/atom/movable/verb/pull))
-			return
-		else
-			verbs += /atom/movable/verb/pull
 	else
 		anchored = 1
-		verbs -= /atom/movable/verb/pull

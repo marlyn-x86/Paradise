@@ -85,8 +85,12 @@ proc/get_radio_key_from_channel(var/channel)
 		verb = "stammers"
 		speech_problem_flag = 1
 
-	if(COMIC in mutations)
+	if(GREY in mutations)
+		message = "<span class='grey'>[message]</span>"
+
+	else if(COMIC in mutations)
 		message = "<span class='sans'>[message]</span>"
+
 
 	returns[1] = message
 	returns[2] = verb
@@ -158,9 +162,10 @@ proc/get_radio_key_from_channel(var/channel)
 
 	message = handle_autohiss(message, speaking)
 
-	var/list/handle_s = handle_speech_problems(message, verb)
-	message = handle_s[1]
-	verb = handle_s[2]
+	if(speaking && !(speaking.flags & NO_STUTTER))
+		var/list/handle_s = handle_speech_problems(message, verb)
+		message = handle_s[1]
+		verb = handle_s[2]
 
 	if(!message || message == "")
 		return 0
@@ -242,13 +247,19 @@ proc/get_radio_key_from_channel(var/channel)
 			if(M.loc && M.locs[1] in hearturfs)
 				listening |= M
 
+	var/list/speech_bubble_recipients = list()
 	var/speech_bubble_test = say_test(message)
-	var/image/speech_bubble = image('icons/mob/talk.dmi',src,"h[speech_bubble_test]")
-	spawn(30) qdel(speech_bubble)
 
 	for(var/mob/M in listening)
-		M << speech_bubble
 		M.hear_say(message, verb, speaking, alt_name, italics, src, speech_sound, sound_vol)
+		if(M.client)
+			speech_bubble_recipients.Add(M.client)
+	spawn(0)
+		if(loc && !isturf(loc))
+			var/atom/A = loc //Non-turf, let it handle the speech bubble
+			A.speech_bubble("hR[speech_bubble_test]", A.loc, speech_bubble_recipients)
+		else //Turf, leave speech bubbles to the mob
+			speech_bubble("h[speech_bubble_test]", src, speech_bubble_recipients)
 
 	for(var/obj/O in listening_obj)
 		spawn(0)
@@ -398,19 +409,23 @@ proc/get_radio_key_from_channel(var/channel)
 	watching  -= eavesdropping
 
 	//now mobs
+	var/list/speech_bubble_recipients = list()
 	var/speech_bubble_test = say_test(message)
-	var/image/speech_bubble = image('icons/mob/talk.dmi',src,"h[speech_bubble_test]")
-	spawn(30) qdel(speech_bubble)
 
 	for(var/mob/M in listening)
-		M << speech_bubble
 		M.hear_say(message, verb, speaking, alt_name, italics, src)
+		if(M.client)
+			speech_bubble_recipients.Add(M.client)
 
 	if(eavesdropping.len)
 		var/new_message = stars(message)	//hopefully passing the message twice through stars() won't hurt... I guess if you already don't understand the language, when they speak it too quietly to hear normally you would be able to catch even less.
 		for(var/mob/M in eavesdropping)
-			M << speech_bubble
 			M.hear_say(new_message, verb, speaking, alt_name, italics, src)
+			if(M.client)
+				speech_bubble_recipients.Add(M.client)
+
+	spawn(0)
+		flick_overlay(image('icons/mob/talk.dmi', src, "h[speech_bubble_test]",MOB_LAYER+1), speech_bubble_recipients, 30)
 
 	if(watching.len)
 		var/rendered = "<span class='game say'><span class='name'>[src.name]</span> [not_heard].</span>"
@@ -419,3 +434,6 @@ proc/get_radio_key_from_channel(var/channel)
 
 	log_whisper("[src.name]/[src.key] : [message]")
 	return 1
+
+/mob/living/speech_bubble(var/bubble_state = "",var/bubble_loc = src, var/list/bubble_recipients = list())
+	flick_overlay(image('icons/mob/talk.dmi', bubble_loc, bubble_state,MOB_LAYER+1), bubble_recipients, 30)

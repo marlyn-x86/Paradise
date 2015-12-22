@@ -10,8 +10,8 @@
 	var/list/datum/disease2/effectholder/effects = list()
 	var/antigen = 0 // 16 bits describing the antigens, when one bit is set, a cure with that bit can dock here
 	var/max_stage = 4
-	var/list/affected_species = list("Human","Unathi","Skrell","Tajaran","Vox","Kidan","Slime People","Grey","Diona", "Vulpkanin")
-
+	var/list/affected_species = list("Human","Unathi","Skrell","Tajaran","Vox","Kidan","Slime People","Grey","Diona", "Vulpkanin") //if this is changed, also change modules/nano/modules/virus2_creator.dm
+                                                                                                                                   //as you cannot use initial() with lists
 /datum/disease2/disease/New()
 	uniqueID = rand(0,10000)
 	..()
@@ -110,7 +110,6 @@
 	for(var/datum/disease2/effectholder/e in effects)
 		e.effect.deactivate(mob)
 	mob.virus2.Remove("[uniqueID]")
-	mob.hud_updateflag |= 1 << STATUS_HUD
 
 /datum/disease2/disease/proc/minormutate()
 	//uniqueID = rand(0,10000)

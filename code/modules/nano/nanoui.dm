@@ -96,6 +96,9 @@ nanoui is used to open and update nano browser uis
 
 	add_common_assets()
 
+	var/datum/asset/assets = get_asset_datum(/datum/asset/nanoui)
+	assets.send(user, ntemplate_filename)
+
  /**
   * Use this proc to add assets which are common to (and required by) all nano uis
   *
@@ -112,6 +115,11 @@ nanoui is used to open and update nano browser uis
 	add_script("nano_base_helpers.js") // The NanoBaseHelpers JS, this is used to set up template helpers which are common to all UIs
 	add_stylesheet("shared.css") // this CSS sheet is common to all UIs
 	add_stylesheet("icons.css") // this CSS sheet is common to all UIs
+
+	//codemirror
+	add_script("codemirror-compressed.js") // A custom compressed JS file of codemirror, with CSS highlighting
+	add_stylesheet("codemirror.css") // this CSS sheet is common to all UIs, so all UIs can use codemirror
+	add_stylesheet("cm_lesser-dark.css") //CSS styling for codemirror, dark theme
 
  /**
   * Set the current status (also known as visibility) of this ui.
@@ -174,9 +182,11 @@ nanoui is used to open and update nano browser uis
   * @return /list config data
   */
 /datum/nanoui/proc/get_config_data()
+	var/name = "[src_object]"
+	name = sanitize(name) //jQuery's parseJSON fails with byond formatting characters in the JSON
 	var/list/config_data = list(
 			"title" = title,
-			"srcObject" = list("name" = "[src_object]"),
+			"srcObject" = list("name" = name),
 			"stateKey" = state_key,
 			"status" = status,
 			"autoUpdateLayout" = auto_update_layout,
@@ -352,10 +362,11 @@ nanoui is used to open and update nano browser uis
 	var/url_parameters_json = list2json(list("src" = "\ref[src]"))
 
 	return {"
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<script type='text/javascript'>
 			function receiveUpdateData(jsonString)
 			{
@@ -364,6 +375,10 @@ nanoui is used to open and update nano browser uis
 				if (typeof NanoStateManager != 'undefined' && typeof jQuery != 'undefined')
 				{
 					NanoStateManager.receiveUpdateData(jsonString);
+				}
+				else
+				{
+					alert('browser.recieveUpdateData failed due to jQuery or NanoStateManager being unavailiable.');
 				}
 			}
 		</script>
@@ -441,7 +456,7 @@ nanoui is used to open and update nano browser uis
 
 	var/list/send_data = get_send_data(data)
 
-	//user << list2json(data) // used for debugging
+	//user << list2json_usecache(send_data) // used for debugging //NANO DEBUG HOOK
 	user << output(list2params(list(list2json_usecache(send_data))),"[window_id].browser:receiveUpdateData")
 
  /**

@@ -24,7 +24,7 @@
 	var/maint_access = 1
 	//var/dna	//dna-locking the mech
 	var/list/proc_res = list() //stores proc owners, like proc_res["functionname"] = owner reference
-	var/datum/effect/effect/system/spark_spread/spark_system = new
+	var/datum/effect/system/spark_spread/spark_system = new
 	var/lights = 0
 	var/lights_power = 6
 
@@ -74,7 +74,6 @@
 	add_cell()
 	add_iterators()
 	removeVerb(/obj/mecha/verb/disconnect_from_port)
-	removeVerb(/atom/movable/verb/pull)
 	log_message("[src.name]'s functions initialised. Work protocols active - Entering IDLE mode.")
 	loc.Entered(src)
 	return

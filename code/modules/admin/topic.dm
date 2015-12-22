@@ -9,9 +9,9 @@
 	if(ticker.mode && ticker.mode.check_antagonists_topic(href, href_list))
 		check_antagonists()
 		return
-		
+
 	if(href_list["rejectadminhelp"])
-		if(!check_rights(R_MOD))
+		if(!check_rights(R_ADMIN|R_MOD))
 			return
 		var/client/C = locate(href_list["rejectadminhelp"])
 		if(!C)
@@ -25,6 +25,9 @@
 
 		message_admins("[key_name_admin(usr)] rejected [key_name_admin(C.mob)]'s admin help")
 		log_admin("[key_name(usr)] rejected [key_name(C.mob)]'s admin help")
+
+	if(href_list["stickyban"])
+		stickyban(href_list["stickyban"],href_list)
 
 	if(href_list["makeAntag"])
 		switch(href_list["makeAntag"])
@@ -122,6 +125,17 @@
 					usr << "Not enough parameters (Requires ckey and reason)"
 					return
 				banduration = null
+				banjob = null
+			if(BANTYPE_ADMIN_PERMA)
+				if(!banckey || !banreason)
+					usr << "Not enough parameters (Requires ckey and reason)"
+					return
+				banduration = null
+				banjob = null
+			if(BANTYPE_ADMIN_TEMP)
+				if(!banckey || !banreason || !banduration)
+					usr << "Not enough parameters (Requires ckey, reason and duration)"
+					return
 				banjob = null
 
 		var/mob/playermob
@@ -247,49 +261,37 @@
 
 		switch(href_list["call_shuttle"])
 			if("1")
-				if ((!( ticker ) || !emergency_shuttle.location()))
+				if(shuttle_master.emergency.mode >= SHUTTLE_DOCKED)
 					return
-				if (emergency_shuttle.can_call())
-					emergency_shuttle.call_evac()
-					log_admin("[key_name(usr)] called the Emergency Shuttle")
-					message_admins("\blue [key_name_admin(usr)] called the Emergency Shuttle to the station", 1)
+				shuttle_master.emergency.request()
+				log_admin("[key_name(usr)] called the Emergency Shuttle")
+				message_admins("<span class='adminnotice'>[key_name_admin(usr)] called the Emergency Shuttle to the station</span>")
 
 			if("2")
-				if (!( ticker ) || !emergency_shuttle.location())
+				if(shuttle_master.emergency.mode >= SHUTTLE_DOCKED)
 					return
-				if (emergency_shuttle.can_call())
-					emergency_shuttle.call_evac()
-					log_admin("[key_name(usr)] called the Emergency Shuttle")
-					message_admins("\blue [key_name_admin(usr)] called the Emergency Shuttle to the station", 1)
+				switch(shuttle_master.emergency.mode)
+					if(SHUTTLE_CALL)
+						shuttle_master.emergency.cancel()
+						log_admin("[key_name(usr)] sent the Emergency Shuttle back")
+						message_admins("<span class='adminnotice'>[key_name_admin(usr)] sent the Emergency Shuttle back</span>")
+					else
+						shuttle_master.emergency.cancel()
+						log_admin("[key_name(usr)] called the Emergency Shuttle")
+						message_admins("<span class='adminnotice'>[key_name_admin(usr)] called the Emergency Shuttle to the station</span>")
 
-				else if (emergency_shuttle.can_recall())
-					emergency_shuttle.recall()
-					log_admin("[key_name(usr)] sent the Emergency Shuttle back")
-					message_admins("\blue [key_name_admin(usr)] sent the Emergency Shuttle back", 1)
 
-		href_list["secretsadmin"] = "check_antagonist"
+		href_list["secrets"] = "check_antagonist"
 
 	else if(href_list["edit_shuttle_time"])
 		if(!check_rights(R_SERVER))	return
 
-		if (emergency_shuttle.wait_for_launch)
-			var/new_time_left = input("Enter new shuttle launch countdown (seconds):","Edit Shuttle Launch Time", emergency_shuttle.estimate_launch_time() ) as num
-
-			emergency_shuttle.launch_time = world.time + new_time_left*10
-
-			log_admin("[key_name(usr)] edited the Emergency Shuttle's launch time to [new_time_left]")
-			message_admins("\blue [key_name_admin(usr)] edited the Emergency Shuttle's launch time to [new_time_left*10]", 1)
-		else if (emergency_shuttle.shuttle.has_arrive_time())
-
-			var/new_time_left = input("Enter new shuttle arrival time (seconds):","Edit Shuttle Arrival Time", emergency_shuttle.estimate_arrival_time() ) as num
-			emergency_shuttle.shuttle.arrive_time = world.time + new_time_left*10
-
-			log_admin("[key_name(usr)] edited the Emergency Shuttle's arrival time to [new_time_left]")
-			message_admins("\blue [key_name_admin(usr)] edited the Emergency Shuttle's arrival time to [new_time_left*10]", 1)
-		else
-			alert("The shuttle is neither counting down to launch nor is it in transit. Please try again when it is.")
-
-		href_list["secretsadmin"] = "check_antagonist"
+		var/timer = input("Enter new shuttle duration (seconds):","Edit Shuttle Timeleft", shuttle_master.emergency.timeLeft() ) as num
+		shuttle_master.emergency.setTimer(timer*10)
+		log_admin("[key_name(usr)] edited the Emergency Shuttle's timeleft to [timer] seconds")
+		minor_announcement.Announce("The emergency shuttle will reach its destination in [round(shuttle_master.emergency.timeLeft(600))] minutes.")
+		message_admins("<span class='adminnotice'>[key_name_admin(usr)] edited the Emergency Shuttle's timeleft to [timer] seconds</span>")
+		href_list["secrets"] = "check_antagonist"
 
 	else if(href_list["delay_round_end"])
 		if(!check_rights(R_SERVER))	return
@@ -905,7 +907,7 @@
 							feedback_add_details("ban_job","- [job]")
 							jobban_fullban(M, job, "[reason]; By [usr.ckey] on [time2text(world.realtime)]")
 							if(!msg)	msg = job
-							else		msg += ", [job]"						
+							else		msg += ", [job]"
 						add_note(M.ckey, "Banned  from [msg] - [reason]", null, usr, 0)
 						message_admins("\blue [key_name_admin(usr)] banned [key_name_admin(M)] from [msg]", 1)
 						M << "\red<BIG><B>You have been jobbanned by [usr.client.ckey] from: [msg].</B></BIG>"
@@ -1000,7 +1002,7 @@
 		if(query_noteedits.NextRow())
 			var/edit_log = query_noteedits.item[1]
 			usr << browse(edit_log,"window=noteedits")
-			
+
 	else if(href_list["removejobban"])
 		if(!check_rights(R_BAN))	return
 
@@ -1048,7 +1050,7 @@
 				message_admins("\blue [key_name_admin(usr)] has banned [M.ckey].\nReason: [reason]\nThis will be removed in [mins] minutes.")
 
 				del(M.client)
-				//del(M)	// See no reason why to delete mob. Important stuff can be lost. And ban can be lifted before round ends.
+				//qdel(M)	// See no reason why to delete mob. Important stuff can be lost. And ban can be lifted before round ends.
 			if("No")
 				var/reason = input(usr,"Please state the reason","Reason") as message|null
 				if(!reason)
@@ -1072,7 +1074,7 @@
 				DB_ban_record(BANTYPE_PERMA, M, -1, reason)
 
 				del(M.client)
-				//del(M)
+				//qdel(M)
 			if("Cancel")
 				return
 
@@ -1085,7 +1087,7 @@
 	else if(href_list["watchremove"])
 		var/target_ckey = href_list["watchremove"]
 		var/confirm = alert("Are you sure you want to remove [target_ckey] from the watchlist?", "Confirm Watchlist Removal", "Yes", "No")
-		if(confirm == "Yes")	
+		if(confirm == "Yes")
 			usr.client.watchlist_remove(target_ckey)
 
 	else if(href_list["watchedit"])
@@ -1119,10 +1121,10 @@
 			return
 		if(query_watchedits.NextRow())
 			var/edit_log = query_watchedits.item[1]
-			usr << browse(edit_log,"window=watchedits")		
-				
+			usr << browse(edit_log,"window=watchedits")
+
 	else if(href_list["mute"])
-		if(!check_rights(R_MOD))
+		if(!check_rights(R_ADMIN|R_MOD))
 			return
 
 		var/mob/M = locate(href_list["mute"])
@@ -1533,7 +1535,8 @@
 		show_player_panel(M)
 
 	else if(href_list["adminplayerobservejump"])
-		if(!check_rights(R_MOD,0) && !check_rights(R_ADMIN))	return
+		if(!check_rights(R_ADMIN|R_MOD))
+			return
 
 		var/mob/M = locate(href_list["adminplayerobservejump"])
 
@@ -1541,9 +1544,10 @@
 		if(!isobserver(usr))	C.admin_ghost()
 		sleep(2)
 		C.jumptomob(M)
-		
+
 	else if(href_list["adminplayerobservefollow"])
-		if(!check_rights(R_MOD,0) && !check_rights(R_ADMIN))	return
+		if(!check_rights(R_ADMIN|R_MOD))
+			return
 
 		var/mob/M = locate(href_list["adminplayerobservefollow"])
 
@@ -2140,7 +2144,7 @@
 					message_admins("[key_name_admin(usr)] created [number]ea [english_list(paths)]")
 					break
 		return
-		
+
 	else if(href_list["kick_all_from_lobby"])
 		if(!check_rights(R_ADMIN))
 			return
@@ -2157,6 +2161,18 @@
 			log_admin("[key_name(usr)] has kicked [afkonly ? "all AFK" : "all"] clients from the lobby. [length(listkicked)] clients kicked: [strkicked ? strkicked : "--"]")
 		else
 			usr << "You may only use this when the game is running."
+
+	else if(href_list["memoeditlist"])
+		if(!check_rights(R_SERVER)) return
+		var/sql_key = sanitizeSQL("[href_list["memoeditlist"]]")
+		var/DBQuery/query_memoedits = dbcon.NewQuery("SELECT edits FROM [format_table_name("memo")] WHERE (ckey = '[sql_key]')")
+		if(!query_memoedits.Execute())
+			var/err = query_memoedits.ErrorMsg()
+			log_game("SQL ERROR obtaining edits from memo table. Error : \[[err]\]\n")
+			return
+		if(query_memoedits.NextRow())
+			var/edit_log = query_memoedits.item[1]
+			usr << browse(edit_log,"window=memoeditlist")
 
 	else if(href_list["secretsfun"])
 		if(!check_rights(R_SERVER|R_EVENT))	return
@@ -2188,7 +2204,7 @@
 						if (M.client)
 							M.client.perspective = MOB_PERSPECTIVE
 							M.client.eye = M
-					del(O)
+					qdel(O)
 				ok = 1*/
 			if("monkey")
 				feedback_inc("admin_secrets_fun_used",1)
@@ -2256,34 +2272,6 @@
 				log_admin("[key_name(usr)] made all SMESs powered", 1)
 				message_admins("\blue [key_name_admin(usr)] made all SMESs powered", 1)
 				power_restore_quick()
-			if("activateprison")
-				feedback_inc("admin_secrets_fun_used",1)
-				feedback_add_details("admin_secrets_fun_used","AP")
-				world << "\blue <B>Transit signature detected.</B>"
-				world << "\blue <B>Incoming shuttle.</B>"
-				/*
-				var/A = locate(/area/shuttle_prison)
-				for(var/atom/movable/AM as mob|obj in A)
-					AM.z = 1
-					AM.Move()
-				*/
-				message_admins("\blue [key_name_admin(usr)] sent the prison shuttle to the station.", 1)
-			if("deactivateprison")
-				/*
-				feedback_inc("admin_secrets_fun_used",1)
-				feedback_add_details("admin_secrets_fun_used","DP")
-				var/A = locate(/area/shuttle_prison)
-				for(var/atom/movable/AM as mob|obj in A)
-					AM.z = 2
-					AM.Move()
-				*/
-				message_admins("\blue [key_name_admin(usr)] sent the prison shuttle back.", 1)
-			if("toggleprisonstatus")
-				feedback_inc("admin_secrets_fun_used",1)
-				feedback_add_details("admin_secrets_fun_used","TPS")
-				for(var/obj/machinery/computer/prison_shuttle/PS in world)
-					PS.allowedtocall = !(PS.allowedtocall)
-					message_admins("\blue [key_name_admin(usr)] toggled status of prison shuttle to [PS.allowedtocall].", 1)
 			if("prisonwarp")
 				if(!ticker)
 					alert("The game hasn't started yet!", null, null, null, null, null)
@@ -2358,112 +2346,6 @@
 					ticker.mode.finalize_traitor(A.mind)
 				message_admins("\blue [key_name_admin(usr)] used everyone is a traitor secret. Objective is [objective]", 1)
 				log_admin("[key_name(usr)] used everyone is a traitor secret. Objective is [objective]")
-
-			if("launchshuttle")
-				if(!shuttle_controller) return // Something is very wrong, the shuttle controller has not been created.
-
-				feedback_inc("admin_secrets_fun_used",1)
-				feedback_add_details("admin_secrets_fun_used","ShL")
-
-				var/list/valid_shuttles = list()
-				for (var/shuttle_tag in shuttle_controller.shuttles)
-					if (istype(shuttle_controller.shuttles[shuttle_tag], /datum/shuttle/ferry))
-						valid_shuttles += shuttle_tag
-
-				var/shuttle_tag = input("Which shuttle do you want to launch?") as null|anything in valid_shuttles
-
-				if (!shuttle_tag)
-					return
-
-				var/datum/shuttle/ferry/S = shuttle_controller.shuttles[shuttle_tag]
-				if (S.can_launch())
-					S.launch(usr)
-					message_admins("\blue [key_name_admin(usr)] launched the [shuttle_tag] shuttle", 1)
-					log_admin("[key_name(usr)] launched the [shuttle_tag] shuttle")
-				else
-					alert("The [shuttle_tag] shuttle cannot be launched at this time. It's probably busy.")
-
-			if("forcelaunchshuttle")
-				if(!shuttle_controller) return // Something is very wrong, the shuttle controller has not been created.
-
-				feedback_inc("admin_secrets_fun_used",1)
-				feedback_add_details("admin_secrets_fun_used","ShFL")
-
-				var/list/valid_shuttles = list()
-				for (var/shuttle_tag in shuttle_controller.shuttles)
-					if (istype(shuttle_controller.shuttles[shuttle_tag], /datum/shuttle/ferry))
-						valid_shuttles += shuttle_tag
-
-				var/shuttle_tag = input("Which shuttle's launch do you want to force?") as null|anything in valid_shuttles
-
-				if (!shuttle_tag)
-					return
-
-				var/datum/shuttle/ferry/S = shuttle_controller.shuttles[shuttle_tag]
-				if (S.can_force())
-					S.force_launch(usr)
-					message_admins("\blue [key_name_admin(usr)] has forced the [shuttle_tag] shuttle launch", 1)
-					log_admin("[key_name(usr)] has forced the [shuttle_tag] shuttle launch")
-				else
-					alert("The [shuttle_tag] shuttle launch cannot be forced at this time. It's busy, or hasn't been launched yet.")
-
-			if("jumpshuttle")
-				if(!shuttle_controller) return // Something is very wrong, the shuttle controller has not been created.
-
-				feedback_inc("admin_secrets_fun_used",1)
-				feedback_add_details("admin_secrets_fun_used","ShJ")
-
-				var/shuttle_tag = input("Which shuttle do you want to jump?") as null|anything in shuttle_controller.shuttles
-				if (!shuttle_tag) return
-
-				var/datum/shuttle/S = shuttle_controller.shuttles[shuttle_tag]
-
-				var/origin_area = input("Which area is the shuttle at now? (MAKE SURE THIS IS CORRECT OR THINGS WILL BREAK)") as null|area in world
-				if (!origin_area) return
-
-				var/destination_area = input("Which area is the shuttle at now? (MAKE SURE THIS IS CORRECT OR THINGS WILL BREAK)") as null|area in world
-				if (!destination_area) return
-
-				var/long_jump = alert("Is there a transition area for this jump?","", "Yes", "No")
-				if (long_jump == "Yes")
-					var/transition_area = input("Which area is the transition area? (MAKE SURE THIS IS CORRECT OR THINGS WILL BREAK)") as null|area in world
-					if (!transition_area) return
-
-					var/move_duration = input("How many seconds will this jump take?") as num
-
-					S.long_jump(origin_area, destination_area, transition_area, move_duration)
-					message_admins("\blue [key_name_admin(usr)] has initiated a jump from [origin_area] to [destination_area] lasting [move_duration] seconds for the [shuttle_tag] shuttle", 1)
-					log_admin("[key_name(usr)] has initiated a jump from [origin_area] to [destination_area] lasting [move_duration] seconds for the [shuttle_tag] shuttle")
-				else
-					S.short_jump(origin_area, destination_area)
-					message_admins("\blue [key_name_admin(usr)] has initiated a jump from [origin_area] to [destination_area] for the [shuttle_tag] shuttle", 1)
-					log_admin("[key_name(usr)] has initiated a jump from [origin_area] to [destination_area] for the [shuttle_tag] shuttle")
-
-			if("moveshuttle")
-
-				if(!shuttle_controller) return // Something is very wrong, the shuttle controller has not been created.
-
-				feedback_inc("admin_secrets_fun_used",1)
-				feedback_add_details("admin_secrets_fun_used","ShM")
-
-				var/confirm = alert("This command directly moves a shuttle from one area to another. DO NOT USE THIS UNLESS YOU ARE DEBUGGING A SHUTTLE AND YOU KNOW WHAT YOU ARE DOING.", "Are you sure?", "Ok", "Cancel")
-				if (confirm == "Cancel")
-					return
-
-				var/shuttle_tag = input("Which shuttle do you want to jump?") as null|anything in shuttle_controller.shuttles
-				if (!shuttle_tag) return
-
-				var/datum/shuttle/S = shuttle_controller.shuttles[shuttle_tag]
-
-				var/origin_area = input("Which area is the shuttle at now? (MAKE SURE THIS IS CORRECT OR THINGS WILL BREAK)") as null|area in world
-				if (!origin_area) return
-
-				var/destination_area = input("Which area is the shuttle at now? (MAKE SURE THIS IS CORRECT OR THINGS WILL BREAK)") as null|area in world
-				if (!destination_area) return
-
-				S.move(origin_area, destination_area)
-				message_admins("\blue [key_name_admin(usr)] moved the [shuttle_tag] shuttle", 1)
-				log_admin("[key_name(usr)] moved the [shuttle_tag] shuttle")
 
 			if("togglebombcap")
 				feedback_inc("admin_secrets_fun_used",1)
@@ -2652,7 +2534,7 @@
 				for(var/obj/item/clothing/under/W in world)
 					W.icon_state = "schoolgirl"
 					W.item_state = "w_suit"
-					W._color = "schoolgirl"
+					W.item_color = "schoolgirl"
 				message_admins("[key_name_admin(usr)] activated Japanese Animes mode")
 				world << sound('sound/AI/animes.ogg')
 			if("eagles")//SCRAW
@@ -2668,6 +2550,10 @@
 				feedback_add_details("admin_secrets_fun_used","OO")
 				usr.client.only_one()
 //				message_admins("[key_name_admin(usr)] has triggered HIGHLANDER")
+			if("onlyme")
+				feedback_inc("admin_secrets_fun_used",1)
+				feedback_add_details("admin_secrets_fun_used","OM")
+				usr.client.only_me()
 			if("onlyoneteam")
 				feedback_inc("admin_secrets_fun_used",1)
 				feedback_add_details("admin_secrets_fun_used","OOT")
@@ -2732,6 +2618,27 @@
 			if("securitylevel5")
 				set_security_level(5)
 				message_admins("\blue [key_name_admin(usr)] change security level to Delta.", 1)
+			if("moveminingshuttle")
+				feedback_inc("admin_secrets_fun_used",1)
+				feedback_add_details("admin_secrets_fun_used","ShM")
+				if(!shuttle_master.toggleShuttle("mining","mining_home","mining_away"))
+					message_admins("[key_name_admin(usr)] moved mining shuttle")
+					log_admin("[key_name(usr)] moved the mining shuttle")
+
+			if("movelaborshuttle")
+				feedback_inc("admin_secrets_fun_used",1)
+				feedback_add_details("admin_secrets_fun_used","ShL")
+				if(!shuttle_master.toggleShuttle("laborcamp","laborcamp_home","laborcamp_away"))
+					message_admins("[key_name_admin(usr)] moved labor shuttle")
+					log_admin("[key_name(usr)] moved the labor shuttle")
+
+			if("moveferry")
+				feedback_inc("admin_secrets_fun_used",1)
+				feedback_add_details("admin_secrets_fun_used","ShF")
+				if(!shuttle_master.toggleShuttle("ferry","ferry_home","ferry_away"))
+					message_admins("[key_name_admin(usr)] moved the centcom ferry")
+					log_admin("[key_name(usr)] moved the centcom ferry")
+
 		if(usr)
 			log_admin("[key_name(usr)] used secret [href_list["secretsfun"]]")
 			if (ok)

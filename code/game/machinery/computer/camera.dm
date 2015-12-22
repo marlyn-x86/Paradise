@@ -2,13 +2,13 @@
 
 /proc/invalidateCameraCache()
 	camera_cache_id = (++camera_cache_id % 999999)
-		
+
 /obj/machinery/computer/security
 	name = "Camera Monitor"
 	desc = "Used to access the various cameras networks on the station."
 	icon_keyboard = "security_key"
 	icon_screen = "cameras"
-	circuit = "/obj/item/weapon/circuitboard/camera"
+	circuit = /obj/item/weapon/circuitboard/camera
 	var/obj/machinery/camera/current = null
 	var/list/network = list("")
 	var/last_pic = 1.0
@@ -43,7 +43,7 @@
 	networks["ERT"] = list(access_cent_specops_commander,access_cent_commander)
 	networks["CentCom"] = list(access_cent_security,access_cent_commander)
 	networks["Thunderdome"] = list(access_cent_thunder,access_cent_commander)
-	
+
 	..()
 
 /obj/machinery/computer/security/attack_ai(var/mob/user as mob)
@@ -115,7 +115,7 @@
 				break
 	if(tempnets.len)
 		data["networks"] = tempnets
-		
+
 	if(current)
 		data["current"] = current.nano_structure()
 	data["cameras"] = list("__json_cache" = camera_cache)
@@ -207,7 +207,7 @@
 			set_current(C)
 			use_power(50)
 		return 1
-		
+
 /obj/machinery/computer/security/proc/set_current(var/obj/machinery/camera/C)
 	if(current == C)
 		return
@@ -220,8 +220,8 @@
 		use_power = 2
 		var/mob/living/L = current.loc
 		if(istype(L))
-			L.tracking_initiated()		
-		
+			L.tracking_initiated()
+
 /obj/machinery/computer/security/proc/reset_current()
 	if(current)
 		var/mob/living/L = current.loc
@@ -280,7 +280,7 @@
 
 // Other computer monitors.
 /obj/machinery/computer/security/telescreen
-	name = "Telescreen"
+	name = "\improper Telescreen"
 	desc = "Used for watching camera networks."
 	icon = 'icons/obj/stationobjs.dmi'
 	icon_state = "telescreen"
@@ -295,7 +295,7 @@
 	return
 
 /obj/machinery/computer/security/telescreen/entertainment
-	name = "Entertainment Monitor"
+	name = "entertainment monitor"
 	desc = "Damn, they better have Paradise TV on these things."
 	icon = 'icons/obj/status_display.dmi'
 	icon_state = "entertainment"
@@ -305,7 +305,7 @@
 	luminosity = 0
 
 /obj/machinery/computer/security/wooden_tv
-	name = "Security Camera Monitor"
+	name = "security camera monitor"
 	desc = "An old TV hooked into the stations camera network."
 	icon_state = "television"
 	icon_keyboard = null
@@ -315,7 +315,7 @@
 	network = list("SS13")
 
 /obj/machinery/computer/security/mining
-	name = "Outpost Camera Monitor"
+	name = "outpost camera monitor"
 	desc = "Used to access the various cameras on the outpost."
 	icon_keyboard = "mining_key"
 	icon_screen = "mining"
@@ -323,7 +323,7 @@
 	network = list("Mining Outpost")
 
 /obj/machinery/computer/security/engineering
-	name = "Engineering Camera Monitor"
+	name = "engineering camera monitor"
 	desc = "Used to monitor fires and breaches."
 	icon_keyboard = "power_key"
 	icon_screen = "engie_cams"

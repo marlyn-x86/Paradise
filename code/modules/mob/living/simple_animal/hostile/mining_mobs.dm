@@ -111,7 +111,7 @@
 		if(3.0)
 			adjustBruteLoss(110)
 
-/mob/living/simple_animal/hostile/asteroid/basilisk/Die()
+/mob/living/simple_animal/hostile/asteroid/basilisk/death()
 	if(stat != DEAD)
 		var/counter
 		for(counter=0, counter<2, counter++)
@@ -153,6 +153,11 @@
 	var/ore_eaten = 1
 	var/chase_time = 100
 
+/mob/living/simple_animal/hostile/asteroid/goldgrub/New()
+	..()
+	ore_types_eaten += pick(/obj/item/weapon/ore/silver, /obj/item/weapon/ore/gold, /obj/item/weapon/ore/uranium, /obj/item/weapon/ore/diamond)
+	ore_eaten = rand(1,3)
+
 /mob/living/simple_animal/hostile/asteroid/goldgrub/GiveTarget(var/new_target)
 	target = new_target
 	if(target != null)
@@ -182,8 +187,8 @@
 		if(!(O.type in ore_types_eaten))
 			ore_types_eaten += O.type
 		qdel(O)
-	if(ore_eaten > 5)//Limit the scope of the reward you can get, or else things might get silly
-		ore_eaten = 5
+	if(ore_eaten > 10)//Limit the scope of the reward you can get, or else things might get silly
+		ore_eaten = 10
 	visible_message("<span class='notice'>The ore was swallowed whole!</span>")
 
 /mob/living/simple_animal/hostile/asteroid/goldgrub/proc/Burrow()//Begin the chase to kill the goldgrub in time
@@ -210,7 +215,7 @@
 	visible_message("<span class='danger'>The [P.name] was repelled by [src.name]'s girth!</span>")
 	return
 
-/mob/living/simple_animal/hostile/asteroid/goldgrub/Die()
+/mob/living/simple_animal/hostile/asteroid/goldgrub/death()
 	alerted = 0
 	Reward()
 	..()
@@ -261,7 +266,7 @@
 /mob/living/simple_animal/hostile/asteroid/hivelord/AttackingTarget()
 	OpenFire()
 
-/mob/living/simple_animal/hostile/asteroid/hivelord/Die()
+/mob/living/simple_animal/hostile/asteroid/hivelord/death()
 	if(stat != DEAD)
 		new /obj/item/asteroid/hivelord_core(src.loc)
 	..()
@@ -272,11 +277,13 @@
 	icon = 'icons/obj/food/food.dmi'
 	icon_state = "boiledrorocore"
 	var/inert = 0
+	var/preserved = 0
 
 /obj/item/asteroid/hivelord_core/New()
-	spawn(1200)
-		inert = 1
-		desc = "The remains of a hivelord that have become useless, having been left alone too long after being harvested."
+	spawn(2400)
+		if(!preserved)
+			inert = 1
+			desc = "The remains of a hivelord that have become useless, having been left alone too long after being harvested."
 
 /obj/item/asteroid/hivelord_core/attack(mob/living/M as mob, mob/living/user as mob)
 	if(ishuman(M))
@@ -328,7 +335,7 @@
 	spawn(100)
 		qdel(src)
 
-/mob/living/simple_animal/hostile/asteroid/hivelordbrood/Die()
+/mob/living/simple_animal/hostile/asteroid/hivelordbrood/death()
 	qdel(src)
 
 /mob/living/simple_animal/hostile/asteroid/goliath
@@ -378,7 +385,7 @@
 	anchored = 1
 	..()
 
-/mob/living/simple_animal/hostile/asteroid/goliath/Die()
+/mob/living/simple_animal/hostile/asteroid/goliath/death()
 	anchored = 0
 	if(stat != DEAD)
 		var/obj/item/asteroid/goliath_hide/G = new /obj/item/asteroid/goliath_hide(src.loc)

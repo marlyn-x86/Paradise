@@ -16,9 +16,6 @@ var/list/blob_nodes = list()
 	recommended_enemies = 1
 	restricted_jobs = list("Cyborg", "AI")
 
-	var/const/waittime_l = 600 //lower bound on time before intercept arrives (in tenths of seconds)
-	var/const/waittime_h = 1800 //upper bound on time before intercept arrives (in tenths of seconds)
-
 	var/declared = 0
 	var/burst = 0
 
@@ -151,8 +148,8 @@ var/list/blob_nodes = list()
 	for(var/datum/mind/blob in infected_crew)
 		greet_blob(blob)
 
-	if(emergency_shuttle)
-		emergency_shuttle.auto_recall = 1
+	if(shuttle_master)
+		shuttle_master.emergencyNoEscape = 1
 
 	spawn(0)
 

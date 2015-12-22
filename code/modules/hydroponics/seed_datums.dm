@@ -132,6 +132,7 @@
 	chems = list("plantmatter" = list(1,50), "sacid" = list(0,1))
 	kitchen_tag = "nettle"
 	preset_icon = "nettle"
+	final_form = 0
 
 /datum/seed/nettle/New()
 	..()
@@ -206,7 +207,7 @@
 	display_name = "killer tomato plant"
 	mutants = null
 	can_self_harvest = 1
-	has_mob_product = /mob/living/simple_animal/tomato
+	preset_product = /mob/living/simple_animal/tomato
 	preset_icon = "killertomato"
 
 /datum/seed/tomato/killer/New()
@@ -250,7 +251,7 @@
 	name = "eggplant"
 	seed_name = "eggplant"
 	display_name = "eggplants"
-	mutants = list("realeggplant")
+	mutants = list("egg-plant")
 	chems = list("plantmatter" = list(1,10))
 	kitchen_tag = "eggplant"
 	preset_icon = "eggplant"
@@ -264,6 +265,25 @@
 	set_trait(TRAIT_POTENCY,20)
 	set_trait(TRAIT_PRODUCT_ICON,"eggplant")
 	set_trait(TRAIT_PRODUCT_COLOUR,"#892694")
+	set_trait(TRAIT_PLANT_ICON,"bush4")
+
+/datum/seed/egg_plant
+	name = "egg-plant"
+	seed_name = "egg-plant"
+	display_name = "egg-plants"
+	mutants = null
+	chems = list("egg" = list(1,10))
+	preset_product = /obj/item/weapon/reagent_containers/food/snacks/egg
+
+/datum/seed/egg_plant/New()
+	..()
+	set_trait(TRAIT_HARVEST_REPEAT,1)
+	set_trait(TRAIT_MATURATION,6)
+	set_trait(TRAIT_PRODUCTION,6)
+	set_trait(TRAIT_YIELD,2)
+	set_trait(TRAIT_POTENCY,20)
+	set_trait(TRAIT_PRODUCT_ICON,"eggplant")
+	set_trait(TRAIT_PRODUCT_COLOUR,"#FFFFE5")
 	set_trait(TRAIT_PLANT_ICON,"bush4")
 
 //Apples/varieties.
@@ -528,7 +548,7 @@
 	display_name = "walking mushrooms"
 	mutants = null
 	can_self_harvest = 1
-	has_mob_product = /mob/living/simple_animal/hostile/mushroom
+	preset_product = /mob/living/simple_animal/hostile/mushroom
 	preset_icon = "walkingmushroom"
 
 /datum/seed/mushroom/plump/walking/New()
@@ -635,7 +655,7 @@
 	name = "glowshroom"
 	seed_name = "glowshroom"
 	display_name = "glowshrooms"
-	mutants = null
+	mutants = list("glowcap")
 	chems = list("radium" = list(1,20))
 	preset_icon = "glowshroom"
 
@@ -652,6 +672,20 @@
 	set_trait(TRAIT_PLANT_COLOUR,"#EFFF8A")
 	set_trait(TRAIT_PLANT_ICON,"mushroom7")
 	set_trait(TRAIT_RARITY,20)
+
+/datum/seed/mushroom/glowshroom/glowcap
+	name = "glowcap"
+	seed_name = "glowcap"
+	display_name = "glowcaps"
+	mutants = null
+	preset_icon = "glowcap"
+
+/datum/seed/mushroom/glowshroom/glowcap/New()
+	..()
+	set_trait(TRAIT_BIOLUM_COLOUR,"#8E0300")
+	set_trait(TRAIT_PRODUCT_COLOUR,"#C65680")
+	set_trait(TRAIT_PLANT_COLOUR,"#B72D68")
+	set_trait(TRAIT_BATTERY_RECHARGE,1)
 
 /datum/seed/mushroom/plastic
 	name = "plastic"
@@ -696,6 +730,7 @@
 	display_name = "poppies"
 	chems = list("plantmatter" = list(1,20), "styptic_powder" = list(1,10))
 	kitchen_tag = "poppy"
+	modular_icon = 1
 	preset_icon = "poppy"
 
 /datum/seed/flower/poppy/New()
@@ -715,6 +750,8 @@
 	mutants = list("moonflowers", "novaflowers")
 	display_name = "sunflowers"
 	preset_icon = "sunflower"
+	final_form = 0
+	kitchen_tag = "sunflower"
 
 /datum/seed/flower/sunflower/New()
 	..()
@@ -730,6 +767,8 @@
 	mutants = null
 	display_name = "moonflowers"
 	preset_icon = "moonflower"
+	final_form = 1
+	kitchen_tag = ""
 
 /datum/seed/flower/moonflower/New()
 	..()
@@ -746,6 +785,8 @@
 	chems = list("fuel" = list(1,10))
 	display_name = "novaflowers"
 	preset_icon = "novaflower"
+	final_form = 0
+	kitchen_tag = "novaflower"
 
 /datum/seed/flower/novaflower/New()
 	..()
@@ -1104,6 +1145,7 @@
 	seed_name = "lemon"
 	display_name = "lemon trees"
 	chems = list("plantmatter" = list(1,20))
+	mutants = list("cashtree")
 	kitchen_tag = "lemon"
 	preset_icon = "lemon"
 
@@ -1111,6 +1153,27 @@
 	..()
 	set_trait(TRAIT_PRODUCES_POWER,1)
 	set_trait(TRAIT_PRODUCT_COLOUR,"#F0E226")
+
+/datum/seed/cashtree
+	name = "cashtree"
+	seed_name = "money tree"
+	seed_noun = "coins"
+	display_name = "money trees"
+	chems = list("gold" = list(1,10), "silver" = list(1,5))
+	mutants = null
+	final_form = 0
+	kitchen_tag = "cashpod"
+	preset_icon = "cashpod"
+
+/datum/seed/cashtree/New()
+	..()
+	set_trait(TRAIT_MATURATION,6)
+	set_trait(TRAIT_PRODUCTION,6)
+	set_trait(TRAIT_YIELD,2)
+	set_trait(TRAIT_POTENCY,10)
+	set_trait(TRAIT_PRODUCT_ICON,"cash")
+	set_trait(TRAIT_PRODUCT_COLOUR,"#F0E226")
+	set_trait(TRAIT_PLANT_ICON,"tree")
 
 /datum/seed/citrus/orange
 	name = "orange"
@@ -1131,6 +1194,7 @@
 	chems = list("plantmatter" = list(1,20))
 	kitchen_tag = "grass"
 	modular_icon = 1
+	final_form = 0
 
 /datum/seed/grass/New()
 	..()
@@ -1209,7 +1273,7 @@
 	seed_noun = "nodes"
 	display_name = "replicant pods"
 	can_self_harvest = 1
-	has_mob_product = /mob/living/simple_animal/diona
+	preset_product = /mob/living/simple_animal/diona
 
 /datum/seed/diona/New()
 	..()
@@ -1230,7 +1294,8 @@
 	seed_noun = "pods"
 	display_name = "laughing clowns"
 	can_self_harvest = 1
-	has_mob_product = /mob/living/simple_animal/hostile/retaliate/clown
+	modular_icon = 1
+	preset_product = /mob/living/simple_animal/hostile/retaliate/clown
 
 /datum/seed/clown/New()
 	..()
@@ -1244,15 +1309,16 @@
 	set_trait(TRAIT_PLANT_COLOUR,"#66804B")
 	set_trait(TRAIT_PLANT_ICON,"alien4")
 
-/datum/seed/shand
-	name = "shand"
-	seed_name = "S'randar's hand"
-	display_name = "S'randar's hand leaves"
+/datum/seed/comfrey
+	name = "comfrey"
+	seed_name = "comfrey"
+	display_name = "Comfrey"
 	chems = list("styptic_powder" = list(0,10))
-	kitchen_tag = "shand"
+	kitchen_tag = "comfrey"
 	modular_icon = 1
+	final_form = 0
 
-/datum/seed/shand/New()
+/datum/seed/comfrey/New()
 	..()
 	set_trait(TRAIT_MATURATION,3)
 	set_trait(TRAIT_PRODUCTION,5)
@@ -1263,21 +1329,22 @@
 	set_trait(TRAIT_PLANT_COLOUR,"#378C61")
 	set_trait(TRAIT_PLANT_ICON,"tree5")
 
-/datum/seed/mtear
-	name = "mtear"
-	seed_name = "Messa's tear"
-	display_name = "Messa's tear leaves"
-	chems = list("honey" = list(1,10), "silver_sulfadiazine" = list(3,5))
-	kitchen_tag = "mtear"
+/datum/seed/aloe
+	name = "aloe"
+	seed_name = "aloe"
+	display_name = "Aloe Vera"
+	chems = list("silver_sulfadiazine" = list(3,5))
+	kitchen_tag = "aloe"
 	modular_icon = 1
+	final_form = 0
 
-/datum/seed/mtear/New()
+/datum/seed/aloe/New()
 	..()
 	set_trait(TRAIT_MATURATION,3)
 	set_trait(TRAIT_PRODUCTION,5)
 	set_trait(TRAIT_YIELD,4)
 	set_trait(TRAIT_POTENCY,10)
-	set_trait(TRAIT_PRODUCT_ICON,"alien4")
+	set_trait(TRAIT_PRODUCT_ICON,"ambrosia")
 	set_trait(TRAIT_PRODUCT_COLOUR,"#4CC5C7")
 	set_trait(TRAIT_PLANT_COLOUR,"#4CC789")
 	set_trait(TRAIT_PLANT_ICON,"bush7")

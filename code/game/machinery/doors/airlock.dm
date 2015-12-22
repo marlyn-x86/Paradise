@@ -601,7 +601,7 @@ About the new airlock wires panel:
 		if (istype(mover, /obj/item))
 			var/obj/item/i = mover
 			if (i.materials[MAT_METAL])
-				var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+				var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 				s.set_up(5, 1, src)
 				s.start()
 	return ..()
@@ -928,7 +928,7 @@ About the new airlock wires panel:
 		set_opacity(1)
 	operating = 0
 	air_update_turf(1)
-	update_freelok_sight()
+	update_freelook_sight()
 	if(safe)
 		if(locate(/mob/living) in get_turf(src))
 			open()

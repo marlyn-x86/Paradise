@@ -8,7 +8,7 @@
 
 
 /obj/machinery/computer/telecomms/monitor
-	name = "Telecommunications Monitor"
+	name = "telecommunications monitor"
 	icon_screen = "comm_monitor"
 
 	var/screen = 0				// the screen number:
@@ -18,7 +18,7 @@
 	var/network = "NULL"		// the network to probe
 
 	var/temp = ""				// temporary feedback messages
-	circuit = "/obj/item/weapon/circuitboard/comm_monitor"
+	circuit = /obj/item/weapon/circuitboard/comm_monitor
 
 	light_color = LIGHT_COLOR_DARKGREEN
 
@@ -133,7 +133,7 @@
 				if (src.stat & BROKEN)
 					user << "\blue The broken glass falls out."
 					var/obj/structure/computerframe/A = new /obj/structure/computerframe( src.loc )
-					PoolOrNew(/obj/item/weapon/shard, loc)
+					new /obj/item/weapon/shard(loc)
 					var/obj/item/weapon/circuitboard/comm_monitor/M = new /obj/item/weapon/circuitboard/comm_monitor( A )
 					for (var/obj/C in src)
 						C.loc = src.loc

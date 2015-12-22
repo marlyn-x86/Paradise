@@ -42,8 +42,8 @@
 		name = "Soy Sauce"
 		id = "soysauce"
 		result = "soysauce"
-		required_reagents = list("soymilk" = 2, "flour" = 1, "sodiumchloride" = 1, "water" = 3)
-		result_amount = 7
+		required_reagents = list("soymilk" = 1,"sodiumchloride" = 1, "water" = 8)
+		result_amount = 10
 
 	cheesewheel
 		name = "Cheesewheel"
@@ -106,3 +106,16 @@
 		max_temp = 273
 		mix_message = "Ice forms as the water freezes."
 		mix_sound = null
+
+	dough
+		name = "Dough"
+		id = "dough"
+		result = null
+		required_reagents = list("water" = 10, "flour" = 15)
+		result_amount = 1
+		mix_message = "The ingredients form a dough."
+
+		on_reaction(datum/reagents/holder, created_volume)
+			var/location = get_turf(holder.my_atom)
+			for(var/i = 1, i <= created_volume, i++)
+				new /obj/item/weapon/reagent_containers/food/snacks/dough(location)

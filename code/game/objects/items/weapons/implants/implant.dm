@@ -8,7 +8,7 @@
 	var/implanted = null
 	var/mob/living/imp_in = null
 	var/obj/item/organ/external/part = null
-	_color = "b"
+	item_color = "b"
 	var/allow_reagents = 0
 	var/malfunction = 0
 
@@ -21,7 +21,10 @@
 // What does the implant do upon injection?
 // return 0 if the implant fails (ex. Revhead and loyalty implant.)
 // return 1 if the implant succeeds (ex. Nonrevhead and loyalty implant.)
-/obj/item/weapon/implant/proc/implanted(var/mob/source)		
+/obj/item/weapon/implant/proc/implanted(var/mob/source)
+	if(istype(source, /mob/living/carbon/human))
+		var/mob/living/carbon/human/H = source
+		H.sec_hud_set_implants()
 	return 1
 
 /obj/item/weapon/implant/proc/get_data()
@@ -55,11 +58,11 @@
 	desc = "Track with this."
 	origin_tech = "materials=2;magnets=2;programming=2;biotech=2"
 	var/id = 1.0
-	
+
 /obj/item/weapon/implant/tracking/New()
 	..()
 	tracking_implants += src
-	
+
 /obj/item/weapon/implant/tracking/Destroy()
 	tracking_implants -= src
 	return ..()
@@ -115,7 +118,6 @@ Implant Specifics:<BR>"}
 <b>Special Features:</b> Explodes<BR>
 <b>Integrity:</b> Implant will occasionally be degraded by the body's immune system and thus will occasionally malfunction."}
 	return dat
-
 
 /obj/item/weapon/implant/dexplosive/trigger(emote, source as mob)
 	if(emote == "deathgasp")
@@ -288,7 +290,7 @@ the implant may become unstable and either pre-maturely inject the subject or si
 	reagents = R
 	R.my_atom = src
 	tracking_implants += src
-	
+
 /obj/item/weapon/implant/chem/Destroy()
 	tracking_implants -= src
 	return ..()
@@ -415,7 +417,7 @@ the implant may become unstable and either pre-maturely inject the subject or si
 	ticker.mode.update_traitor_icons_added(user.mind)
 	log_admin("[ckey(user.key)] has mind-slaved [ckey(H.key)].")
 	return 1
-	
+
 /obj/item/weapon/implant/traitor/islegal()
 	return 0
 

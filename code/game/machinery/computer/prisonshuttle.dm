@@ -11,13 +11,13 @@ var/prison_shuttle_time = 0
 var/prison_shuttle_timeleft = 0
 
 /obj/machinery/computer/prison_shuttle
-	name = "Prison Shuttle Console"
+	name = "prison shuttle console"
 	icon = 'icons/obj/computer.dmi'
 	icon_keyboard = "security_key"
 	icon_screen = "syndishuttle"
 	light_color = LIGHT_COLOR_PURE_CYAN
 	req_access = list(access_security)
-	circuit = "/obj/item/weapon/circuitboard/prison_shuttle"
+	circuit = /obj/item/weapon/circuitboard/prison_shuttle
 	var/temp = null
 	var/hacked = 0
 	var/allowedtocall = 0
@@ -46,7 +46,7 @@ var/prison_shuttle_timeleft = 0
 
 				if (src.stat & BROKEN)
 					user << "\blue The broken glass falls out."
-					PoolOrNew(/obj/item/weapon/shard, loc)
+					new /obj/item/weapon/shard(loc)
 					A.state = 3
 					A.icon_state = "3"
 				else

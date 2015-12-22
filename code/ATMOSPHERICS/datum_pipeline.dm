@@ -22,25 +22,13 @@ var/global/list/datum/pipeline/pipe_networks = list()
 		P.parent = null
 	for(var/obj/machinery/atmospherics/A in other_atmosmch)
 		A.nullifyPipenet(src)
-	..()
-	return QDEL_HINT_QUEUE
+	return ..()
 
 /datum/pipeline/proc/process()//This use to be called called from the pipe networks
 	if(update)
 		update = 0
 		reconcile_air()
 	return
-	/*
-	//Check to see if pressure is within acceptable limits
-	var/pressure = air.return_pressure()
-	if(pressure > alert_pressure)
-		for(var/obj/machinery/atmospherics/pipe/member in members)
-			if(!member.check_pressure(pressure))
-				break //Only delete 1 pipe per process
-	//Allow for reactions
-	//air.react() //Should be handled by pipe_network now
-	*/
-
 
 var/pipenetwarnings = 10
 
@@ -231,11 +219,13 @@ var/pipenetwarnings = 10
 				PL |= V.parent2
 		for(var/obj/machinery/atmospherics/trinary/tvalve/T in P.other_atmosmch)
 			if(!T.state)
-				PL |= T.parent3
-				PL |= T.parent1
+				if(src != T.parent2) // otherwise dc'd side connects to both other sides!
+					PL |= T.parent1
+					PL |= T.parent3
 			else
-				PL |= T.parent3
-				PL |= T.parent2
+				if(src != T.parent3)
+					PL |= T.parent1
+					PL |= T.parent2
 		for(var/obj/machinery/atmospherics/unary/portables_connector/C in P.other_atmosmch)
 			if(C.connected_device)
 				GL += C.portableConnectorReturnAir()

@@ -72,12 +72,16 @@
 
 
 //Personal shielding for the combat module.
+/obj/item/borg
+	var/powerneeded // Percentage of power remaining required to run item
+
 /obj/item/borg/combat/shield
-    name = "personal shielding"
-    desc = "A powerful experimental module that turns aside or absorbs incoming attacks at the cost of charge."
-    icon = 'icons/obj/decals.dmi'
-    icon_state = "shock"
-    var/shield_level = 0.5 //Percentage of damage absorbed by the shield.
+	name = "personal shielding"
+	desc = "A powerful experimental module that turns aside or absorbs incoming attacks at the cost of charge."
+	icon = 'icons/obj/decals.dmi'
+	icon_state = "shock"
+	powerneeded = 25
+	var/shield_level = 0.5 //Percentage of damage absorbed by the shield.
 
 /obj/item/borg/combat/shield/verb/set_shield_level()
     set name = "Set shield level"
@@ -89,26 +93,27 @@
         shield_level = text2num(N)/100
 
 /obj/item/borg/combat/mobility
-    name = "mobility module"
-    desc = "By retracting limbs and tucking in its head, a combat android can roll at high speeds."
-    icon = 'icons/obj/decals.dmi'
-    icon_state = "shock"
-    
-/* 
-A general-purpose stack item that can be used to let cyborgs and drones pick up items of a type they've 
+	name = "mobility module"
+	desc = "By retracting limbs and tucking in its head, a combat android can roll at high speeds."
+	icon = 'icons/obj/decals.dmi'
+	icon_state = "shock"
+	powerneeded = 25
+
+/*
+A general-purpose stack item that can be used to let cyborgs and drones pick up items of a type they've
 exhausted their entire supply of. Also forms a handy base item for a recharging stack.
 */
 /obj/item/borg/robot_stack
     var/obj/item/stack/stack = null
     var/stacktype = ""
     var/refill_cap // This is the limit for standard cyborg recharging. Collecting extra items can bring you above this.
-    
+
 /obj/item/borg/robot_stack/New(var/loc)
     stack = new stacktype(loc, refill_cap)
     icon_state = stack.icon_state
 	name = stack.name
 	desc = stack.desc
-    
+
 
 /obj/item/borg/robot_stack/attack(mob/living/M as mob, mob/user as mob)
     if (stack)
@@ -116,8 +121,8 @@ exhausted their entire supply of. Also forms a handy base item for a recharging 
     // Otherwise, we've exhausted our supply, we'll handle replenishment in the afterattack.
 	else
 		user << "<span class='danger'>\You've exhausted your supply of [stack.name]!</span>"
-        
-    
+
+
 /obj/item/borg/robot_stack/attack_self(mob/user as mob)
     if (stack)
         return stack.attack_self(mob/user as mob)
@@ -126,12 +131,12 @@ exhausted their entire supply of. Also forms a handy base item for a recharging 
 	if (!stack && istype(target, stacktype))
 		target.loc = src
 		stack = target
-		
+
 	if (stack)
 		stack.update_icon()
 		icon_state = stack.icon_state
 
-// Will resupply the stack by [count] items		
+// Will resupply the stack by [count] items
 /obj/item/borg/robot_stack/replenish(var/count)
 	if (stack)
 		stack.amount = min(stack.amount + count, refill_cap)
@@ -158,12 +163,12 @@ Things this would NOT be used for:
     var/charge_tick = 0
     var/charge_cost
     var/recharge_time
-    
+
 /obj/item/borg/robot_stack/recharging/process()
     charge_tick++
     if (charge_tick < recharge_time) return
     charge_tick = 0
-    
+
     if (isrobot(src.loc))
         var/mob/living/silicon/robot = src.loc
         if (R && R.cell)
@@ -175,13 +180,13 @@ Things this would NOT be used for:
     name = "medical nanopaste"
     desc = "A tube of paste containing swarms of repair nanites. Very effective in repairing robotic machinery. This particular tube is engineered specifically for medical situations."
     origin_tech = null
-    
+
 /obj/item/stack/nanopaste/mediborg/attack(mob/living/M as mob, mob/usr as mob)
     if (istype(M, /mob/living/silicon/robot))
         user << "<span class='danger'>This tube doesn't work on cyborgs!</span>"
         return 1
     return ..()
-    
+
 /obj/item/robot_stack/recharging/mediborg_nanopaste
 	stacktype = /obj/item/stack/nanopaste/mediborg
     charge_cost = 150 // A fuzzy value for now.
@@ -192,7 +197,7 @@ Things this would NOT be used for:
 	stacktype = /obj/item/stack/medical/advanced/bruise_pack
 	charge_cost = 150
 	recharge_time = 150
-	refill_cap = 5	
+	refill_cap = 5
 
 /obj/item/robot_stack/recharging/mediborg_burn
 	stacktype = /obj/item/stack/medical/advanced/ointment

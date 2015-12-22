@@ -22,6 +22,8 @@ var/const/INGEST = 2
 		for(var/path in paths)
 			var/datum/reagent/D = new path()
 			chemical_reagents_list[D.id] = D
+			if(!D.can_grow_in_plants)
+				plant_blocked_chems.Add(D.id)
 	if(!chemical_reactions_list)
 		//Chemical Reactions - Initialises all /datum/chemical_reaction into a list
 		// It is filtered into multiple lists within a list.
@@ -116,32 +118,6 @@ var/const/INGEST = 2
 	R.update_total()
 	R.handle_reactions()
 	src.handle_reactions()
-	return amount
-
-/datum/reagents/proc/trans_to_ingest(var/obj/target, var/amount=1, var/multiplier=1, var/preserve_data=1)//For items ingested. A delay is added between ingestion and addition of the reagents
-	if (!target )
-		return
-	if (!target.reagents || src.total_volume<=0)
-		return
-
-	var/obj/item/weapon/reagent_containers/glass/beaker/noreact/B = new /obj/item/weapon/reagent_containers/glass/beaker/noreact //temporary holder
-	B.volume = 1000
-
-	var/datum/reagents/BR = B.reagents
-	var/datum/reagents/R = target.reagents
-
-	amount = min(min(amount, src.total_volume), R.maximum_volume-R.total_volume)
-
-	src.trans_to(B, amount)
-
-	spawn(-1)
-		src = null // Survive through deletion of the reagent holder
-		sleep(100)
-		if(!target)
-			return
-		BR.trans_to(target, BR.total_volume)
-		qdel(B)
-
 	return amount
 
 /datum/reagents/proc/copy_to(var/obj/target, var/amount=1, var/multiplier=1, var/preserve_data=1, var/safety = 0)
@@ -395,6 +371,9 @@ var/const/INGEST = 2
 			//Species with PROCESS_DUO are only affected by reagents that affect both organics and synthetics, like acid and hellwater
 			if((R.process_flags & ORGANIC) && (R.process_flags & SYNTHETIC) && (H.species.reagent_tag & PROCESS_DUO))
 				can_process = 1
+		if(H.species && H.species.exotic_blood)
+			if(R.id == H.species.exotic_blood)
+				can_process = 0
 	//We'll assume that non-human mobs lack the ability to process synthetic-oriented reagents (adjust this if we need to change that assumption)
 	else
 		if(R.process_flags != SYNTHETIC)
@@ -628,7 +607,7 @@ atom/proc/create_reagents(var/max_vol)
 	reagents.my_atom = src
 
 /datum/reagents/Destroy()
-	..()
+	. = ..()
 	processing_objects.Remove(src)
 	for(var/datum/reagent/R in reagent_list)
 		qdel(R)
@@ -636,4 +615,3 @@ atom/proc/create_reagents(var/max_vol)
 	reagent_list = null
 	if(my_atom && my_atom.reagents == src)
 		my_atom.reagents = null
-	return QDEL_HINT_QUEUE

@@ -12,10 +12,8 @@
 	uplink_welcome = "Wizardly Uplink Console:"
 	uplink_uses = 20
 
+	var/use_huds = 0
 	var/finished = 0
-
-	var/const/waittime_l = 600 //lower bound on time before intercept arrives (in tenths of seconds)
-	var/const/waittime_h = 1800 //upper bound on time before intercept arrives (in tenths of seconds)
 
 /datum/game_mode/wizard/announce()
 	world << "<B>The current game mode is - Wizard!</B>"
@@ -55,12 +53,21 @@
 		equip_wizard(wizard.current)
 		name_wizard(wizard.current)
 		greet_wizard(wizard)
+		if(use_huds)
+			update_wiz_icons_added(wizard)
 
-	spawn (rand(waittime_l, waittime_h))
-		send_intercept()
 	..()
-	return
 
+/datum/game_mode/proc/update_wiz_icons_added(datum/mind/wiz_mind)
+	var/datum/atom_hud/antag/wizhud = huds[ANTAG_HUD_WIZ]
+	wizhud.join_hud(wiz_mind.current)
+	set_antag_hud(wiz_mind.current, ((wiz_mind in wizards) ? "hudwizard" : "apprentice"))
+
+
+/datum/game_mode/proc/update_wiz_icons_removed(datum/mind/wiz_mind)
+	var/datum/atom_hud/antag/wizhud = huds[ANTAG_HUD_WIZ]
+	wizhud.leave_hud(wiz_mind.current)
+	set_antag_hud(wiz_mind.current, null)
 
 /datum/game_mode/proc/forge_wizard_objectives(var/datum/mind/wizard)
 	switch(rand(1,100))
@@ -69,7 +76,7 @@
 			kill_objective.owner = wizard
 			kill_objective.find_target()
 			wizard.objectives += kill_objective
-			
+
 			var/datum/objective/steal/steal_objective = new
 			steal_objective.owner = wizard
 			steal_objective.find_target()
@@ -111,7 +118,7 @@
 			steal_objective.owner = wizard
 			steal_objective.find_target()
 			wizard.objectives += steal_objective
-			
+
 			if (!(locate(/datum/objective/hijack) in wizard.objectives))
 				var/datum/objective/hijack/hijack_objective = new
 				hijack_objective.owner = wizard
@@ -184,6 +191,8 @@
 	wizard_mob.equip_to_slot_or_del(new /obj/item/weapon/spellbook(wizard_mob), slot_r_hand)
 
 	wizard_mob.faction = list("wizard")
+
+	wizard_mob.species.equip(wizard_mob)
 
 	wizard_mob << "You will find a list of available spells in your spell book. Choose your magic arsenal carefully."
 	wizard_mob << "In your pockets you will find a teleport scroll. Use it as needed."

@@ -249,11 +249,11 @@ datum/preferences
 				dat += "<br>"
 				dat += "Species: <a href='?_src_=prefs;preference=species;task=input'>[species]</a><br>"
 				if(species == "Vox")//oldvox code, sucks I know
-					dat += "Old Vox? <a href='?_src_=prefs;preference=speciesprefs;task=input'>[speciesprefs ? "Yes (Large N2 tank)" : "No(Vox-special N2 tank)"]</a><br>"
+					dat += "N2 Tank: <a href='?_src_=prefs;preference=speciesprefs;task=input'>[speciesprefs ? "Large N2 Tank" : "Specialized N2 Tank"]</a><br>"
 				dat += "Secondary Language:<br><a href='?_src_=prefs;preference=language;task=input'>[language]</a><br>"
 				dat += "Blood Type: <a href='?_src_=prefs;preference=b_type;task=input'>[b_type]</a><br>"
 				if(species == "Human")
-					dat += "Skin Tone: <a href='?_src_=prefs;preference=s_tone;task=input'>[-s_tone + 35]/220<br></a>"
+					dat += "Skin Tone: <a href='?_src_=prefs;preference=s_tone;task=input'>[-s_tone + 35]/220</a><br>"
 
 		//		dat += "Skin pattern: <a href='byond://?src=\ref[user];preference=skin_style;task=input'>Adjust</a><br>"
 				dat += "<br><b>Handicaps</b><br>"
@@ -358,16 +358,16 @@ datum/preferences
 					hairname = "Frame Color"
 				dat += "<br><b>[hairname]</b><br>"
 				dat += "<a href='?_src_=prefs;preference=hair;task=input'>Change Color</a> <font face='fixedsys' size='3' color='#[num2hex(r_hair, 2)][num2hex(g_hair, 2)][num2hex(b_hair, 2)]'><table style='display:inline;' bgcolor='#[num2hex(r_hair, 2)][num2hex(g_hair, 2)][num2hex(b_hair)]'><tr><td>__</td></tr></table></font> "
-				dat += " Style: <a href='?_src_=prefs;preference=h_style;task=input'>[h_style]</a><br>"
+				dat += " <br>Style: <a href='?_src_=prefs;preference=h_style;task=input'>[h_style]</a><br>"
 
 				dat += "<br><b>Facial</b><br>"
 				dat += "<a href='?_src_=prefs;preference=facial;task=input'>Change Color</a> <font face='fixedsys' size='3' color='#[num2hex(r_facial, 2)][num2hex(g_facial, 2)][num2hex(b_facial, 2)]'><table  style='display:inline;' bgcolor='#[num2hex(r_facial, 2)][num2hex(g_facial, 2)][num2hex(b_facial)]'><tr><td>__</td></tr></table></font> "
-				dat += " Style: <a href='?_src_=prefs;preference=f_style;task=input'>[f_style]</a><br>"
+				dat += " <br>Style: <a href='?_src_=prefs;preference=f_style;task=input'>[f_style]</a><br>"
 
 				dat += "<br><b>Eyes</b><br>"
 				dat += "<a href='?_src_=prefs;preference=eyes;task=input'>Change Color</a> <font face='fixedsys' size='3' color='#[num2hex(r_eyes, 2)][num2hex(g_eyes, 2)][num2hex(b_eyes, 2)]'><table  style='display:inline;' bgcolor='#[num2hex(r_eyes, 2)][num2hex(g_eyes, 2)][num2hex(b_eyes)]'><tr><td>__</td></tr></table></font><br>"
 
-				if(species == "Unathi" || species == "Tajaran" || species == "Skrell" || species == "Slime People" || species == "Vulpkanin" || body_accessory_by_species[species] || check_rights(R_ADMIN, 0, user)) //admins can always fuck with this, because they are admins
+				if((species in list("Unathi", "Tajaran", "Skrell", "Slime People", "Vulpkanin", "Machine")) || body_accessory_by_species[species] || check_rights(R_ADMIN, 0, user)) //admins can always fuck with this, because they are admins
 					dat += "<br><b>Body Color</b><br>"
 					dat += "<a href='?_src_=prefs;preference=skin;task=input'>Change Color</a> <font face='fixedsys' size='3' color='#[num2hex(r_skin, 2)][num2hex(g_skin, 2)][num2hex(b_skin, 2)]'><table style='display:inline;' bgcolor='#[num2hex(r_skin, 2)][num2hex(g_skin, 2)][num2hex(b_skin)]'><tr><td>__</td></tr></table></font>"
 
@@ -433,11 +433,11 @@ datum/preferences
 		dat += "</center></body></html>"
 
 //		user << browse(dat, "window=preferences;size=560x580")
-		var/datum/browser/popup = new(user, "preferences", "<div align='center'>Character Setup</div>", 640, 750)
+		var/datum/browser/popup = new(user, "preferences", "<div align='center'>Character Setup</div>", 640, 810)
 		popup.set_content(dat)
 		popup.open(0)
 
-	proc/SetChoices(mob/user, limit = 12, list/splitJobs = list("Civilian","Research Director","AI","Bartender"), width = 755, height = 780)
+	proc/SetChoices(mob/user, limit = 12, list/splitJobs = list("Civilian","Research Director","AI","Bartender"), width = 760, height = 790)
 		if(!job_master)
 			return
 
@@ -528,12 +528,12 @@ datum/preferences
 
 			if(rank == "Civilian")//Civilian is special
 				if(job_support_low & CIVILIAN)
-					HTML += " <font color=green>\[Yes]</font>"
+					HTML += " <font color=green>\[Yes]</font></a>"
 				else
-					HTML += " <font color=red>\[No]</font>"
+					HTML += " <font color=red>\[No]</font></a>"
 				if(job.alt_titles)
 					HTML += "<br><b><a class='white' href=\"byond://?src=\ref[user];preference=job;task=alt_title;job=\ref[job]\">\[[GetPlayerAltTitle(job)]\]</a></b></td></tr>"
-				HTML += "</a></td></tr>"
+				HTML += "</td></tr>"
 				continue
 /*
 			if(GetJobDepartment(job, 1) & job.flag)
@@ -545,13 +545,13 @@ datum/preferences
 			else
 				HTML += " <font color=red>\[NEVER]</font>"
 				*/
-			HTML += "<font color=[prefLevelColor]>[prefLevelLabel]</font>"
+			HTML += "<font color=[prefLevelColor]>[prefLevelLabel]</font></a>"
 
 			if(job.alt_titles)
 				HTML += "<br><b><a class='white' href=\"byond://?src=\ref[user];preference=job;task=alt_title;job=\ref[job]\">\[[GetPlayerAltTitle(job)]\]</a></b></td></tr>"
 
 
-			HTML += "</a></td></tr>"
+			HTML += "</td></tr>"
 
 		for(var/i = 1, i < (limit - index), i += 1) // Finish the column so it is even
 			HTML += "<tr bgcolor='[lastJob.selection_color]'><td width='60%' align='right'>&nbsp</td><td>&nbsp</td></tr>"
@@ -905,7 +905,6 @@ datum/preferences
 	proc/process_link(mob/user, list/href_list)
 		if(!user)	return
 
-		if(!istype(user, /mob/new_player))	return
 		if(href_list["preference"] == "job")
 			switch(href_list["task"])
 				if("close")
@@ -1028,7 +1027,7 @@ datum/preferences
 						if(species == "Human")
 							s_tone = random_skin_tone()
 					if("s_color")
-						if(species == "Unathi" || species == "Tajaran" || species == "Skrell" || species == "Slime People" || species == "Wryn" || species == "Vulpkanin")
+						if(species in list("Unathi", "Tajaran", "Skrell", "Slime People", "Wyrn", "Vulpkanin", "Machine"))
 							r_skin = rand(0,255)
 							g_skin = rand(0,255)
 							b_skin = rand(0,255)
@@ -1041,7 +1040,7 @@ datum/preferences
 			if("input")
 				switch(href_list["preference"])
 					if("name")
-						var/raw_name = input(user, "Choose your character's name:", "Character Preference")  as text|null
+						var/raw_name = input(user, "Choose your character's name:", "Character Preference") as text|null
 						if (!isnull(raw_name)) // Check to ensure that the user entered text (rather than cancel.)
 							var/new_name = reject_bad_name(raw_name)
 							if(new_name)
@@ -1109,12 +1108,27 @@ datum/preferences
 								//this shouldn't happen
 								f_style = facial_hair_styles_list["Shaved"]
 
+							// Don't wear another species' underwear!
+							var/datum/sprite_accessory/S = underwear_list[underwear]
+							if(!(species in S.species_allowed))
+								underwear = random_underwear(gender, species)
+
+							S = undershirt_list[undershirt]
+							if(!(species in S.species_allowed))
+								undershirt = random_undershirt(gender, species)
+
+							S = socks_list[socks]
+							if(!(species in S.species_allowed))
+								socks = random_socks(gender, species)
+
 							//reset hair colour and skin colour
 							r_hair = 0//hex2num(copytext(new_hair, 2, 4))
 							g_hair = 0//hex2num(copytext(new_hair, 4, 6))
 							b_hair = 0//hex2num(copytext(new_hair, 6, 8))
 
 							s_tone = 0
+
+							body_accessory = null //no vulpatail on humans damnit
 					if("speciesprefs")//oldvox code
 						speciesprefs = !speciesprefs
 
@@ -1155,7 +1169,7 @@ datum/preferences
 							var/input = "Choose your character's hair colour:"
 							if(species == "Machine")
 								input = "Choose your character's frame colour:"
-							var/new_hair = input(user, input, "Character Preference") as color|null
+							var/new_hair = input(user, input, "Character Preference", rgb(r_hair, g_hair, b_hair)) as color|null
 							if(new_hair)
 								r_hair = hex2num(copytext(new_hair, 2, 4))
 								g_hair = hex2num(copytext(new_hair, 4, 6))
@@ -1189,10 +1203,10 @@ datum/preferences
 
 						var/new_body_accessory = input(user, "Choose your body accessory:", "Character Preference") as null|anything in possible_body_accessories
 						if(new_body_accessory)
-							body_accessory = new_body_accessory
+							body_accessory = (new_body_accessory == "None") ? null : new_body_accessory
 
 					if("facial")
-						var/new_facial = input(user, "Choose your character's facial-hair colour:", "Character Preference") as color|null
+						var/new_facial = input(user, "Choose your character's facial-hair colour:", "Character Preference", rgb(r_facial, g_facial, b_facial)) as color|null
 						if(new_facial)
 							r_facial = hex2num(copytext(new_facial, 2, 4))
 							g_facial = hex2num(copytext(new_facial, 4, 6))
@@ -1254,7 +1268,7 @@ datum/preferences
 							socks = new_socks
 
 					if("eyes")
-						var/new_eyes = input(user, "Choose your character's eye colour:", "Character Preference") as color|null
+						var/new_eyes = input(user, "Choose your character's eye colour:", "Character Preference", rgb(r_eyes, g_eyes, b_eyes)) as color|null
 						if(new_eyes)
 							r_eyes = hex2num(copytext(new_eyes, 2, 4))
 							g_eyes = hex2num(copytext(new_eyes, 4, 6))
@@ -1268,8 +1282,8 @@ datum/preferences
 							s_tone = 35 - max(min( round(new_s_tone), 220),1)
 
 					if("skin")
-						if(species == "Unathi" || species == "Tajaran" || species == "Skrell" || species == "Slime People"|| species == "Vulpkanin" || body_accessory_by_species[species] || check_rights(R_ADMIN, 1, user))
-							var/new_skin = input(user, "Choose your character's skin colour: ", "Character Preference") as color|null
+						if((species in list("Unathi", "Tajaran", "Skrell", "Slime People", "Vulpkanin", "Machine")) || body_accessory_by_species[species] || check_rights(R_ADMIN, 0, user))
+							var/new_skin = input(user, "Choose your character's skin colour: ", "Character Preference", rgb(r_skin, g_skin, b_skin)) as color|null
 							if(new_skin)
 								r_skin = hex2num(copytext(new_skin, 2, 4))
 								g_skin = hex2num(copytext(new_skin, 4, 6))
@@ -1277,7 +1291,7 @@ datum/preferences
 
 
 					if("ooccolor")
-						var/new_ooccolor = input(user, "Choose your OOC colour:", "Game Preference") as color|null
+						var/new_ooccolor = input(user, "Choose your OOC colour:", "Game Preference", ooccolor) as color|null
 						if(new_ooccolor)
 							ooccolor = new_ooccolor
 
@@ -1422,7 +1436,7 @@ datum/preferences
 								UI_style = "Midnight"
 
 					if("UIcolor")
-						var/UI_style_color_new = input(user, "Choose your UI color, dark colors are not recommended!") as color|null
+						var/UI_style_color_new = input(user, "Choose your UI color, dark colors are not recommended!", UI_style_color) as color|null
 						if(!UI_style_color_new) return
 						UI_style_color = UI_style_color_new
 
@@ -1608,7 +1622,7 @@ datum/preferences
 
 	proc/open_load_dialog(mob/user)
 
-		var/DBQuery/query = dbcon.NewQuery("SELECT slot,real_name FROM characters WHERE ckey='[user.ckey]' ORDER BY slot")
+		var/DBQuery/query = dbcon.NewQuery("SELECT slot,real_name FROM [format_table_name("characters")] WHERE ckey='[user.ckey]' ORDER BY slot")
 
 		var/dat = "<body>"
 		dat += "<tt><center>"

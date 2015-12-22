@@ -114,6 +114,10 @@
 	radio = new /obj/item/radio/integrated/signal(src)
 	..()
 
+/obj/item/weapon/cartridge/signal/Destroy()
+	qdel(radio)
+	return ..()
+
 /obj/item/weapon/cartridge/quartermaster
 	name = "Space Parts & Space Vendors Cartridge"
 	desc = "Perfect for the Quartermaster on the go!"
@@ -174,7 +178,7 @@
 
 /obj/item/weapon/cartridge/rd/initialize()
 	radio = new /obj/item/radio/integrated/signal(src)
-	..()		
+	..()
 
 /obj/item/weapon/cartridge/captain
 	name = "Value-PAK Cartridge"
@@ -191,7 +195,7 @@
 
 /obj/item/weapon/cartridge/captain/initialize()
 	radio = new /obj/item/radio/integrated/beepsky(src)
-	..()		
+	..()
 
 /obj/item/weapon/cartridge/supervisor
 	name = "Easy-Record DELUXE"
@@ -282,7 +286,7 @@
 
 
 	/*		Power Monitor (Mode: 43 / 433)			*/
-	if(mode==43 || mode==433)						
+	if(mode==43 || mode==433)
 		values["powermonitors"] = powermonitor_repository.powermonitor_data()
 
 		if (powmonitor && !isnull(powmonitor.powernet))
@@ -419,17 +423,23 @@
 
 	if(mode==47)
 		var/supplyData[0]
-		var/datum/shuttle/ferry/supply/shuttle = supply_controller.shuttle
-		if (shuttle)
-			supplyData["shuttle_moving"] = shuttle.has_arrive_time()
-			supplyData["shuttle_eta"] = shuttle.eta_minutes()
-			supplyData["shuttle_loc"] = shuttle.at_station() ? "Station" : "Dock"
+
+		if(shuttle_master.supply.mode == SHUTTLE_CALL)
+			supplyData["shuttle_moving"] = 1
+
+		if(shuttle_master.supply.z != ZLEVEL_STATION)
+			supplyData["shuttle_loc"] = "station"
+		else
+			supplyData["shuttle_loc"] = "centcom"
+
+		supplyData["shuttle_time"] = "([shuttle_master.supply.timeLeft(600)] Mins)"
+
 		var/supplyOrderCount = 0
 		var/supplyOrderData[0]
-		for(var/S in supply_controller.shoppinglist)
+		for(var/S in shuttle_master.shoppinglist)
 			var/datum/supply_order/SO = S
-
 			supplyOrderData[++supplyOrderData.len] = list("Number" = SO.ordernum, "Name" = html_encode(SO.object.name), "ApprovedBy" = SO.orderedby, "Comment" = html_encode(SO.comment))
+
 		if(!supplyOrderData.len)
 			supplyOrderData[++supplyOrderData.len] = list("Number" = null, "Name" = null, "OrderedBy"=null)
 
@@ -438,10 +448,11 @@
 
 		var/requestCount = 0
 		var/requestData[0]
-		for(var/S in supply_controller.requestlist)
+		for(var/S in shuttle_master.requestlist)
 			var/datum/supply_order/SO = S
 			requestCount++
 			requestData[++requestData.len] = list("Number" = SO.ordernum, "Name" = html_encode(SO.object.name), "OrderedBy" = SO.orderedby, "Comment" = html_encode(SO.comment))
+
 		if(!requestData.len)
 			requestData[++requestData.len] = list("Number" = null, "Name" = null, "orderedBy" = null, "Comment" = null)
 
@@ -463,7 +474,7 @@
 		else
 			JaniData["user_loc"] = list("x" = 0, "y" = 0)
 		var/MopData[0]
-		for(var/obj/item/weapon/mop/M in world)
+		for(var/obj/item/weapon/mop/M in janitorial_equipment)
 			var/turf/ml = get_turf(M)
 			if(ml)
 				if(ml.z != cl.z)
@@ -476,7 +487,7 @@
 
 
 		var/BucketData[0]
-		for(var/obj/structure/mopbucket/B in world)
+		for(var/obj/structure/mopbucket/B in janitorial_equipment)
 			var/turf/bl = get_turf(B)
 			if(bl)
 				if(bl.z != cl.z)
@@ -488,7 +499,7 @@
 			BucketData[++BucketData.len] = list("x" = 0, "y" = 0, dir=null, status = null)
 
 		var/CbotData[0]
-		for(var/obj/machinery/bot/cleanbot/B in world)
+		for(var/obj/machinery/bot/cleanbot/B in aibots)
 			var/turf/bl = get_turf(B)
 			if(bl)
 				if(bl.z != cl.z)
@@ -500,7 +511,7 @@
 		if(!CbotData.len)
 			CbotData[++CbotData.len] = list("x" = 0, "y" = 0, dir=null, status = null)
 		var/CartData[0]
-		for(var/obj/structure/stool/bed/chair/cart/janicart/B in world)
+		for(var/obj/structure/janitorialcart/B in janitorial_equipment)
 			var/turf/bl = get_turf(B)
 			if(bl)
 				if(bl.z != cl.z)

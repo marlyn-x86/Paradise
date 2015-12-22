@@ -10,7 +10,7 @@
 	materials = list(MAT_METAL = 1000, MAT_GLASS = 500, MAT_PLASMA = 1500, MAT_URANIUM = 200)
 	build_path = /obj/item/weapon/weldingtool/experimental
 	category = list("Equipment")
-	
+
 /datum/design/health_hud
 	name = "Health Scanner HUD"
 	desc = "A heads-up display that scans the humans in view and provides accurate data about their health status."
@@ -120,4 +120,44 @@
 	materials = list(MAT_METAL = 6000, MAT_GLASS = 2000)
 	build_path = /obj/item/device/detective_scanner
 	locked = 1      //no validhunting scientists.
+	category = list("Equipment")
+
+/datum/design/sci_goggles
+	name = "Science Goggles"
+	desc = "Goggles fitted with a portable analyzer capable of determining the research worth of an item or components of a machine."
+	id = "scigoggles"
+	req_tech = list("materials" = 3, "magnets" = 3, "engineering" = 2)
+	build_type = PROTOLATHE
+	materials = list(MAT_METAL = 250, MAT_GLASS = 300)
+	build_path = /obj/item/clothing/glasses/science
+	category = list("Equipment")
+
+/datum/design/nv_sci_goggles
+	name = "Night Vision Science Goggles"
+	desc = "Like Science google, but works in darkness."
+	id = "nvscigoggles"
+	req_tech = list("materials" = 5, "magnets" = 5, "engineering" = 4)
+	build_type = PROTOLATHE
+	materials = list(MAT_METAL = 250, MAT_GLASS = 300, MAT_PLASMA = 250, MAT_URANIUM = 1000)
+	build_path = /obj/item/clothing/glasses/science/night
+	category = list("Equipment")
+
+/datum/design/diagnostic_hud
+	name = "Diagnostic HUD"
+	desc = "A HUD used to analyze and determine faults within robotic machinery."
+	id = "dianostic_hud"
+	req_tech = list("magnets" = 3, "engineering" = 3, "materials" = 2)
+	build_type = PROTOLATHE
+	materials = list("$metal" = 50, "$glass" = 50)
+	build_path = /obj/item/clothing/glasses/hud/diagnostic
+	category = list("Equipment")
+
+/datum/design/diagnostic_hud_night
+	name = "Night Vision Diagnostic HUD"
+	desc = "Upgraded version of the diagnostic HUD designed to function during a power failure."
+	id = "dianostic_hud_night"
+	req_tech = list("magnets" = 5, "engineering" = 4, "materials" = 4)
+	build_type = PROTOLATHE
+	materials = list("$metal" = 200, "$glass" = 200, "$uranium" = 1000, "$plasma" = 300)
+	build_path = /obj/item/clothing/glasses/hud/diagnostic/night
 	category = list("Equipment")

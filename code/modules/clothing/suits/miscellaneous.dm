@@ -241,6 +241,7 @@
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|LEGS|ARMS|HANDS
 	flags_inv = HIDEGLOVES|HIDESHOES|HIDEJUMPSUIT|HIDETAIL
 	flags = ONESIZEFITSALL
+	strip_delay = 60
 
 /obj/item/clothing/suit/ianshirt
 	name = "worn shirt"
@@ -334,14 +335,14 @@
 	name = "pink swimsuit"
 	desc = "A rather skimpy pink swimsuit."
 	icon_state = "stripper_p_under"
-	_color = "stripper_p"
+	item_color = "stripper_p"
 	siemens_coefficient = 1
 
 /obj/item/clothing/under/stripper/stripper_green
 	name = "green swimsuit"
 	desc = "A rather skimpy green swimsuit."
 	icon_state = "stripper_g_under"
-	_color = "stripper_g"
+	item_color = "stripper_g"
 	siemens_coefficient = 1
 
 /obj/item/clothing/suit/stripper/stripper_pink
@@ -362,7 +363,7 @@
 	name = "the mankini"
 	desc = "No honest man would wear this abomination"
 	icon_state = "mankini"
-	_color = "mankini"
+	item_color = "mankini"
 	siemens_coefficient = 1
 
 /obj/item/clothing/suit/jacket/miljacket
@@ -389,35 +390,35 @@
 	name = "black swimsuit"
 	desc = "An oldfashioned black swimsuit."
 	icon_state = "swim_black"
-	_color = "swim_black"
+	item_color = "swim_black"
 	siemens_coefficient = 1
 
 /obj/item/clothing/under/swimsuit/blue
 	name = "blue swimsuit"
 	desc = "An oldfashioned blue swimsuit."
 	icon_state = "swim_blue"
-	_color = "swim_blue"
+	item_color = "swim_blue"
 	siemens_coefficient = 1
 
 /obj/item/clothing/under/swimsuit/purple
 	name = "purple swimsuit"
 	desc = "An oldfashioned purple swimsuit."
 	icon_state = "swim_purp"
-	_color = "swim_purp"
+	item_color = "swim_purp"
 	siemens_coefficient = 1
 
 /obj/item/clothing/under/swimsuit/green
 	name = "green swimsuit"
 	desc = "An oldfashioned green swimsuit."
 	icon_state = "swim_green"
-	_color = "swim_green"
+	item_color = "swim_green"
 	siemens_coefficient = 1
 
 /obj/item/clothing/under/swimsuit/red
 	name = "red swimsuit"
 	desc = "An oldfashioned red swimsuit."
 	icon_state = "swim_red"
-	_color = "swim_red"
+	item_color = "swim_red"
 	siemens_coefficient = 1
 
 /obj/item/clothing/suit/storage/mercy_hoodie
@@ -445,7 +446,6 @@
 	armor = list(melee = 0, bullet = 0, laser = 0,energy = 0, bomb = 0, bio = 100, rad = 20)
 	flags_inv = HIDEMASK|HIDEEARS|HIDEEYES
 	siemens_coefficient = 0.9
-	loose = 7
 
 /obj/item/clothing/suit/jacket
 	name = "bomber jacket"
@@ -505,3 +505,66 @@
 	icon_state = "lordadmiral"
 	item_state = "lordadmiral"
 	allowed = list (/obj/item/weapon/gun)
+
+/obj/item/clothing/suit/fluff/noble_coat
+	name = "noble coat"
+	desc = "The livid blues, purples and greens are awesome enough to evoke a visceral response in you; it is not dissimilar to indigestion."
+	icon_state = "noble_coat"
+	item_state = "noble_coat"
+	body_parts_covered = UPPER_TORSO|LOWER_TORSO|ARMS
+
+
+///Advanced Protective Suit, AKA, God Mode in wearable form.
+
+/obj/item/clothing/suit/advanced_protective_suit
+	name = "Advanced Protective Suit"
+	desc = "An incredibly advanced and complex suit; it has so many buttons and dials as to be incomprehensible."
+	icon_state = "bomb"
+	item_state = "bomb"
+	action_button_name = "Toggle Advanced Protective Suit"
+	gas_transfer_coefficient = 0.01
+	permeability_coefficient = 0.01
+	flags = STOPSPRESSUREDMAGE | THICKMATERIAL | NODROP
+	body_parts_covered = UPPER_TORSO|LOWER_TORSO|LEGS|FEET|ARMS|HANDS|HEAD
+	armor = list(melee = 100, bullet = 100, laser = 100,energy = 100, bomb = 100, bio = 100, rad = 100)
+	cold_protection = UPPER_TORSO | LOWER_TORSO | LEGS | FEET | ARMS | HANDS | HEAD
+	min_cold_protection_temperature = SPACE_SUIT_MIN_TEMP_PROTECT
+	heat_protection = UPPER_TORSO | LOWER_TORSO|LEGS|FEET|ARMS|HANDS | HEAD
+	max_heat_protection_temperature = FIRE_IMMUNITY_SUIT_MAX_TEMP_PROTECT
+	slowdown = -10
+	siemens_coefficient = 0
+	var/on = 0
+
+/obj/item/clothing/suit/advanced_protective_suit/Destroy()
+	if(on)
+		on = 0
+		processing_objects.Remove(src)
+	return ..()
+
+/obj/item/clothing/suit/advanced_protective_suit/ui_action_click()
+	if(on)
+		on = 0
+		usr << "You turn the suit's special processes off."
+	else
+		on = 1
+		usr << "You turn the suit's special processes on."
+		processing_objects.Add(src)
+
+
+/obj/item/clothing/suit/advanced_protective_suit/IsReflect()
+	return (on)
+
+/obj/item/clothing/suit/advanced_protective_suit/process()
+	if(on)
+		var/mob/living/carbon/human/user = src.loc
+		if(user && ishuman(user) && (user.wear_suit == src))
+			if(user.reagents.get_reagent_amount("stimulants") < 15)
+				user.reagents.add_reagent("stimulants", 15)
+			if(user.reagents.get_reagent_amount("adminordrazine") < 15)
+				user.reagents.add_reagent("adminordrazine", 15)
+			if(user.reagents.get_reagent_amount("nanites") < 15)
+				user.reagents.add_reagent("nanites", 15)
+			if(user.reagents.get_reagent_amount("syndicate_nanites") < 15)
+				user.reagents.add_reagent("syndicate_nanites", 15)
+	else
+		processing_objects.Remove(src)

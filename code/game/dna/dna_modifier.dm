@@ -79,7 +79,7 @@
 	component_parts += new /obj/item/stack/cable_coil(null, 1)
 	component_parts += new /obj/item/stack/cable_coil(null, 1)
 	RefreshParts()
-	
+
 /obj/machinery/dna_scannernew/RefreshParts()
 	scan_level = 0
 	damage_coeff = 0
@@ -120,10 +120,10 @@
 		   !istype(O,/obj/item/weapon/stock_parts) && \
 		   !istype(O,/obj/item/stack/cable_coil) && \
 		   O != beaker)
-			O.loc = get_turf(src)//Ejects items that manage to get in there (exluding the components and beaker)
+			O.forceMove(get_turf(src))//Ejects items that manage to get in there (exluding the components and beaker)
 	if(!occupant)
 		for(var/mob/M in src)//Failsafe so you can get mobs out
-			M.loc = get_turf(src)
+			M.forceMove(get_turf(src))
 
 /obj/machinery/dna_scannernew/verb/move_inside()
 	set src in oview(1)
@@ -135,18 +135,18 @@
 	if(usr.restrained() || usr.stat || usr.weakened || usr.stunned || usr.paralysis || usr.resting) //are you cuffed, dying, lying, stunned or other
 		return
 	if (!ishuman(usr)) //Make sure they're a mob that has dna
-		usr << "\blue Try as you might, you can not climb up into the scanner."
+		usr << "<span class='notice'>Try as you might, you can not climb up into the [src].</span>"
 		return
 	if (src.occupant)
-		usr << "\blue <B>The scanner is already occupied!</B>"
+		usr << "<span class='boldnotice'>The [src] is already occupied!</span>"
 		return
 	if (usr.abiotic())
-		usr << "\blue <B>Subject cannot have abiotic items on.</B>"
+		usr << "<span class='boldnotice'>Subject cannot have abiotic items on.</span>"
 		return
 	usr.stop_pulling()
 	usr.client.perspective = EYE_PERSPECTIVE
 	usr.client.eye = src
-	usr.loc = src
+	usr.forceMove(src)
 	src.occupant = usr
 	src.icon_state = "scanner_occupied"
 	src.add_fingerprint(usr)
@@ -172,28 +172,25 @@
 	if(!istype(user.loc, /turf) || !istype(O.loc, /turf)) // are you in a container/closet/pod/etc?
 		return
 	if(occupant)
-		user << "\blue <B>The DNA Scanner is already occupied!</B>"
+		user << "<span class='boldnotice'>The [src] is already occupied!</span>"
 		return
-/*	if(isrobot(user))
-		if(!istype(user:module, /obj/item/weapon/robot_module/medical))
-			user << "<span class='warning'>You do not have the means to do this!</span>"
-			return*/
 	var/mob/living/L = O
 	if(!istype(L) || L.buckled)
 		return
 	if(L.abiotic())
-		user << "\red <B>Subject cannot have abiotic items on.</B>"
+		user << "<span class='danger'>Subject cannot have abiotic items on.</span>"
 		return
 	for(var/mob/living/carbon/slime/M in range(1,L))
 		if(M.Victim == L)
-			usr << "[L.name] will not fit into the DNA Scanner because they have a slime latched onto their head."
+			usr << "[L.name] will not fit into the [src] because they have a slime latched onto their head."
 			return
-	if(L == user)
-		return
-	visible_message("[user] puts [L.name] into the DNA Scanner.", 3)
+	if (L == user)
+		visible_message("[user] climbs into the [src].")
+	else
+		visible_message("[user] puts [L.name] into the [src].")
 	put_in(L)
 	if(user.pulling == L)
-		user.pulling = null
+		user.stop_pulling()
 
 /obj/machinery/dna_scannernew/attackby(var/obj/item/weapon/item as obj, var/mob/user as mob, params)
 	if(istype(item, /obj/item/weapon/screwdriver))
@@ -208,17 +205,20 @@
 	if(istype(item, /obj/item/weapon/crowbar))
 		if(panel_open)
 			for(var/obj/I in contents) // in case there is something in the scanner
-				I.loc = src.loc
+				I.forceMove(src.loc)
 			default_deconstruction_crowbar(item)
 		return
 	else if(istype(item, /obj/item/weapon/reagent_containers/glass))
 		if(beaker)
-			user << "\red A beaker is already loaded into the machine."
+			user << "<span class='warning'>A beaker is already loaded into the machine.</span>"
+			return
+
+		if(!user.drop_item())
+			user << "<span class='warning'>\The [item] is stuck to you!</span>"
 			return
 
 		beaker = item
-		user.drop_item()
-		item.loc = src
+		item.forceMove(src)
 		user.visible_message("[user] adds \a [item] to \the [src]!", "You add \a [item] to \the [src]!")
 		return
 	else if (!istype(item, /obj/item/weapon/grab))
@@ -227,24 +227,29 @@
 	if (!ismob(G.affecting))
 		return
 	if (src.occupant)
-		user << "\blue <b>The scanner is already occupied!</b>"
+		user << "<span class='boldnotice'>The scanner is already occupied!</span>"
 		return
 	if (G.affecting.abiotic())
-		user << "\blue <b>Subject cannot have abiotic items on.</b>"
+		user << "<span class='boldnotice'>Subject cannot have abiotic items on.</span>"
 		return
 	if(panel_open)
-		usr << "\blue <b>Close the maintenance panel first.</b>"
+		usr << "<span class='boldnotice'>Close the maintenance panel first.</span>"
 		return
 	put_in(G.affecting)
 	src.add_fingerprint(user)
 	qdel(G)
 	return
 
+/obj/machinery/dna_scannernew/relaymove(mob/user as mob)
+	if(user.incapacitated())
+		return 0 //maybe they should be able to get out with cuffs, but whatever
+	go_out()
+
 /obj/machinery/dna_scannernew/proc/put_in(var/mob/M)
 	if(M.client)
 		M.client.perspective = EYE_PERSPECTIVE
 		M.client.eye = src
-	M.loc = src
+	M.forceMove(src)
 	src.occupant = M
 	src.icon_state = "scanner_occupied"
 
@@ -262,17 +267,17 @@
 
 /obj/machinery/dna_scannernew/proc/go_out()
 	if (!src.occupant)
-		usr << "<span class=\"warning\">The scanner is empty!</span>"
+		usr << "<span class='warning'>The scanner is empty!</span>"
 		return
 
 	if (src.locked)
-		usr << "<span class=\"warning\">The scanner is locked!</span>"
+		usr << "<span class='warning'>The scanner is locked!</span>"
 		return
 
 	if (src.occupant.client)
 		src.occupant.client.eye = src.occupant.client.mob
 		src.occupant.client.perspective = MOB_PERSPECTIVE
-	src.occupant.loc = src.loc
+	src.occupant.forceMove(src.loc)
 	src.occupant = null
 	src.icon_state = "scanner_open"
 	return
@@ -281,7 +286,7 @@
 	switch(severity)
 		if(1.0)
 			for(var/atom/movable/A as mob|obj in src)
-				A.loc = src.loc
+				A.forceMove(src.loc)
 				ex_act(severity)
 				//Foreach goto(35)
 			//SN src = null
@@ -290,7 +295,7 @@
 		if(2.0)
 			if (prob(50))
 				for(var/atom/movable/A as mob|obj in src)
-					A.loc = src.loc
+					A.forceMove(src.loc)
 					ex_act(severity)
 					//Foreach goto(108)
 				//SN src = null
@@ -299,7 +304,7 @@
 		if(3.0)
 			if (prob(25))
 				for(var/atom/movable/A as mob|obj in src)
-					A.loc = src.loc
+					A.forceMove(src.loc)
 					ex_act(severity)
 					//Foreach goto(181)
 				//SN src = null
@@ -311,27 +316,27 @@
 /obj/machinery/dna_scannernew/blob_act()
 	if(prob(75))
 		for(var/atom/movable/A as mob|obj in src)
-			A.loc = src.loc
+			A.forceMove(src.loc)
 		qdel(src)
-	
+
 // Checks if occupants can be irradiated/mutated - prevents exploits where wearing full rad protection would still let you gain mutations
 /obj/machinery/dna_scannernew/proc/radiation_check()
 	if(!occupant)
 		return 1
-		
+
 	if(ishuman(occupant))
 		var/mob/living/carbon/human/H = occupant
 		if((H.species.flags & NO_DNA_RAD))
 			return 1
-			
+
 	var/radiation_protection = occupant.run_armor_check(null, "rad", "Your clothes feel warm.", "Your clothes feel warm.")
 	if (radiation_protection > NEGATE_MUTATION_THRESHOLD)
 		return 1
-		
+
 	return 0
 
 /obj/machinery/computer/scan_consolenew
-	name = "DNA Modifier Access Console"
+	name = "\improper DNA Modifier access console"
 	desc = "Allows you to scan and modify DNA."
 	icon = 'icons/obj/computer.dmi'
 	icon_screen = "dna"
@@ -362,7 +367,7 @@
 	if (istype(I, /obj/item/weapon/disk/data)) //INSERT SOME diskS
 		if (!src.disk)
 			user.drop_item()
-			I.loc = src
+			I.forceMove(src)
 			src.disk = I
 			user << "You insert [I]."
 			nanomanager.update_uis(src) // update all UIs attached to src()
@@ -442,9 +447,9 @@
 		if(..(user))
 			return
 
-		if(stat & (NOPOWER|BROKEN)) 
-			return			
-			
+		if(stat & (NOPOWER|BROKEN))
+			return
+
 		ui_interact(user)
 
  /**
@@ -585,10 +590,10 @@
 			return 1 // return 1 forces an update to all Nano uis attached to src
 
 		var/radiation = (((src.radiation_intensity*3)+src.radiation_duration*3) / connected.damage_coeff)
-		src.connected.occupant.apply_effect(radiation,IRRADIATE,0)			
-		if(src.connected.radiation_check())			
+		src.connected.occupant.apply_effect(radiation,IRRADIATE,0)
+		if(src.connected.radiation_check())
 			return 1
-			
+
 		if (prob(95))
 			if(prob(75))
 				randmutb(src.connected.occupant)
@@ -688,29 +693,29 @@
 
 		if (!src.connected.occupant)
 			return 1
-			
+
 		if (prob((80 + (src.radiation_duration / 2))))
 			var/radiation = (src.radiation_intensity+src.radiation_duration)
 			src.connected.occupant.apply_effect(radiation,IRRADIATE,0)
-			
+
 			if(src.connected.radiation_check())
 				return 1
-				
+
 			block = miniscrambletarget(num2text(selected_ui_target), src.radiation_intensity, src.radiation_duration)
 			src.connected.occupant.dna.SetUISubBlock(src.selected_ui_block,src.selected_ui_subblock,block)
 			src.connected.occupant.UpdateAppearance()
 		else
 			var/radiation = ((src.radiation_intensity*2)+src.radiation_duration)
-			src.connected.occupant.apply_effect(radiation,IRRADIATE,0)		
+			src.connected.occupant.apply_effect(radiation,IRRADIATE,0)
 			if(src.connected.radiation_check())
 				return 1
-				
+
 			if (prob(20+src.radiation_intensity))
 				randmutb(src.connected.occupant)
 				domutcheck(src.connected.occupant,src.connected)
 			else
 				randmuti(src.connected.occupant)
-				src.connected.occupant.UpdateAppearance()	
+				src.connected.occupant.UpdateAppearance()
 		return 1 // return 1 forces an update to all Nano uis attached to src
 
 	////////////////////////////////////////////////////////
@@ -752,16 +757,16 @@
 		sleep(10*src.radiation_duration) // sleep for radiation_duration seconds
 
 		irradiating = 0
-		src.connected.locked = lock_state	
-		
-		if(src.connected.occupant)					
+		src.connected.locked = lock_state
+
+		if(src.connected.occupant)
 			if (prob((80 + ((src.radiation_duration / 2) + (connected.precision_coeff ** 3)))))
 				var/radiation = ((src.radiation_intensity+src.radiation_duration) / connected.damage_coeff)
-				src.connected.occupant.apply_effect(radiation,IRRADIATE,0)	
-				
+				src.connected.occupant.apply_effect(radiation,IRRADIATE,0)
+
 				if(src.connected.radiation_check())
 					return 1
-				
+
 				var/real_SE_block=selected_se_block
 				block = miniscramble(block, src.radiation_intensity, src.radiation_duration)
 				if(prob(20))
@@ -779,7 +784,7 @@
 
 				if(src.connected.radiation_check())
 					return 1
-				
+
 				if (prob(80-src.radiation_duration))
 					//testing("Random bad mut!")
 					randmutb(src.connected.occupant)
@@ -793,7 +798,7 @@
 	if(href_list["ejectBeaker"])
 		if(connected.beaker)
 			var/obj/item/weapon/reagent_containers/glass/B = connected.beaker
-			B.loc = connected.loc
+			B.forceMove(connected.loc)
 			connected.beaker = null
 		return 1
 
@@ -818,7 +823,7 @@
 		if (bufferOption == "ejectDisk")
 			if (!src.disk)
 				return
-			src.disk.loc = get_turf(src)
+			src.disk.forceMove(get_turf(src))
 			src.disk = null
 			return 1
 
@@ -890,8 +895,8 @@
 			src.connected.locked = lock_state
 
 			var/radiation = (rand(20,50) / connected.damage_coeff)
-			src.connected.occupant.apply_effect(radiation,IRRADIATE,0)			
-			
+			src.connected.occupant.apply_effect(radiation,IRRADIATE,0)
+
 			if(src.connected.radiation_check())
 				return 1
 
@@ -927,7 +932,7 @@
 					I.buf = buf
 				waiting_for_user_input=0
 				if(success)
-					I.loc = src.loc
+					I.forceMove(src.loc)
 					I.name += " ([buf.name])"
 					src.injector_ready = 0
 					spawn(300)

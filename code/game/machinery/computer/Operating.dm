@@ -1,12 +1,12 @@
 //This file was auto-corrected by findeclaration.exe on 25.5.2012 20:42:31
 
 /obj/machinery/computer/operating
-	name = "Operating Computer"
+	name = "operating computer"
 	density = 1
 	anchored = 1.0
 	icon_keyboard = "med_key"
 	icon_screen = "crew"
-	circuit = "/obj/item/weapon/circuitboard/operating"
+	circuit = /obj/item/weapon/circuitboard/operating
 	var/mob/living/carbon/human/victim = null
 	var/obj/machinery/optable/table = null
 
@@ -31,11 +31,11 @@
 	if(..(user))
 		return
 
-	if(stat & (NOPOWER|BROKEN)) 
-		return	
-		
-		
-	add_fingerprint(user)	
+	if(stat & (NOPOWER|BROKEN))
+		return
+
+
+	add_fingerprint(user)
 	interact(user)
 
 

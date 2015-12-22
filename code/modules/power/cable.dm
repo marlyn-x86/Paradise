@@ -148,7 +148,7 @@ By design, d1 is the smallest direction and d2 is the highest
 						if(c.d1 == 12 || c.d2 == 12)
 							c.qdel()*/
 ///// Z-Level Stuff
-		investigate_log("was cut by [key_name(usr, usr.client)] in [user.loc.loc]","wires")
+		investigate_log("was cut by [key_name(usr, usr.client)] in [user.loc.loc]([T.x], [T.y], [T.z] - <A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[T.x];Y=[T.y];Z=[T.z]'>JMP</a>)","wires")
 
 		qdel(src) // qdel
 		return
@@ -182,7 +182,7 @@ By design, d1 is the smallest direction and d2 is the highest
 	if(!prob(prb))
 		return 0
 	if (electrocute_mob(user, powernet, src, siemens_coeff))
-		var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+		var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 		s.set_up(5, 1, src)
 		s.start()
 		return 1
@@ -610,7 +610,7 @@ obj/structure/cable/proc/cableColor(var/colorC)
 		if(ismob(loc)) //handle mob icon update
 			var/mob/M = loc
 			M.unEquip(src)
-		qqdel(src)
+		qdel(src)
 		return 1
 	else
 		amount -= used

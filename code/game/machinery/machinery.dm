@@ -139,6 +139,9 @@ Class Procs:
 
 	return ..()
 
+/obj/machinery/proc/locate_machinery()
+	return
+
 /obj/machinery/process() // If you dont use process or power why are you here
 	return PROCESS_KILL
 
@@ -146,15 +149,7 @@ Class Procs:
 	if(use_power && stat == 0)
 		use_power(7500/severity)
 
-		var/obj/effect/overlay/pulse2 = new/obj/effect/overlay ( src.loc )
-		pulse2.icon = 'icons/effects/effects.dmi'
-		pulse2.icon_state = "empdisable"
-		pulse2.name = "emp sparks"
-		pulse2.anchored = 1
-		pulse2.dir = pick(cardinal)
-
-		spawn(10)
-			pulse2.delete()
+	new/obj/effect/overlay/temp/emp(src.loc)
 	..()
 
 /obj/machinery/ex_act(severity)
@@ -322,6 +317,11 @@ Class Procs:
 /obj/machinery/CouldNotUseTopic(var/mob/user)
 	usr.unset_machine()
 
+/obj/machinery/proc/dropContents()//putting for swarmers, occupent code commented out, someone can use later.
+	var/turf/T = get_turf(src)
+	for(var/atom/movable/AM in contents)
+		AM.forceMove(T)
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 /obj/machinery/attack_ai(var/mob/user as mob)
@@ -334,31 +334,32 @@ Class Procs:
 		return src.attack_hand(user)
 
 /obj/machinery/attack_hand(mob/user as mob)
-	if(!interact_offline && stat & (NOPOWER|BROKEN|MAINT))
-		return 1
 	if(user.lying || user.stat)
 		return 1
-	if ( ! (istype(usr, /mob/living/carbon/human) || \
-			istype(usr, /mob/living/silicon)))
-		usr << "\red You don't have the dexterity to do this!"
+
+	if(!user.IsAdvancedToolUser())
+		user << "<span class='warning'>You don't have the dexterity to do this!</span>"
 		return 1
-/*
-	//distance checks are made by atom/proc/DblClick
-	if ((get_dist(src, user) > 1 || !istype(src.loc, /turf)) && !istype(user, /mob/living/silicon))
-		return 1
-*/
+
 	if (ishuman(user))
 		var/mob/living/carbon/human/H = user
 		if(H.getBrainLoss() >= 60)
-			visible_message("\red [H] stares cluelessly at [src] and drools.")
+			visible_message("<span class='warning'>[H] stares cluelessly at [src] and drools.</span>")
 			return 1
 		else if(prob(H.getBrainLoss()))
-			user << "\red You momentarily forget how to use [src]."
+			user << "<span class='warning'>You momentarily forget how to use [src].</span>"
 			return 1
+
+	if(panel_open)
+		src.add_fingerprint(user)
+		return 0
+
+	if(!interact_offline && stat & (NOPOWER|BROKEN|MAINT))
+		return 1
 
 	src.add_fingerprint(user)
 
-	return 0
+	return ..()
 
 /obj/machinery/CheckParts()
 	RefreshParts()
@@ -435,9 +436,7 @@ Class Procs:
 			var/obj/item/weapon/circuitboard/CB = locate(/obj/item/weapon/circuitboard) in component_parts
 			var/P
 			if(W.works_from_distance)
-				user << "<span class='notice'>Following parts detected in the machine:</span>"
-				for(var/var/obj/item/C in component_parts)
-					user << "<span class='notice'>    [C.name]</span>"
+				display_parts(user)
 			for(var/obj/item/weapon/stock_parts/A in component_parts)
 				for(var/D in CB.req_components)
 					if(ispath(A.type, D))
@@ -456,14 +455,22 @@ Class Procs:
 							break
 			RefreshParts()
 		else
-			user << "<span class='notice'>Following parts detected in the machine:</span>"
-			for(var/var/obj/item/C in component_parts)
-				user << "<span class='notice'>    [C.name]</span>"
+			display_parts(user)
 		if(shouldplaysound)
 			W.play_rped_sound()
 		return 1
 	else
 		return 0
+
+/obj/machinery/proc/display_parts(mob/user)
+	user << "<span class='notice'>Following parts detected in the machine:</span>"
+	for(var/obj/item/C in component_parts)
+		user << "<span class='notice'>\icon[C] [C.name]</span>"
+
+/obj/machinery/examine(mob/user)
+	..(user)
+	if(user.research_scanner && component_parts)
+		display_parts(user)
 
 /obj/machinery/proc/dismantle()
 	playsound(loc, 'sound/items/Crowbar.ogg', 50, 1)
@@ -537,14 +544,14 @@ Class Procs:
 		return 0
 	if(!prob(prb))
 		return 0
-	var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+	var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 	s.set_up(5, 1, src)
 	s.start()
 	if (electrocute_mob(user, get_area(src), src, 0.7))
 		if(user.stunned)
 			return 1
 	return 0
-	
+
 //called on machinery construction (i.e from frame to machinery) but not on initialization
 /obj/machinery/proc/construction()
 	return

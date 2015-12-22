@@ -32,12 +32,6 @@
 	/obj/structure/falsewall/reinforced  // WHY DO WE SMOOTH WITH FALSE R-WALLS WHEN WE DON'T SMOOTH WITH REAL R-WALLS.
 	)
 
-
-/turf/simulated/wall/Del()
-	for(var/obj/effect/E in src)
-		if(E.name == "Wallrot")
-			qdel(E)
-
 /turf/simulated/wall/ChangeTurf(var/newtype)
 	for(var/obj/effect/E in src)
 		if(E.name == "Wallrot")
@@ -265,29 +259,35 @@
 /turf/simulated/wall/attack_hand(mob/user as mob)
 	user.changeNext_move(CLICK_CD_MELEE)
 	if (HULK in user.mutations)
-		if (prob(40) || rotting)
-			user << text("\blue You smash through the wall.")
+		if (prob(hardness) || rotting)
+			playsound(src, 'sound/effects/meteorimpact.ogg', 100, 1)
+			user << text("<span class='notice'>You smash through the wall.</span>")
 			user.say(pick(";RAAAAAAAARGH!", ";HNNNNNNNNNGGGGGGH!", ";GWAAAAAAAARRRHHH!", "NNNNNNNNGGGGGGGGHH!", ";AAAAAAARRRGH!" ))
 			dismantle_wall(1)
 			return
 		else
-			usr << text("\blue You punch the wall.")
-			take_damage(rand(25, 75))
+			playsound(src, 'sound/effects/bang.ogg', 50, 1)
+			user << text("<span class='notice'>You punch the wall.</span>")
 			return
 
 	if(rotting)
-		user << "\blue The wall crumbles under your touch."
-		dismantle_wall()
-		return
+		if(hardness <= 10)
+			user << "<span class='notice'>This wall feels rather unstable.</span>"
+			return
+		else
+			user << "<span class='notice'>The wall crumbles under your touch.</span>"
+			dismantle_wall()
+			return
 
-	user << "\blue You push the wall but nothing happens!"
+	user << "<span class='notice'>You push the wall but nothing happens!</span>"
 	playsound(src, 'sound/weapons/Genhit.ogg', 25, 1)
 	src.add_fingerprint(user)
+	..()
 	return
 
 /turf/simulated/wall/attackby(obj/item/weapon/W as obj, mob/user as mob, params)
 	user.changeNext_move(CLICK_CD_MELEE)
-	if (!(istype(user, /mob/living/carbon/human) || ticker) && ticker.mode.name != "monkey")
+	if (!user.IsAdvancedToolUser())
 		user << "<span class='warning'>You don't have the dexterity to do this!</span>"
 		return
 
@@ -384,6 +384,15 @@
 			user << "<span class='notice'>Your drill tears though the last of the reinforced plating.</span>"
 			dismantle_wall()
 			visible_message("<span class='warning'>[user] drills through \the [src]!</span>","<span class='warning'>You hear the grinding of metal.</span>")
+
+	else if (istype(W, /obj/item/weapon/pickaxe/drill/jackhammer))
+
+		user << "<span class='notice'>You begin to disintegrates the wall.</span>"
+
+		if(do_after(user, mineral == "diamond" ? 60 : 30, target = src))
+			user << "<span class='notice'>Your jackhammer disintegrate the reinforced plating.</span>"
+			dismantle_wall()
+			visible_message("<span class='warning'>[user] disintegrates \the [src]!</span>","<span class='warning'>You hear the grinding of metal.</span>")
 
 	else if(istype(W, /obj/item/weapon/melee/energy/blade))
 		var/obj/item/weapon/melee/energy/blade/EB = W

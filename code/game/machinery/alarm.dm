@@ -119,6 +119,9 @@
 
 /obj/machinery/alarm/monitor
 	report_danger_level = 0
+	
+/obj/machinery/alarm/monitor/server
+	preset = AALARM_PRESET_SERVER
 
 /obj/machinery/alarm/server
 	preset = AALARM_PRESET_SERVER
@@ -323,10 +326,11 @@
 			use_power(energy_used/1000, ENVIRON)
 
 			//We need to cool ourselves.
-			if(environment.temperature > target_temperature)
-				gas.temperature -= energy_used/heat_capacity
-			else
-				gas.temperature += energy_used/heat_capacity
+			if(heat_capacity)
+				if(environment.temperature > target_temperature)
+					gas.temperature -= energy_used/heat_capacity
+				else
+					gas.temperature += energy_used/heat_capacity
 
 			environment.merge(gas)
 
@@ -602,9 +606,6 @@
 /obj/machinery/alarm/attack_ai(mob/user)
 	src.add_hiddenprint(user)
 	return ui_interact(user)
-
-/obj/machinery/alarm/attack_robot(mob/user)
-	return attack_ai(user)
 
 /obj/machinery/alarm/attack_ghost(user as mob)
 	if(stat & (BROKEN|MAINT))

@@ -67,7 +67,7 @@
 
 	if(host)
 
-		if(!stat && !host.stat)
+		if(!stat && host.stat != DEAD)
 
 			if(host.reagents.has_reagent("sugar"))
 				if(!docile)
@@ -111,10 +111,10 @@
 	..()
 	statpanel("Status")
 
-	if(emergency_shuttle)
-		var/eta_status = emergency_shuttle.get_status_panel_eta()
-		if(eta_status)
-			stat(null, eta_status)
+	if(shuttle_master.emergency.mode >= SHUTTLE_RECALL)
+		var/timeleft = shuttle_master.emergency.timeLeft()
+		if(timeleft > 0)
+			stat(null, "[add_zero(num2text((timeleft / 60) % 60),2)]:[add_zero(num2text(timeleft % 60), 2)]")
 
 	if (client.statpanel == "Status")
 		stat("Chemicals", chemicals)
@@ -294,7 +294,7 @@
 		if(!host || !src) return
 
 		if(src.stat)
-			src << "You cannot infest a target in your current state."
+			src << "You cannot release a target in your current state."
 			return
 
 		src << "You wiggle out of [host]'s ear and plop to the ground."
@@ -360,7 +360,7 @@ mob/living/simple_animal/borer/proc/detatch()
 
 	if(!host)	return
 
-	src.loc = get_turf(host)
+	src.forceMove(get_turf(host))
 
 	reset_view(null)
 	machine = null
@@ -426,7 +426,7 @@ mob/living/simple_animal/borer/proc/detatch()
 			M << "Something disgusting and slimy wiggles into your ear!"
 
 		src.host = M
-		src.loc = M
+		src.forceMove(M)
 
 		if(istype(M,/mob/living/carbon/human))
 			var/mob/living/carbon/human/H = M
@@ -442,7 +442,7 @@ mob/living/simple_animal/borer/proc/detatch()
 
 /mob/living/simple_animal/borer/proc/perform_infestation(var/mob/living/carbon/M)
 	src.host = M
-	src.loc = M
+	src.forceMove(M)
 
 	if(istype(M,/mob/living/carbon/human))
 		var/mob/living/carbon/human/H = M

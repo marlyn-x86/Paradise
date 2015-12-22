@@ -37,7 +37,7 @@
 	var/maint_access = 1
 	var/dna	//dna-locking the mech
 	var/list/proc_res = list() //stores proc owners, like proc_res["functionname"] = owner reference
-	var/datum/effect/effect/system/spark_spread/spark_system = new
+	var/datum/effect/system/spark_spread/spark_system = new
 	var/lights = 0
 	var/lights_power = 6
 	var/emagged = 0
@@ -59,7 +59,6 @@
 	var/list/internals_req_access = list(access_engine,access_robotics)//required access level to open cell compartment
 
 	var/datum/global_iterator/pr_int_temp_processor //normalizes internal air mixture temperature
-	var/datum/global_iterator/pr_inertial_movement //controls intertial movement in spesss
 	var/datum/global_iterator/pr_give_air //moves air from tank to cabin
 	var/datum/global_iterator/pr_internal_damage //processes internal damage
 
@@ -76,6 +75,8 @@
 	var/melee_cooldown = 10
 	var/melee_can_hit = 1
 
+	hud_possible = list (DIAG_STAT_HUD, DIAG_BATT_HUD, DIAG_MECH_HUD)
+
 /obj/mecha/New()
 	..()
 	events = new
@@ -90,10 +91,15 @@
 	add_cell()
 	add_iterators()
 	removeVerb(/obj/mecha/verb/disconnect_from_port)
-	removeVerb(/atom/movable/verb/pull)
 	log_message("[src.name] created.")
 	loc.Entered(src)
 	mechas_list += src //global mech list
+	prepare_huds()
+	var/datum/atom_hud/data/diagnostic/diag_hud = huds[DATA_HUD_DIAGNOSTIC]
+	diag_hud.add_to_hud(src)
+	diag_hud_set_mechhealth()
+	diag_hud_set_mechcell()
+	diag_hud_set_mechstat()
 	return
 
 ////////////////////////
@@ -136,7 +142,6 @@
 
 /obj/mecha/proc/add_iterators()
 	pr_int_temp_processor = new /datum/global_iterator/mecha_preserve_temp(list(src))
-	pr_inertial_movement = new /datum/global_iterator/mecha_intertial_movement(null,0)
 	pr_give_air = new /datum/global_iterator/mecha_tank_give_air(list(src))
 	pr_internal_damage = new /datum/global_iterator/mecha_internal_damage(list(src),0)
 
@@ -158,13 +163,6 @@
 
 	return 1
 
-
-
-/obj/mecha/proc/check_for_support()
-	if(locate(/obj/structure/grille, orange(1, src)) || locate(/obj/structure/lattice, orange(1, src)) || locate(/turf/simulated, orange(1, src)) || locate(/turf/unsimulated, orange(1, src)))
-		return 1
-	else
-		return 0
 
 /obj/mecha/examine(mob/user)
 	..(user)
@@ -289,11 +287,15 @@
 ////////  Movement procs  ////////
 //////////////////////////////////
 
-/obj/mecha/Move()
+/obj/mecha/Move(atom/newLoc, direct)
 	. = ..()
 	if(.)
 		events.fireEvent("onMove",get_turf(src))
-	return
+
+/obj/mecha/Process_Spacemove(var/movement_dir = 0)
+	if(occupant)
+		return occupant.Process_Spacemove(movement_dir) //We'll just say you used the clamp to grab the wall
+	return ..()
 
 /obj/mecha/relaymove(mob/user,direction)
 	if(user != src.occupant) //While not "realistic", this piece is player friendly.
@@ -316,7 +318,7 @@
 /obj/mecha/proc/dyndomove(direction)
 	if(!can_move)
 		return 0
-	if(src.pr_inertial_movement.active())
+	if(!Process_Spacemove(direction))
 		return 0
 	if(!has_charge(step_energy_drain))
 		return 0
@@ -326,14 +328,10 @@
 	else if(src.dir!=direction)
 		move_result = mechturn(direction)
 	else
-		move_result	= mechstep(direction)
+		move_result = mechstep(direction)
 	if(move_result)
 		can_move = 0
 		use_power(step_energy_drain)
-		if(istype(src.loc, /turf/space))
-			if(!src.check_for_support())
-				src.pr_inertial_movement.start(list(src,direction))
-				src.log_message("Movement control lost. Inertial movement started.")
 		if(mecha_do_after(step_in))
 			can_move = 1
 		return 1
@@ -371,7 +369,7 @@
 			G.destroyed = 1
 			G.icon_state = "[initial(G.icon_state)]-b"
 			G.density = 0
-			PoolOrNew(/obj/item/stack/rods, get_turf(G.loc))
+			new /obj/item/stack/rods(get_turf(G.loc))
 			breakthrough = 1
 
 		else if(istype(obstacle, /obj/structure/table))
@@ -418,7 +416,7 @@
 		var/obj/O = obstacle
 		if(istype(O, /obj/effect/portal)) //derpfix
 			src.anchored = 0
-			O.Crossed(src)
+			O.Bumped(src)
 			spawn(0)//countering portal teleport spawn(0), hurr
 				src.anchored = 1
 		else if(!O.anchored)
@@ -461,6 +459,7 @@
 	pr_internal_damage.start()
 	log_append_to_last("Internal damage of type [int_dam_flag].",1)
 	occupant << sound('sound/machines/warning-buzzer.ogg',wait=0)
+	diag_hud_set_mechstat()
 	return
 
 /obj/mecha/proc/clearInternalDamage(int_dam_flag)
@@ -473,6 +472,7 @@
 			occupant_message("<font color='blue'><b>Internal fire extinquished.</b></font>")
 		if(MECHA_INT_TANK_BREACH)
 			occupant_message("<font color='blue'><b>Damaged internal tank has been sealed.</b></font>")
+	diag_hud_set_mechstat()
 	return
 
 
@@ -540,7 +540,7 @@
 /obj/mecha/attack_animal(mob/living/simple_animal/user as mob)
 	src.log_message("Attack by simple animal. Attacker - [user].",1)
 	if(user.melee_damage_upper == 0)
-		user.emote("[user.friendly] [src]")
+		user.custom_emote(1, "[user.friendly] [src]")
 	else
 		user.do_attack_animation(src)
 		if(!prob(src.deflect_chance))
@@ -805,7 +805,16 @@
 		else if(state==3)
 			state=2
 			user << "You close the hatch to the power unit"
+		else if(state==4 && pilot_is_mmi())
+			// Since having maint protocols available is controllable by the MMI, I see this as a consensual way to remove an MMI without destroying the mech
+			user.visible_message("[user] begins levering out the MMI from the [src].", "You begin to lever out the MMI from the [src].")
+			occupant << "<span class='warning'>[user] is prying you out of the exosuit!</span>"
+			if(do_after(user,80,target=src))
+				user.visible_message("<span class='notice'>[user] pries the MMI out of the [src]!</span>", "<span class='notice'>You finish removing the MMI from the [src]!</span>")
+				go_out()
 		return
+
+
 	else if(istype(W, /obj/item/stack/cable_coil))
 		if(state == 3 && hasInternalDamage(MECHA_INT_SHORT_CIRCUIT))
 			var/obj/item/stack/cable_coil/CC = W
@@ -1070,7 +1079,7 @@
 	connected_port = new_port
 	connected_port.connected_device = src
 	connected_port.parent.reconcile_air()
-	
+
 	log_message("Connected to gas port.")
 	return 1
 
@@ -1082,7 +1091,7 @@
 	connected_port = null
 	src.log_message("Disconnected from gas port.")
 	return 1
-	
+
 /obj/mecha/portableConnectorReturnAir()
 	return internal_tank.return_air()
 
@@ -1252,7 +1261,7 @@
 			return 0
 		if(!user.unEquip(mmi_as_oc))
 			user << "<span class='notice'>\the [mmi_as_oc] is stuck to your hand, you cannot put it in \the [src]</span>"
-			return
+			return 0
 		var/mob/brainmob = mmi_as_oc.brainmob
 		brainmob.reset_view(src)
 	/*
@@ -1275,6 +1284,18 @@
 		return 1
 	else
 		return 0
+
+/obj/mecha/proc/pilot_is_mmi()
+	var/atom/movable/mob_container
+	if(istype(occupant, /mob/living/carbon/brain))
+		var/mob/living/carbon/brain/brain = occupant
+		mob_container = brain.container
+	if(istype(mob_container, /obj/item/device/mmi))
+		return 1
+	return 0
+
+/obj/mecha/proc/pilot_mmi_hud(var/mob/living/carbon/brain/pilot)
+	return
 
 /obj/mecha/verb/view_stats()
 	set name = "View Stats"
@@ -1819,12 +1840,20 @@
 	if(get_charge())
 		cell.use(amount)
 		return 1
+	//Diagnostic HUD updates
+	diag_hud_set_mechhealth()
+	diag_hud_set_mechcell()
+	diag_hud_set_mechstat()
 	return 0
 
 /obj/mecha/proc/give_power(amount)
 	if(!isnull(get_charge()))
 		cell.give(amount)
 		return 1
+	//Diagnostic HUD updates
+	diag_hud_set_mechhealth()
+	diag_hud_set_mechcell()
+	diag_hud_set_mechstat()
 	return 0
 
 /obj/mecha/proc/reset_icon()
@@ -1881,16 +1910,6 @@
 			return stop()
 		return
 
-/datum/global_iterator/mecha_intertial_movement //inertial movement in space
-	delay = 7
-
-	process(var/obj/mecha/mecha as obj,direction)
-		if(direction)
-			if(!step(mecha, direction)||mecha.check_for_support())
-				src.stop()
-		else
-			src.stop()
-		return
 
 /datum/global_iterator/mecha_internal_damage // processing internal damage
 
@@ -1964,3 +1983,7 @@
 	//src.check_for_internal_damage(list(MECHA_INT_FIRE,MECHA_INT_TEMP_CONTROL,MECHA_INT_TANK_BREACH,MECHA_INT_CONTROL_LOST))
 	return
 */
+
+
+/obj/mecha/speech_bubble(var/bubble_state = "",var/bubble_loc = src, var/list/bubble_recipients = list())
+	flick_overlay(image('icons/mob/talk.dmi', bubble_loc, bubble_state,MOB_LAYER+1), bubble_recipients, 30)

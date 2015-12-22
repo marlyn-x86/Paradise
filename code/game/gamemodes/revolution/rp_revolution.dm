@@ -69,8 +69,7 @@
 		rev_mind.current.verbs += /mob/living/carbon/human/proc/RevConvert
 
 	modePlayer += head_revolutionaries
-	spawn (rand(waittime_l, waittime_h))
-		send_intercept()
+
 
 /datum/game_mode/revolution/rp_revolution/greet_revolutionary(var/datum/mind/rev_mind, var/you_are=1)
 	var/obj_count = 1
@@ -106,7 +105,6 @@
 	rev_mind.current << "\red <FONT size = 3> You are now a revolutionary! Help your cause. Do not harm your fellow freedom fighters. You can identify your comrades by the red \"R\" icons, and your leaders by the blue \"R\" icons. Help them kill, capture or convert the heads to win the revolution!</FONT>"
 	rev_mind.special_role = "Revolutionary"
 	update_rev_icons_added(rev_mind)
-	H.hud_updateflag |= 1 << SPECIALROLE_HUD
 	return 1
 
 /////////////////////////////

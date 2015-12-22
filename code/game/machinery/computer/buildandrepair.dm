@@ -125,9 +125,6 @@
 	name = "circuit board (Orion Trail)"
 	build_path = /obj/machinery/computer/arcade/orion_trail
 	origin_tech = "programming=2"
-/obj/item/weapon/circuitboard/turbine_control
-	name = "Circuit board (Turbine Control)"
-	build_path = /obj/machinery/computer/turbine_computer
 /obj/item/weapon/circuitboard/solar_control
 	name = "Circuit board (Solar Control)"
 	build_path = /obj/machinery/power/solar_control
@@ -194,29 +191,39 @@
 	build_path = /obj/machinery/computer/telecomms/traffic
 	origin_tech = "programming=3"
 
+
+/obj/item/weapon/circuitboard/shuttle
+	name = "circuit board (Shuttle)"
+	build_path = /obj/machinery/computer/shuttle
+	var/shuttleId
+	var/possible_destinations = ""
+
+/obj/item/weapon/circuitboard/labor_shuttle
+	name = "circuit Board (Labor Shuttle)"
+	build_path = /obj/machinery/computer/shuttle/labor
+/obj/item/weapon/circuitboard/labor_shuttle/one_way
+	name = "circuit Board (Prisoner Shuttle Console)"
+	build_path = /obj/machinery/computer/shuttle/labor/one_way
+/obj/item/weapon/circuitboard/ferry
+	name = "circuit Board (Transport Ferry)"
+	build_path = /obj/machinery/computer/shuttle/ferry
+/obj/item/weapon/circuitboard/ferry/request
+	name = "circuit Board (Transport Ferry Console)"
+	build_path = /obj/machinery/computer/shuttle/ferry/request
+/obj/item/weapon/circuitboard/mining_shuttle
+	name = "circuit Board (Mining Shuttle)"
+	build_path = /obj/machinery/computer/shuttle/mining
+/obj/item/weapon/circuitboard/white_ship
+	name = "circuit Board (White Ship)"
+	build_path = /obj/machinery/computer/shuttle/white_ship
+
+
 /obj/item/weapon/circuitboard/curefab
 	name = "Circuit board (Cure Fabricator)"
 	build_path = /obj/machinery/computer/curer
 /obj/item/weapon/circuitboard/splicer
 	name = "Circuit board (Disease Splicer)"
 	build_path = /obj/machinery/computer/diseasesplicer
-/obj/item/weapon/circuitboard/mining_shuttle
-	name = "Circuit board (Mining Shuttle)"
-	build_path = /obj/machinery/computer/shuttle_control/mining
-	origin_tech = "programming=2"
-/obj/item/weapon/circuitboard/white_ship
-	name = "circuit Board (White Ship)"
-	desc = {"A dusty circuitboard, marked "property of the NGV Venal"."}
-	build_path = /obj/machinery/computer/shuttle_control/multi/whiteship
-	origin_tech = "programming=2"
-/obj/item/weapon/circuitboard/engineering_shuttle
-	name = "Circuit board (Engineering Shuttle)"
-	build_path = /obj/machinery/computer/shuttle_control/engineering
-	origin_tech = "programming=2"
-/obj/item/weapon/circuitboard/research_shuttle
-	name = "Circuit board (Research Shuttle)"
-	build_path = /obj/machinery/computer/shuttle_control/research
-	origin_tech = "programming=2"
 /obj/item/weapon/circuitboard/HolodeckControl
 	name = "Circuit board (Holodeck Control)"
 	build_path = /obj/machinery/computer/HolodeckControl
@@ -229,10 +236,6 @@
 	name = "Circuit board (Area Air Control)"
 	build_path = /obj/machinery/computer/area_atmos
 	origin_tech = "programming=2"
-/obj/item/weapon/circuitboard/prison_shuttle
-	name = "Circuit board (Prison Shuttle)"
-	build_path = /obj/machinery/computer/prison_shuttle
-	origin_tech = "programming=2"
 /obj/item/weapon/circuitboard/telesci_console
 	name = "Circuit board (Telepad Control Console)"
 	build_path = /obj/machinery/computer/telescience
@@ -244,6 +247,11 @@
 /obj/item/weapon/circuitboard/large_tank_control
 	name = "Circuit board (Atmospheric Tank Control)"
 	build_path = /obj/machinery/computer/general_air_control/large_tank_control
+
+/obj/item/weapon/circuitboard/turbine_computer
+	name = "circuit board (Turbine Computer)"
+	build_path = /obj/machinery/computer/turbine_computer
+	origin_tech = "programming=4;engineering=4;powerstorage=4"
 
 /obj/item/weapon/circuitboard/HONKputer
 	name = "Circuit board (HONKputer)"

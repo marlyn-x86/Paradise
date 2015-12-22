@@ -202,6 +202,7 @@
 		result_amount = 10
 		required_container = /obj/item/slime_extract/blue
 		required_other = 1
+
 //Dark Blue
 	slimefreeze
 		name = "Slime Freeze"
@@ -220,6 +221,21 @@
 					for(var/mob/living/M in range (get_turf(holder.my_atom), 7))
 						M.bodytemperature -= 140
 						M << "\blue You feel a chill!"
+
+
+	slimefireproof
+		name = "Slime Fireproof"
+		id = "m_fireproof"
+		result = null
+		required_reagents = list("water" = 1)
+		result_amount = 1
+		required_container = /obj/item/slime_extract/darkblue
+		required_other = 1
+
+		on_reaction(datum/reagents/holder)
+			feedback_add_details("slime_cores_used","[type]")
+			var/obj/item/weapon/slimefireproof/P = new /obj/item/weapon/slimefireproof
+			P.loc = get_turf(holder.my_atom)
 
 //Orange
 	slimecasp
@@ -353,6 +369,21 @@
 				for(var/mob/O in viewers(get_turf(holder.my_atom), null))
 					O.show_message(text("\red The [slime] is driven into a frenzy!."), 1)
 
+
+	slimespeed
+		name = "Slime Speed"
+		id = "m_speed"
+		result = null
+		required_reagents = list("water" = 1)
+		result_amount = 1
+		required_container = /obj/item/slime_extract/red
+		required_other = 1
+
+		on_reaction(datum/reagents/holder)
+			feedback_add_details("slime_cores_used","[type]")
+			var/obj/item/weapon/slimespeed/P = new /obj/item/weapon/slimespeed
+			P.loc = get_turf(holder.my_atom)
+
 //Pink
 	slimeppotion
 		name = "Slime Potion"
@@ -402,7 +433,7 @@
 		required_reagents = list("plasma" = 5)
 		required_other = 1
 		on_reaction(var/datum/reagents/holder)
-			var/obj/item/weapon/slimepotion2/P = new /obj/item/weapon/slimepotion2
+			var/obj/item/weapon/sentience_potion/P = new /obj/item/weapon/sentience_potion
 			P.loc = get_turf(holder.my_atom)
 //Adamantine
 	slimegolem
@@ -430,7 +461,7 @@
 		on_reaction(var/datum/reagents/holder, var/created_volume)
 			feedback_add_details("slime_cores_used","[replacetext(name," ","_")]")
 			if(holder.my_atom)
-				var/obj/item/bluespace_crystal/BC = new(get_turf(holder.my_atom))
+				var/obj/item/weapon/ore/bluespace_crystal/BC = new(get_turf(holder.my_atom))
 				BC.visible_message("<span class='notice'>The [BC.name] appears out of thin air!</span>")
 //Cerulean
 	slimepsteroid2

@@ -1,4 +1,8 @@
-/mob/living/carbon/human/emote(var/act,var/m_type=1,var/message = null)
+/mob/living/carbon/human/emote(var/act,var/m_type=1,var/message = null,var/force)
+
+	if (stat == DEAD)
+		return // No screaming bodies
+
 	var/param = null
 	if (findtext(act, "-", 1, null))
 		var/t1 = findtext(act, "-", 1, null)
@@ -16,8 +20,6 @@
 	for (var/obj/item/weapon/implant/I in src)
 		if (I.implanted)
 			I.trigger(act, src)
-
-
 
 	//Emote Cooldown System (it's so simple!)
 	// proc/handle_emote_CD() located in [code\modules\mob\emote.dm]
@@ -42,9 +44,12 @@
 
 	if(on_CD == 1)		// Check if we need to suppress the emote attempt.
 		return			// Suppress emote, you're still cooling off.
-	//--FalseIncarnate
 
 	switch(act)
+		if("me")									//OKAY SO RANT TIME, THIS FUCKING HAS TO BE HERE OR A SHITLOAD OF THINGS BREAK
+			return custom_emote(m_type, message)	//DO YOU KNOW WHY SHIT BREAKS? BECAUSE SO MUCH OLDCODE CALLS mob.emote("me",1,"whatever_the_fuck_it_wants_to_emote")
+													//WHO THE FUCK THOUGHT THAT WAS A GOOD FUCKING IDEA!?!?
+
 		if("ping")
 			var/M = null
 			if(param)
@@ -330,7 +335,7 @@
 					m_type = 2
 
 		if ("deathgasp")
-			message = "<B>[src]</B> seizes up and falls limp, \his eyes dead and lifeless..."
+			message = "<B>[src]</B> [species.death_message]"
 			m_type = 1
 
 		if ("giggle")
@@ -720,7 +725,7 @@
 			if(locate(/obj/item/weapon/storage/bible) in get_turf(src))
 				viewers(src) << "<span class='warning'><b>[src] farts on the Bible!</b></span>"
 				viewers(src) << "<span class='notice'><b>A mysterious force smites [src]!</b></span>"
-				var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+				var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 				s.set_up(3, 1, src)
 				s.start()
 				src.gib()
@@ -738,7 +743,7 @@
 			// Process toxic farts first.
 			if(TOXIC_FARTS in mutations)
 				for(var/mob/M in range(location,aoe_range))
-					if (M.internal != null && M.wear_mask && (M.wear_mask.flags & MASKINTERNALS))
+					if (M.internal != null && M.wear_mask && (M.wear_mask.flags & AIRTIGHT))
 						continue
 					if(!airborne_can_reach(location,M,aoe_range))
 						continue

@@ -3,9 +3,13 @@
 	dead_mob_list -= src
 	living_mob_list -= src
 	qdel(hud_used)
+	hud_used = null
 	if(mind && mind.current == src)
 		spellremove(src)
 	ghostize()
+	for(var/mob/dead/observer/M in following_mobs)
+		M.following = null
+	following_mobs = null
 	return ..()
 
 /mob/New()
@@ -14,7 +18,12 @@
 		dead_mob_list += src
 	else
 		living_mob_list += src
+	prepare_huds()
 	..()
+
+/atom/proc/prepare_huds()
+	for(var/hud in hud_possible)
+		hud_list[hud] = image('icons/mob/hud.dmi', src, "")
 
 /mob/proc/generate_name()
 	return name
@@ -102,7 +111,21 @@
 	for(var/mob/M in get_mobs_in_view(range, src))
 		if(self_message && M==src)
 			msg = self_message
-		M.show_message( msg, 2, deaf_message, 1)
+		M.show_message(msg, 2, deaf_message, 1)
+	
+	// based on say code
+	var/omsg = replacetext(message, "<B>[src]</B> ", "")
+	var/list/listening_obj = new
+	for(var/atom/movable/A in view(range, src))
+		if(istype(A, /mob))
+			var/mob/M = A
+			for(var/obj/O in M.contents)
+				listening_obj |= O
+		else if(istype(A, /obj))
+			var/obj/O = A
+			listening_obj |= O
+	for(var/obj/O in listening_obj)
+		O.hear_message(src, omsg)
 
 // Show a message to all mobs in earshot of this atom
 // Use for objects performing audible actions
@@ -133,6 +156,9 @@
 
 
 /mob/proc/restrained()
+	return
+
+/mob/proc/incapacitated()
 	return
 
 //This proc is called whenever someone clicks an inventory ui slot.
@@ -466,23 +492,18 @@ var/list/slot_equipment_priority = list( \
 	return
 
 
-/mob/proc/show_inv(mob/user as mob)
+/mob/proc/show_inv(mob/user)
 	user.set_machine(src)
 	var/dat = {"
-	<B><HR><FONT size=3>[name]</FONT></B>
-	<BR><HR>
-	<BR><B>Head(Mask):</B> <A href='?src=\ref[src];item=mask'>[(wear_mask ? wear_mask : "Nothing")]</A>
-	<BR><B>Left Hand:</B> <A href='?src=\ref[src];item=l_hand'>[(l_hand && !(l_hand.flags & ABSTRACT)) ? l_hand  : "Nothing"]</A>
-	<BR><B>Right Hand:</B> <A href='?src=\ref[src];item=r_hand'>[(r_hand && !(r_hand.flags & ABSTRACT)) ? r_hand : "Nothing"]</A>
-	<BR><B>Back:</B> <A href='?src=\ref[src];item=back'>[(back && !(back.flags & ABSTRACT)) ? back : "Nothing"]</A> [((istype(wear_mask, /obj/item/clothing/mask) && istype(back, /obj/item/weapon/tank) && !( internal )) ? text(" <A href='?src=\ref[];item=internal'>Set Internal</A>", src) : "")]
-	<BR>[(internal ? text("<A href='?src=\ref[src];item=internal'>Remove Internal</A>") : "")]
-	<BR><A href='?src=\ref[src];item=pockets'>Empty Pockets</A>
-	<BR><A href='?src=\ref[user];refresh=1'>Refresh</A>
+	<HR>
+	<B><FONT size=3>[name]</FONT></B>
+	<HR>
+	<BR><B>Left Hand:</B> <A href='?src=\ref[src];item=[slot_l_hand]'>		[(l_hand&&!(l_hand.flags&ABSTRACT)) 	? l_hand	: "Nothing"]</A>
+	<BR><B>Right Hand:</B> <A href='?src=\ref[src];item=[slot_r_hand]'>		[(r_hand&&!(r_hand.flags&ABSTRACT))		? r_hand	: "Nothing"]</A>
 	<BR><A href='?src=\ref[user];mach_close=mob\ref[src]'>Close</A>
-	<BR>"}
-	user << browse(dat, text("window=mob[];size=325x500", name))
+	"}
+	user << browse(dat, "window=mob\ref[src];size=325x500")
 	onclose(user, "mob\ref[src]")
-	return
 
 //mob verbs are faster than object verbs. See http://www.byond.com/forum/?post=1326139&page=2#comment8198716 for why this isn't atom/verb/examine()
 /mob/verb/examinate(atom/A as mob|obj|turf in view())
@@ -636,11 +657,6 @@ var/list/slot_equipment_priority = list( \
 
 		flavor_text = msg
 
-/mob/proc/warn_flavor_changed()
-	if(flavor_text && flavor_text != "") // don't spam people that don't use it!
-		src << "<h2 class='alert'>OOC Warning:</h2>"
-		src << "<span class='alert'>Your flavor text is likely out of date! <a href='byond://?src=\ref[src];flavor_change=1'>Change</a></span>"
-
 /mob/proc/print_flavor_text(var/shrink = 1)
 	if (flavor_text && flavor_text != "")
 		var/msg = replacetext(flavor_text, "\n", " ")
@@ -669,12 +685,13 @@ var/list/slot_equipment_priority = list( \
 
 	log_game("[key_name(usr)] has respawned.")
 
-	usr << "\blue <B>Make sure to play a different character, and please roleplay correctly!</B>"
+	usr << "<span class='boldnotice'>Make sure to play a different character, and please roleplay correctly!</span>"
 
 	if(!client)
 		log_game("[key_name(usr)] respawn failed due to disconnect.")
 		return
 	client.screen.Cut()
+	client.screen += client.void
 
 	if(!client)
 		log_game("[key_name(usr)] respawn failed due to disconnect.")
@@ -787,14 +804,42 @@ var/list/slot_equipment_priority = list( \
 		unset_machine()
 		src << browse(null, t1)
 
+	if(href_list["refresh"])
+		if(machine && in_range(src, usr))
+			show_inv(machine)
+
+	if(!usr.stat && usr.canmove && !usr.restrained() && in_range(src, usr))
+		if(href_list["item"])
+			var/slot = text2num(href_list["item"])
+			var/obj/item/what = get_item_by_slot(slot)
+
+			if(what)
+				usr.stripPanelUnequip(what,src,slot)
+			else
+				usr.stripPanelEquip(what,src,slot)
+
+	if(usr.machine == src)
+		if(Adjacent(usr))
+			show_inv(usr)
+		else
+			usr << browse(null,"window=mob\ref[src]")
+
 	if(href_list["flavor_more"])
 		usr << browse(text("<HTML><HEAD><TITLE>[]</TITLE></HEAD><BODY><TT>[]</TT></BODY></HTML>", name, replacetext(flavor_text, "\n", "<BR>")), text("window=[];size=500x200", name))
 		onclose(usr, "[name]")
 	if(href_list["flavor_change"])
 		update_flavor_text()
 
+	return
 
-//	..()
+// The src mob is trying to strip an item from someone
+// Defined in living.dm
+/mob/proc/stripPanelUnequip(obj/item/what, mob/who)
+	return
+
+// The src mob is trying to place an item on someone
+// Defined in living.dm
+/mob/proc/stripPanelEquip(obj/item/what, mob/who)
 	return
 
 
@@ -819,6 +864,30 @@ var/list/slot_equipment_priority = list( \
 	if(istype(M,/mob/living/silicon/ai)) return
 	show_inv(usr)
 
+//this and stop_pulling really ought to be /mob/living procs
+/mob/proc/start_pulling(atom/movable/AM)
+	if ( !AM || !src || src==AM || !isturf(AM.loc) )	//if there's no person pulling OR the person is pulling themself OR the object being pulled is inside something: abort!
+		return
+	if (!( AM.anchored ))
+		AM.add_fingerprint(src)
+
+		// If we're pulling something then drop what we're currently pulling and pull this instead.
+		if(pulling)
+			// Are we trying to pull something we are already pulling? Then just stop here, no need to continue.
+			if(AM == pulling)
+				return
+			stop_pulling()
+
+		src.pulling = AM
+		AM.pulledby = src
+		if(pullin)
+			pullin.update_icon(src)
+		if(ismob(AM))
+			var/mob/M = AM
+			if(!iscarbon(src))
+				M.LAssailant = null
+			else
+				M.LAssailant = usr
 
 /mob/verb/stop_pulling()
 
@@ -828,37 +897,8 @@ var/list/slot_equipment_priority = list( \
 	if(pulling)
 		pulling.pulledby = null
 		pulling = null
-
-/mob/proc/start_pulling(var/atom/movable/AM)
-
-	if ( !AM || !usr || src==AM || !isturf(src.loc) )	//if there's no person pulling OR the person is pulling themself OR the object being pulled is inside something: abort!
-		return
-
-	if (AM.anchored)
-		usr << "<span class='notice'>It won't budge!</span>"
-		return
-
-	var/mob/M = AM
-	if(ismob(AM))
-		if(!iscarbon(src))
-			M.LAssailant = null
-		else
-			M.LAssailant = usr
-
-	if(pulling)
-		var/pulling_old = pulling
-		stop_pulling()
-		// Are we pulling the same thing twice? Just stop pulling.
-		if(pulling_old == AM)
-			return
-
-	src.pulling = AM
-	AM.pulledby = src
-
-	//Attempted fix for people flying away through space when cuffed and dragged.
-	if(ismob(AM))
-		var/mob/pulled = AM
-		pulled.inertia_dir = 0
+		if(pullin)
+			pullin.update_icon(src)
 
 /mob/proc/can_use_hands()
 	return
@@ -989,76 +1029,29 @@ var/list/slot_equipment_priority = list( \
 //Updates canmove, lying and icons. Could perhaps do with a rename but I can't think of anything to describe it.
 /mob/proc/update_canmove()
 	var/ko = weakened || paralysis || stat || (status_flags & FAKEDEATH)
-	if(ko || resting || buckled)
-		canmove = 0
-		if(!lying)
-			if(resting) //Presuming that you're resting on a bed, which would look goofy lying the wrong way
-				lying = 90
-			else
-				lying = pick(90, 270) //180 looks like shit since BYOND inverts rather than turns in that case
-	else if(stunned)
-		drop_l_hand()
+	var/buckle_lying = !(buckled && !buckled.buckle_lying)
+	if(ko || resting || stunned)
 		drop_r_hand()
-		canmove = 0
+		drop_l_hand()
 	else
 		lying = 0
 		canmove = 1
-	var/is_movable
-	if(buckled && istype(buckled))
-		is_movable = buckled.movable
-
-	if(istype(buckled, /obj/vehicle))
-		var/obj/vehicle/V = buckled
-		if(stat || weakened || paralysis || resting || sleeping || (status_flags & FAKEDEATH))
-			lying = 90
-			canmove = 0
-			pixel_y = V.mob_offset_y - 5
-		else
-			lying = 0
-			canmove = 1
-			pixel_y = V.mob_offset_y
-	else if(buckled && (!buckled.movable))
-		anchored = 1
-		canmove = 0
-		if( istype(buckled,/obj/structure/stool/bed/chair) )
-			lying = 0
-		else
-			lying = 90
-	else if(buckled && is_movable)
-		anchored = 0
-		canmove = 1
-		lying = 0
-	else if( stat || weakened || paralysis || resting || sleeping || (status_flags & FAKEDEATH))
-		lying = 90
-		canmove = 0
-	else if( stunned )
-		drop_l_hand()
-		drop_r_hand()
-		canmove = 0
+	if(buckled)
+		lying = 90 * buckle_lying
 	else
-		lying = 0
-		canmove = 1
-
-	if(lying)
-		density = 0
-		drop_l_hand()
-		drop_r_hand()
-	else
-		density = 1
-
-	//Temporarily moved here from the various life() procs
-	//I'm fixing stuff incrementally so this will likely find a better home.
-	//It just makes sense for now. ~Carn
-
-	if(lying != lying_prev)
-		if(lying && !lying_prev)
+		if((ko || resting) && !lying)
 			fall(ko)
 
-	if(update_icon)	//forces a full overlay update
-		update_icon = 0
-		regenerate_icons()
+	canmove = !(ko || resting || stunned || buckled)
+	density = !lying
+	if(lying)
+		if(layer == initial(layer))
+			layer = MOB_LAYER - 0.2
+	else
+		if(layer == MOB_LAYER - 0.2)
+			layer = initial(layer)
+
 	update_transform()
-	lying_prev = lying
 	return canmove
 
 /mob/proc/fall(var/forced)
@@ -1068,9 +1061,6 @@ var/list/slot_equipment_priority = list( \
 /mob/proc/facedir(var/ndir)
 	if(!canface())	return 0
 	dir = ndir
-	if(buckled && buckled.movable)
-		buckled.dir = ndir
-		buckled.handle_rotation()
 	client.move_delay += movement_delay()
 	return 1
 
@@ -1323,8 +1313,6 @@ mob/proc/yank_out_object()
 					NPC.key = key
 					spawn(5)
 						respawnable_list += usr
-				else
-//					message_admins("Failed to check type")
 	else
 		usr << "You are not dead or you have given up your right to be respawned!"
 		return
@@ -1354,49 +1342,6 @@ mob/proc/yank_out_object()
 	if(host)
 		host.ckey = src.ckey
 		host << "<span class='info'>You are now a mouse. Try to avoid interaction with players, and do not give hints away that you are more than a simple rodent.</span>"
-
-/mob/living/proc/handle_statuses()
-	handle_stunned()
-	handle_weakened()
-	handle_stuttering()
-	handle_silent()
-	handle_drugged()
-	handle_slurring()
-
-/mob/living/proc/handle_stunned()
-	if(stunned)
-		AdjustStunned(-1)
-	return stunned
-
-/mob/living/proc/handle_weakened()
-	if(weakened)
-		weakened = max(weakened-1,0)	//before you get mad Rockdtben: I done this so update_canmove isn't called multiple times
-	return weakened
-
-/mob/living/proc/handle_stuttering()
-	if(stuttering)
-		stuttering = max(stuttering-1, 0)
-	return stuttering
-
-/mob/living/proc/handle_silent()
-	if(silent)
-		silent = max(silent-1, 0)
-	return silent
-
-/mob/living/proc/handle_drugged()
-	if(druggy)
-		druggy = max(druggy-1, 0)
-	return druggy
-
-/mob/living/proc/handle_slurring()
-	if(slurring)
-		slurring = max(slurring-1, 0)
-	return slurring
-
-/mob/living/proc/handle_paralysed() // Currently only used by simple_animal.dm, treated as a special case in other mobs
-	if(paralysis)
-		AdjustParalysis(-1)
-	return paralysis
 
 /mob/proc/assess_threat() //For sec bot threat assessment
 	return
@@ -1432,6 +1377,14 @@ mob/proc/yank_out_object()
 		location.add_poop_floor()
 		playsound(location, 'sound/effects/splat.ogg', 50, 1)
 
+
+
+/mob/proc/adjustEarDamage()
+	return
+
+/mob/proc/setEarDamage()
+	return
+
 /mob/proc/AddSpell(var/obj/effect/proc_holder/spell/spell)
 	spell_list += spell
 	if(!spell.action)
@@ -1445,5 +1398,41 @@ mob/proc/yank_out_object()
 		spell.action.Grant(src)
 	return
 
+//override to avoid rotating pixel_xy on mobs
+/mob/shuttleRotate(rotation)
+	dir = angle2dir(rotation+dir2angle(dir))
+
 /mob/proc/handle_ventcrawl()
 	return // Only living mobs can ventcrawl
+
+//You can buckle on mobs if you're next to them since most are dense
+/mob/buckle_mob(mob/living/M)
+	if(M.buckled)
+		return 0
+	var/turf/T = get_turf(src)
+	if(M.loc != T)
+		var/old_density = density
+		density = 0
+		var/can_step = step_towards(M, T)
+		density = old_density
+		if(!can_step)
+			return 0
+	return ..()
+
+//Default buckling shift visual for mobs
+/mob/post_buckle_mob(mob/living/M)
+	if(M == buckled_mob) //post buckling
+		M.pixel_y = initial(M.pixel_y) + 9
+		if(M.layer < layer)
+			M.layer = layer + 0.1
+	else //post unbuckling
+		M.layer = initial(M.layer)
+		M.pixel_y = initial(M.pixel_y)
+
+/mob/proc/can_unbuckle(mob/user)
+	return 1
+
+
+//Can the mob see reagents inside of containers?
+/mob/proc/can_see_reagents()
+	return 0

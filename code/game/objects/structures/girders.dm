@@ -2,7 +2,7 @@
 	icon_state = "girder"
 	anchored = 1
 	density = 1
-	layer = 2
+	layer = TURF_LAYER + 0.9
 	var/state = 0
 	var/health = 200
 
@@ -34,6 +34,12 @@
 
 	else if(istype(W, /obj/item/weapon/pickaxe/drill/diamonddrill))
 		user << "\blue You drill through the girder!"
+		new /obj/item/stack/sheet/metal(get_turf(src))
+		qdel(src)
+
+	else if(istype(W, /obj/item/weapon/pickaxe/drill/jackhammer))
+		playsound(src.loc, 'sound/weapons/sonic_jackhammer.ogg', 100, 1)
+		user << "<span class='notice'>You Disintegrate the girder!</span>"
 		new /obj/item/stack/sheet/metal(get_turf(src))
 		qdel(src)
 
@@ -184,7 +190,7 @@
 				qdel(src)
 			return
 		if(3.0)
-			if (prob(30))
+			if (prob(40))
 				var/remains = pick(/obj/item/stack/rods,/obj/item/stack/sheet/metal)
 				new remains(loc)
 				qdel(src)

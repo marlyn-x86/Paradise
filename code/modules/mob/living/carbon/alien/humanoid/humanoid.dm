@@ -2,8 +2,6 @@
 	name = "alien"
 	icon_state = "alien_s"
 
-	var/obj/item/clothing/suit/wear_suit = null		//TODO: necessary? Are they even used? ~Carn
-	var/obj/item/clothing/head/head = null			//
 	var/obj/item/weapon/r_store = null
 	var/obj/item/weapon/l_store = null
 	var/caste = ""
@@ -159,7 +157,7 @@
 					stuttering = power
 				Stun(power)
 
-				var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+				var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 				s.set_up(5, 1, src)
 				s.start()
 
@@ -173,7 +171,7 @@
 
 /mob/living/carbon/alien/humanoid/attack_animal(mob/living/simple_animal/M as mob)
 	if(M.melee_damage_upper == 0)
-		M.emote("[M.friendly] [src]")
+		M.custom_emote(1, "[M.friendly] [src]")
 	else
 		M.do_attack_animation(src)
 		if(M.attack_sound)
@@ -317,7 +315,6 @@ In all, this is a lot like the monkey code. /N
 	return 0
 
 
-/mob/living/carbon/alien/humanoid/var/co2overloadtime = null
 /mob/living/carbon/alien/humanoid/var/temperature_resistance = T0C+75
 
 /mob/living/carbon/alien/humanoid/show_inv(mob/user as mob)

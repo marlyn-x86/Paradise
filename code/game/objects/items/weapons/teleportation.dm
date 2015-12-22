@@ -46,12 +46,12 @@ Frequency:
 /obj/item/weapon/locator/Topic(href, href_list)
 	if(..())
 		return 1
-		
+
 	var/turf/current_location = get_turf(usr)//What turf is the user on?
 	if(!current_location ||( current_location.z in config.admin_levels))//If turf was not found or they're on z level 2.
 		usr << "<span class='warning'>\The [src] is malfunctioning.</span>"
 		return 1
-		
+
 	if (href_list["refresh"])
 		temp = "<B>Persistent Signal Locator</B><HR>"
 		var/turf/sr = get_turf(src)
@@ -127,17 +127,15 @@ Frequency:
 		turfs += T
 	if(turfs.len)
 		L["None (Dangerous)"] = pick(turfs)
-	var/t1 = input(user, "Please select a teleporter to lock in on.", "Hand Teleporter") in L
-	if ((user.get_active_hand() != src || user.stat || user.restrained()))
+	var/t1 = input(user, "Please select a teleporter to lock in on.", "Hand Teleporter") as null|anything in L
+	if (!t1 || (user.get_active_hand() != src || user.stat || user.restrained()))
 		return
 	if(active_portals >= 3)
 		user.show_message("<span class='notice'>\The [src] is recharging!</span>")
 		return
 	var/T = L[t1]
 	user.show_message("<span class='notice'>Locked In.</span>", 2)
-	var/obj/effect/portal/P = new /obj/effect/portal( get_turf(src) )
-	P.target = T
-	P.creator = src
+	var/obj/effect/portal/P = new /obj/effect/portal(get_turf(src), T, src)
 	try_move_adjacent(P)
 	active_portals++
 	add_fingerprint(user)

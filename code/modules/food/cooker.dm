@@ -62,7 +62,7 @@
 	var/obj/item/weapon/reagent_containers/food/snacks/badrecipe/burnt = new(get_turf(src))
 	setRegents(props, burnt)
 	user << "<span class='warning'>You smell burning coming from the [src]!</span>"
-	var/datum/effect/effect/system/bad_smoke_spread/smoke = new /datum/effect/effect/system/bad_smoke_spread()    // burning things makes smoke!
+	var/datum/effect/system/bad_smoke_spread/smoke = new /datum/effect/system/bad_smoke_spread()    // burning things makes smoke!
 	smoke.set_up(5, 0, src)
 	smoke.start()
 	if (prob(firechance))
@@ -125,7 +125,7 @@
 			setCooked(I, newfood)
 		newfood.cooktype[thiscooktype] = 1
 		turnoff(I)
-		//del(I)
+		//qdel(I)
 
 // MAKE SURE TO OVERRIDE THESE ON THE MACHINE IF IT HAS SPECIAL FOOD INTERACTIONS!
 // FAILURE TO OVERRIDE WILL RESULT IN FAILURE TO PROPERLY HANDLE SPECIAL INTERACTIONS!		--FalseIncarnate

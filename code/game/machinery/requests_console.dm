@@ -62,8 +62,7 @@ var/list/obj/machinery/requests_console/allConsoles = list()
 		if(icon_state != "req_comp_off")
 			icon_state = "req_comp_off"
 	else
-		if(icon_state == "req_comp_off")
-			icon_state = "req_comp[newmessagepriority]"
+		icon_state = "req_comp[newmessagepriority]"
 
 /obj/machinery/requests_console/New()
 	..()
@@ -79,7 +78,7 @@ var/list/obj/machinery/requests_console/allConsoles = list()
 		req_console_supplies |= department
 	if (departmentType & RC_INFO)
 		req_console_information |= department
-	
+
 	set_light(1)
 
 /obj/machinery/requests_console/Destroy()
@@ -96,14 +95,14 @@ var/list/obj/machinery/requests_console/allConsoles = list()
 			req_console_supplies -= department
 		if (departmentType & RC_INFO)
 			req_console_information -= department
-	..()
+	return ..()
 
 /obj/machinery/requests_console/attack_ghost(user as mob)
 	if(stat & NOPOWER)
 		return
-		
-	ui_interact(user)	
-	
+
+	ui_interact(user)
+
 /obj/machinery/requests_console/attack_hand(user as mob)
 	if(..(user))
 		return
@@ -138,7 +137,7 @@ var/list/obj/machinery/requests_console/allConsoles = list()
 		ui.set_auto_update(1)
 
 /obj/machinery/requests_console/Topic(href, href_list)
-	if(..())	
+	if(..())
 		return 1
 	usr.set_machine(src)
 	add_fingerprint(usr)
@@ -262,3 +261,26 @@ var/list/obj/machinery/requests_console/allConsoles = list()
 	announcement.announcer = ""
 	if(mainmenu)
 		screen = RCS_MAINMENU
+
+/obj/machinery/requests_console/proc/createMessage(source, title, message, priority)
+	var/linkedSender
+	if(istype(source, /obj/machinery/requests_console))
+		var/obj/machinery/requests_console/sender = source
+		linkedSender = "<a href='?src=\ref[src];write=[ckey(sender.department)]'[sender.department]</a>"
+	else
+		capitalize(source)
+		linkedSender = source
+	capitalize(title)
+	if(src.newmessagepriority < priority)
+		src.newmessagepriority = priority
+		update_icon()
+	if(!src.silent)
+		playsound(src.loc, 'sound/machines/twobeep.ogg', 50, 1)
+		state(title)
+
+	switch(priority)
+		if(2) // High
+			src.message_log += "<span class='bad'>High Priority</span><BR><b>From:</b> [linkedSender]<BR>[message]"
+		else // Normal
+			src.message_log += "<b>From:</b> [linkedSender]<BR>[message]"
+	set_light(2)

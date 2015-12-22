@@ -16,7 +16,7 @@
 <A href='?src=\ref[src];make=1;dir=5'>Bent Pipe</A><BR>
 <A href='?src=\ref[src];make=5;dir=1'>Manifold</A><BR>
 <A href='?src=\ref[src];make=8;dir=1'>Manual Valve</A><BR>
-<A href='?src=\ref[src];make=36;dir=1'>Digital Valve</A><BR>
+<A href='?src=\ref[src];make=35;dir=1'>Digital Valve</A><BR>
 <A href='?src=\ref[src];make=20;dir=1'>Pipe Cap</A><BR>
 <A href='?src=\ref[src];make=19;dir=1'>4-Way Manifold</A><BR>
 <A href='?src=\ref[src];make=18;dir=1'>Manual T-Valve</A><BR>
@@ -145,7 +145,7 @@
 //Allow you to push disposal pipes into it (for those with density 1)
 /obj/machinery/pipedispenser/disposal/Crossed(var/obj/structure/disposalconstruct/pipe as obj)
 	if(istype(pipe) && !pipe.anchored)
-		del(pipe)
+		qdel(pipe)
 
 Nah
 */

@@ -174,7 +174,13 @@
 ********************/
 
 /obj/machinery/smartfridge/attackby(var/obj/item/O as obj, var/mob/user as mob)
-	if(default_deconstruction_screwdriver(user, "smartfridge_open", "smartfridge", O))
+	if(istype(O, /obj/item/weapon/screwdriver) && anchored)
+		playsound(src.loc, 'sound/items/Screwdriver.ogg', 50, 1)
+		panel_open = !panel_open
+		user << "You [panel_open ? "open" : "close"] the maintenance panel."
+		overlays.Cut()
+		if(panel_open)
+			overlays += image(icon, "[initial(icon_state)]-panel")
 		return
 
 	if(exchange_parts(user, O))
@@ -200,8 +206,11 @@
 			user << "<span class='notice'>\The [src] is full.</span>"
 			return 1
 		else
-			user.remove_from_mob(O)
-			O.loc = src
+			if(!user.drop_item())
+				user << "<span class='warning'>\The [O] is stuck to you!</span>"
+				return
+
+			O.forceMove(src)
 			if(item_quants[O.name])
 				item_quants[O.name]++
 			else
@@ -338,7 +347,7 @@
 			var/i = amount
 			for(var/obj/O in contents)
 				if(O.name == K)
-					O.loc = loc
+					O.forceMove(loc)
 					i--
 					if(i <= 0)
 						return 1
@@ -359,7 +368,7 @@
 		item_quants[O]--
 		for(var/obj/T in contents)
 			if(T.name == O)
-				T.loc = src.loc
+				T.forceMove(src.loc)
 				throw_item = T
 				break
 		break

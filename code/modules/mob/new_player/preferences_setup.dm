@@ -5,9 +5,9 @@ datum/preferences
 			gender = gender_override
 		else
 			gender = pick(MALE, FEMALE)
-		underwear = random_underwear(gender)
-		undershirt = random_undershirt(gender)
-		socks = random_socks(gender)
+		underwear = random_underwear(gender, species)
+		undershirt = random_undershirt(gender, species)
+		socks = random_socks(gender, species)
 		if(species == "Human")
 			s_tone = random_skin_tone()
 		h_style = random_hair_style(gender, species)
@@ -189,9 +189,9 @@ datum/preferences
 		return clothes_s
 
 	proc/update_preview_icon(var/for_observer=0)		//seriously. This is horrendous.
-		del(preview_icon_front)
-		del(preview_icon_side)
-		del(preview_icon)
+		qdel(preview_icon_front)
+		qdel(preview_icon_side)
+		qdel(preview_icon)
 
 		var/g = "m"
 		if(gender == FEMALE)	g = "f"
@@ -223,7 +223,18 @@ datum/preferences
 
 		//Tail
 		if(current_species && (current_species.bodyflags & HAS_TAIL))
-			var/icon/temp = new/icon("icon" = 'icons/effects/species.dmi', "icon_state" = "[current_species.tail]_s")
+			var/tail_icon
+			var/tail_icon_state
+
+			if(body_accessory)
+				var/datum/body_accessory/accessory = body_accessory_by_name[body_accessory]
+				tail_icon = accessory.icon
+				tail_icon_state = accessory.icon_state
+			else
+				tail_icon = "icons/effects/species.dmi"
+				tail_icon_state = "[current_species.tail]_s"
+
+			var/icon/temp = new /icon("icon" = tail_icon, "icon_state" = tail_icon_state)
 			preview_icon.Blend(temp, ICON_OVERLAY)
 
 		// Skin color
@@ -257,19 +268,19 @@ datum/preferences
 		if(underwear && current_species.clothing_flags & HAS_UNDERWEAR)
 			var/datum/sprite_accessory/underwear/U = underwear_list[underwear]
 			if(U)
-				underwear_s = new/icon(U.icon, "[U.icon_state]_s", ICON_OVERLAY)
+				underwear_s = new/icon(U.icon, "uw_[U.icon_state]_s", ICON_OVERLAY)
 
 		var/icon/undershirt_s = null
 		if(undershirt && current_species.clothing_flags & HAS_UNDERSHIRT)
 			var/datum/sprite_accessory/undershirt/U2 = undershirt_list[undershirt]
 			if(U2)
-				undershirt_s = new/icon(U2.icon, "[U2.icon_state]_s", ICON_OVERLAY)
+				undershirt_s = new/icon(U2.icon, "us_[U2.icon_state]_s", ICON_OVERLAY)
 
 		var/icon/socks_s = null
 		if(socks && current_species.clothing_flags & HAS_SOCKS)
 			var/datum/sprite_accessory/socks/U3 = socks_list[socks]
 			if(U3)
-				socks_s = new/icon(U3.icon, "[U3.icon_state]_s", ICON_OVERLAY)
+				socks_s = new/icon(U3.icon, "sk_[U3.icon_state]_s", ICON_OVERLAY)
 
 		var/icon/clothes_s = null
 		var/uniform_dmi='icons/mob/uniform.dmi'
@@ -760,7 +771,7 @@ datum/preferences
 					clothes_s = new /icon(uniform_dmi, "officer_s")
 					clothes_s.Blend(new /icon('icons/mob/feet.dmi', "jackboots"), ICON_UNDERLAY)
 					clothes_s.Blend(new /icon('icons/mob/hands.dmi', "swat_gl"), ICON_UNDERLAY)
-					clothes_s.Blend(new /icon('icons/mob/suit.dmi', "deus_blueshield"), ICON_OVERLAY)
+					clothes_s.Blend(new /icon('icons/mob/suit.dmi', "blueshield"), ICON_OVERLAY)
 					switch(backbag)
 						if(2)
 							clothes_s.Blend(new /icon('icons/mob/back.dmi', "securitypack"), ICON_OVERLAY)
@@ -793,7 +804,7 @@ datum/preferences
 			else if(backbag == 3 || backbag == 4)
 				clothes_s.Blend(new /icon('icons/mob/back.dmi', "satchel"), ICON_OVERLAY)
 
-		if(!current_species.bloodflags & BLOOD_SLIME)
+		if(!(current_species.bodyflags & NO_EYES))
 			preview_icon.Blend(eyes_s, ICON_OVERLAY)
 		if(underwear_s)
 			preview_icon.Blend(underwear_s, ICON_OVERLAY)
@@ -806,8 +817,8 @@ datum/preferences
 		preview_icon_front = new(preview_icon, dir = SOUTH)
 		preview_icon_side = new(preview_icon, dir = WEST)
 
-		del(eyes_s)
-		del(underwear_s)
-		del(undershirt_s)
-		del(socks_s)
-		del(clothes_s)
+		qdel(eyes_s)
+		qdel(underwear_s)
+		qdel(undershirt_s)
+		qdel(socks_s)
+		qdel(clothes_s)

@@ -7,19 +7,26 @@ mob/living
 	update_hud()
 	return
 
+/mob/living/carbon/prepare_huds()
+	..()
+	prepare_data_huds()
+
+/mob/living/carbon/proc/prepare_data_huds()
+	..()
+	med_hud_set_health()
+	med_hud_set_status()
+
+/mob/living/carbon/updatehealth()
+	..()
+	med_hud_set_health()
+	med_hud_set_status()
+
 /mob/living/carbon/Destroy()
 	for(var/atom/movable/guts in internal_organs)
 		qdel(guts)
 	for(var/atom/movable/food in stomach_contents)
 		qdel(food)
 	return ..()
-
-/mob/living/carbon/Life()
-	..()
-
-	// Increase germ_level regularly
-	if(germ_level < GERM_LEVEL_AMBIENT && prob(30))	//if you're just standing there, you shouldn't get more germs beyond an ambient level
-		germ_level++
 
 /mob/living/carbon/blob_act()
 	if (stat == DEAD)
@@ -107,13 +114,14 @@ mob/living
 			return
 	return
 
-/mob/living/carbon/electrocute_act(var/shock_damage, var/obj/source, var/siemens_coeff = 1.0, var/def_zone = null)
+/mob/living/carbon/electrocute_act(var/shock_damage, var/obj/source, var/siemens_coeff = 1.0, var/def_zone = null,var/override = 0)
+
 	if(status_flags & GODMODE)	//godmode
 		return 0
 	if(NO_SHOCK in mutations) //shockproof
 		return 0
 	shock_damage *= siemens_coeff
-	if (shock_damage<1)
+	if(shock_damage<1 && !override)
 		return 0
 
 	src.apply_damage(shock_damage, BURN, def_zone, used_weapon="Electrocution")
@@ -127,6 +135,8 @@ mob/living
 			"\red You feel a mild shock course through your body.", \
 			"\red You hear a light zapping." \
 		)
+		jitteriness += (rand(2,4))//mostly for the swarmer trap
+		do_jitter_animation(jitteriness)
 	if (shock_damage > 10)
 		if (shock_damage < 200)
 			src.visible_message(
@@ -150,7 +160,10 @@ mob/living
 		)
 		playsound(loc, "sound/effects/eleczap.ogg", 50, 1, -1)
 		explosion(src.loc,-1,0,2,2)
-	return shock_damage
+	if(override)
+		return override
+	else
+		return shock_damage
 
 
 /mob/living/carbon/proc/swap_hand()
@@ -307,6 +320,10 @@ var/list/ventcrawl_machinery = list(/obj/machinery/atmospherics/unary/vent_pump,
 
 	if(lying)
 		src << "You can't vent crawl while you're stunned!"
+		return
+
+	if(buckled_mob)
+		src << "You can't vent crawl with [buckled_mob] on you!"
 		return
 
 	var/obj/machinery/atmospherics/unary/vent_found
@@ -481,19 +498,7 @@ var/list/ventcrawl_machinery = list(/obj/machinery/atmospherics/unary/vent_pump,
 		item.layer = initial(item.layer)
 		src.visible_message("\red [src] has thrown [item].")
 
-		if(!src.lastarea)
-			src.lastarea = get_area(src.loc)
-		if((istype(src.loc, /turf/space)) || (src.lastarea.has_gravity == 0))
-			src.inertia_dir = get_dir(target, src)
-			step(src, inertia_dir)
-
-
-/*
-		if(istype(src.loc, /turf/space) || (src.flags & NOGRAV)) //they're in space, move em one space in the opposite direction
-			src.inertia_dir = get_dir(target, src)
-			step(src, inertia_dir)
-*/
-
+		newtonian_move(get_dir(target, src))
 
 		item.throw_at(target, item.throw_range, item.throw_speed, src)
 /*
@@ -521,67 +526,104 @@ var/list/ventcrawl_machinery = list(/obj/machinery/atmospherics/unary/vent_pump,
 
 	if(I == back)
 		back = null
-		update_inv_back(0)
+		update_inv_back()
 	else if(I == wear_mask)
 		if(istype(src, /mob/living/carbon/human)) //If we don't do this hair won't be properly rebuilt.
 			return
 		wear_mask = null
-		update_inv_wear_mask(0)
+		update_inv_wear_mask()
 	else if(I == handcuffed)
 		handcuffed = null
-		update_inv_handcuffed(1)
+		if(buckled && buckled.buckle_requires_restraints)
+			buckled.unbuckle_mob()
+		update_inv_handcuffed()
 	else if(I == legcuffed)
 		legcuffed = null
-		update_inv_legcuffed(1)
+		update_inv_legcuffed()
 
-/mob/living/carbon/proc/get_temperature(var/datum/gas_mixture/environment)
-	var/loc_temp = T0C
-	if(istype(loc, /obj/mecha))
-		var/obj/mecha/M = loc
-		loc_temp =  M.return_temperature()
-
-	else if(istype(loc, /obj/spacepod))
-		var/obj/spacepod/S = loc
-		loc_temp = S.return_temperature()
-
-	else if(istype(loc, /obj/structure/transit_tube_pod))
-		loc_temp = environment.temperature
-
-	else if(istype(get_turf(src), /turf/space))
-		var/turf/heat_turf = get_turf(src)
-		loc_temp = heat_turf.temperature
-
-	else if(istype(loc, /obj/machinery/atmospherics/unary/cryo_cell))
-		var/obj/machinery/atmospherics/unary/cryo_cell/C = loc
-
-		if(C.air_contents.total_moles() < 10)
-			loc_temp = environment.temperature
-		else
-			loc_temp = C.air_contents.temperature
-
-	else
-		loc_temp = environment.temperature
-
-	return loc_temp
-
-/mob/living/carbon/show_inv(mob/living/carbon/user as mob)
+/mob/living/carbon/show_inv(mob/user)
 	user.set_machine(src)
 	var/dat = {"
-	<B><HR><FONT size=3>[name]</FONT></B>
-	<BR><HR>
-	<BR><B>Head(Mask):</B> <A href='?src=\ref[src];item=mask'>[(wear_mask && !(wear_mask.flags & ABSTRACT)) ? wear_mask : "Nothing"]</A>
-	<BR><B>Left Hand:</B> <A href='?src=\ref[src];item=l_hand'>[(l_hand && !(l_hand.flags & ABSTRACT)) ? l_hand  : "Nothing"]</A>
-	<BR><B>Right Hand:</B> <A href='?src=\ref[src];item=r_hand'>[(r_hand && !(r_hand.flags & ABSTRACT)) ? r_hand : "Nothing"]</A>
-	<BR><B>Back:</B> <A href='?src=\ref[src];item=back'>[(back ? back : "Nothing")]</A> [((istype(wear_mask, /obj/item/clothing/mask) && istype(back, /obj/item/weapon/tank) && !( internal )) ? text(" <A href='?src=\ref[];item=internal'>Set Internal</A>", src) : "")]
-	<BR>[(handcuffed ? text("<A href='?src=\ref[src];item=handcuff'>Handcuffed</A>") : text("<A href='?src=\ref[src];item=handcuff'>Not Handcuffed</A>"))]
-	<BR>[(internal ? text("<A href='?src=\ref[src];item=internal'>Remove Internal</A>") : "")]
-	<BR><A href='?src=\ref[src];item=pockets'>Empty Pockets</A>
-	<BR><A href='?src=\ref[user];refresh=1'>Refresh</A>
+	<HR>
+	<B><FONT size=3>[name]</FONT></B>
+	<HR>
+	<BR><B>Head:</B> <A href='?src=\ref[src];item=[slot_head]'>				[(head && !(head.flags&ABSTRACT)) 			? head 		: "Nothing"]</A>
+	<BR><B>Mask:</B> <A href='?src=\ref[src];item=[slot_wear_mask]'>		[(wear_mask && !(wear_mask.flags&ABSTRACT))	? wear_mask	: "Nothing"]</A>
+	<BR><B>Left Hand:</B> <A href='?src=\ref[src];item=[slot_l_hand]'>		[(l_hand && !(l_hand.flags&ABSTRACT))		? l_hand	: "Nothing"]</A>
+	<BR><B>Right Hand:</B> <A href='?src=\ref[src];item=[slot_r_hand]'>		[(r_hand && !(r_hand.flags&ABSTRACT))		? r_hand	: "Nothing"]</A>"}
+
+	dat += "<BR><B>Back:</B> <A href='?src=\ref[src];item=[slot_back]'>[back ? back : "Nothing"]</A>"
+
+	if(istype(wear_mask, /obj/item/clothing/mask) && istype(back, /obj/item/weapon/tank))
+		dat += "<BR><A href='?src=\ref[src];internal=1'>[internal ? "Disable Internals" : "Set Internals"]</A>"
+
+	if(handcuffed)
+		dat += "<BR><A href='?src=\ref[src];item=[slot_handcuffed]'>Handcuffed</A>"
+	if(legcuffed)
+		dat += "<BR><A href='?src=\ref[src];item=[slot_legcuffed]'>Legcuffed</A>"
+
+	dat += {"
+	<BR>
 	<BR><A href='?src=\ref[user];mach_close=mob\ref[src]'>Close</A>
-	<BR>"}
-	user << browse(dat, text("window=mob\ref[src];size=325x500"))
+	"}
+	user << browse(dat, "window=mob\ref[src];size=325x500")
 	onclose(user, "mob\ref[src]")
-	return
+
+/mob/living/carbon/Topic(href, href_list)
+	..()
+	//strip panel
+	if(!usr.stat && usr.canmove && !usr.restrained() && in_range(src, usr))
+		if(href_list["internal"])
+			var/slot = text2num(href_list["internal"])
+			var/obj/item/ITEM = get_item_by_slot(slot)
+			if(ITEM && istype(ITEM, /obj/item/weapon/tank))
+				visible_message("<span class='danger'>[usr] tries to [internal ? "close" : "open"] the valve on [src]'s [ITEM].</span>", \
+								"<span class='userdanger'>[usr] tries to [internal ? "close" : "open"] the valve on [src]'s [ITEM].</span>")
+
+				var/no_mask
+				if(!(wear_mask && wear_mask.flags & AIRTIGHT))
+					if(!(head && head.flags & AIRTIGHT))
+						no_mask = 1
+				if(no_mask)
+					usr << "<span class='warning'>[src] is not wearing a suitable mask or helmet!</span>"
+					return
+
+				if(do_mob(usr, src, POCKET_STRIP_DELAY))
+					if(internal)
+						internal = null
+						if(internals)
+							internals.icon_state = "internal0"
+					else
+						var/no_mask2
+						if(!(wear_mask && wear_mask.flags & AIRTIGHT))
+							if(!(head && head.flags & AIRTIGHT))
+								no_mask2 = 1
+						if(no_mask2)
+							usr << "<span class='warning'>[src] is not wearing a suitable mask or helmet!</span>"
+							return
+						internal = ITEM
+						if(internals)
+							internals.icon_state = "internal1"
+
+					visible_message("<span class='danger'>[usr] [internal ? "opens" : "closes"] the valve on [src]'s [ITEM].</span>", \
+									"<span class='userdanger'>[usr] [internal ? "opens" : "closes"] the valve on [src]'s [ITEM].</span>")
+
+/mob/living/carbon/get_item_by_slot(slot_id)
+	switch(slot_id)
+		if(slot_back)
+			return back
+		if(slot_wear_mask)
+			return wear_mask
+		if(slot_handcuffed)
+			return handcuffed
+		if(slot_legcuffed)
+			return legcuffed
+		if(slot_l_hand)
+			return l_hand
+		if(slot_r_hand)
+			return r_hand
+	return null
+
 
 //generates realistic-ish pulse output based on preset levels
 /mob/living/carbon/proc/get_pulse(var/method)	//method 0 is for hands, 1 is for machines, more accurate
@@ -677,6 +719,9 @@ var/list/ventcrawl_machinery = list(/obj/machinery/atmospherics/unary/vent_pump,
 /mob/living/carbon/proc/canBeHandcuffed()
 	return 0
 
+/mob/living/carbon/fall(forced)
+    loc.handle_fall(src, forced)//it's loc so it doesn't call the mob's handle_fall which does nothing
+
 /mob/living/carbon/is_muzzled()
 	return(istype(src.wear_mask, /obj/item/clothing/mask/muzzle))
 
@@ -686,7 +731,7 @@ var/list/ventcrawl_machinery = list(/obj/machinery/atmospherics/unary/vent_pump,
 		return -6
 	else
 		return initial(pixel_y)
-		
+
 /mob/living/carbon/get_all_slots()
 	return list(l_hand,
 				r_hand,

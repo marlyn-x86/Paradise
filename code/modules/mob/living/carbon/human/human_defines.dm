@@ -1,4 +1,6 @@
 /mob/living/carbon/human
+
+	hud_possible = list(HEALTH_HUD,STATUS_HUD,ID_HUD,WANTED_HUD,IMPLOYAL_HUD,IMPCHEM_HUD,IMPTRACK_HUD,SPECIALROLE_HUD,NATIONS_HUD)
 	//Hair colour and style
 	var/r_hair = 0
 	var/g_hair = 0
@@ -35,13 +37,11 @@
 	var/backbag = 2		//Which backpack type the player has chosen. Nothing, Satchel or Backpack.
 
 	//Equipment slots
-	var/obj/item/wear_suit = null
 	var/obj/item/w_uniform = null
 	var/obj/item/shoes = null
 	var/obj/item/belt = null
 	var/obj/item/gloves = null
 	var/obj/item/glasses = null
-	var/obj/item/head = null
 	var/obj/item/l_ear = null
 	var/obj/item/r_ear = null
 	var/obj/item/wear_id = null
@@ -63,8 +63,6 @@
 	var/special_voice = "" // For changing our voice. Used by a symptom.
 	var/said_last_words=0
 
-	var/failed_last_breath = 0 //This is used to determine if the mob failed a breath. If they did fail a brath, they will attempt to breathe each tick, otherwise just once per 4 ticks.
-
 	var/last_dam = -1	//Used for determining if we need to process all organs or just some or even none.
 	var/list/bad_external_organs = list()// organs we check until they are good.
 
@@ -75,6 +73,7 @@
 	var/mob/remoteview_target = null
 	var/meatleft = 3 //For chef item
 	var/decaylevel = 0 // For rotting bodies
+	var/max_blood = 560 // For stuff in the vessel
 	var/slime_color = "blue" //For slime people this defines their color, it's blue by default to pay tribute to the old icons
 
 	var/check_mutations=0 // Check mutations on next life tick

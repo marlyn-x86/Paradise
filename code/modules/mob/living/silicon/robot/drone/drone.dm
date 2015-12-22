@@ -11,9 +11,10 @@
 	pass_flags = PASSTABLE
 	braintype = "Robot"
 	lawupdate = 0
-	density = 1
+	density = 0
 	req_access = list(access_engine, access_robotics)
 	local_transmit = 1
+	ventcrawler = 2
 
 	// We need to keep track of a few module items so we don't need to do list operations
 	// every time we need them. These get set in New() after the module is chosen.
@@ -68,6 +69,7 @@
 
 	//Some tidying-up.
 	flavor_text = "It's a tiny little repair drone. The casing is stamped with an NT logo and the subscript: 'Nanotrasen Recursive Repair Systems: Fixing Tomorrow's Problem, Today!'"
+	scanner.Grant(src)
 	update_icons()
 
 /mob/living/silicon/robot/drone/init()
@@ -75,16 +77,16 @@
 	connected_ai = null
 
 	aiCamera = new/obj/item/device/camera/siliconcam/drone_camera(src)
-	additional_law_channels["Drone"] = ":d"
-	
+	additional_law_channels["Drone"] = ";"
+
 	playsound(src.loc, 'sound/machines/twobeep.ogg', 50, 0)
 
 //Redefining some robot procs...
 /mob/living/silicon/robot/drone/SetName(pickedName as text)
 	// Would prefer to call the grandparent proc but this isn't possible, so..
 	real_name = pickedName
-	name = real_name	
-	
+	name = real_name
+
 //Redefining some robot procs...
 /mob/living/silicon/robot/drone/updatename()
 	real_name = "maintenance drone ([rand(100,999)])"
@@ -127,13 +129,13 @@
 			if(!allowed(usr))
 				user << "\red Access denied."
 				return
-	
+
 			var/delta = (world.time / 10) - last_reboot
 			if(reboot_cooldown > delta)
 				var/cooldown_time = round(reboot_cooldown - ((world.time / 10) - last_reboot), 1)
 				usr << "\red The reboot system is currently offline. Please wait another [cooldown_time] seconds."
 				return
-				
+
 			user.visible_message("\red \the [user] swipes \his ID card through \the [src], attempting to reboot it.", "\red You swipe your ID card through \the [src], attempting to reboot it.")
 			last_reboot = world.time / 10
 			var/drones = 0
@@ -210,12 +212,12 @@
 //Drones killed by damage will gib.
 /mob/living/silicon/robot/drone/handle_regular_status_updates()
 
-	if(health <= -35 && src.stat != 2)
+	if(health <= -35 && src.stat != DEAD)
 		timeofdeath = world.time
 		death() //Possibly redundant, having trouble making death() cooperate.
 		gib()
 		return
-	..()
+	return ..() // If you don't return anything here, you won't update status effects, like weakening
 
 /mob/living/silicon/robot/drone/death(gibbed)
 
@@ -225,10 +227,6 @@
 
 	..(gibbed)
 
-//DRONE MOVEMENT.
-/mob/living/silicon/robot/drone/Process_Spaceslipping(var/prob_slip)
-	//TODO: Consider making a magboot item for drones to equip. ~Z
-	return 0
 
 //CONSOLE PROCS
 /mob/living/silicon/robot/drone/proc/law_resync()
@@ -287,10 +285,10 @@
 	full_law_reset()
 	src << "<br><b>You are a maintenance drone, a tiny-brained robotic repair machine</b>."
 	src << "You have no individual will, no personality, and no drives or urges other than your laws."
-	src << "Use <b>:d</b> to talk to other drones, and <b>say</b> to speak silently to your nearby fellows."
-	src << "Remember,  you are <b>lawed against interference with the crew</b>. Also remember, <b>you DO NOT take orders from the AI.</b>"
+	src << "Use <b>;</b> to talk to other drones, and <b>say</b> to speak silently to your nearby fellows."
+	src << "Remember, you are <b>lawed against interference with the crew</b>. Also remember, <b>you DO NOT take orders from the AI.</b>"
 	src << "<b>Don't invade their worksites, don't steal their resources, don't tell them about the changeling in the toilets.</b>"
-	src << "<b>If a crewmember has noticed you, <i>you are probably breaking your first law</i></b>."
+	src << "<b>Make sure crew members do not notice you.</b>."
 
 /*
 	sprite["Default"] = "repairbot"
@@ -338,4 +336,8 @@
 	src.verbs |= silicon_subsystems
 
 /mob/living/silicon/robot/drone/remove_robot_verbs()
-	src.verbs -= silicon_subsystems		
+	src.verbs -= silicon_subsystems
+
+/mob/living/silicon/robot/drone/update_canmove()
+	. = ..()
+	density = 0 //this is reset every canmove update otherwise

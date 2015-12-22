@@ -8,7 +8,7 @@
 	idle_power_usage = 5
 	active_power_usage = 1000
 	var/mob/occupant = null
-	var/circuitboard = "/obj/item/weapon/circuitboard/cyborgrecharger"
+	var/circuitboard = /obj/item/weapon/circuitboard/cyborgrecharger
 	var/recharge_speed
 	var/recharge_speed_nutrition
 	var/repairs
@@ -44,7 +44,9 @@
 	for(var/obj/item/weapon/stock_parts/manipulator/M in component_parts)
 		repairs += M.rating - 1
 	for(var/obj/item/weapon/stock_parts/cell/C in component_parts)
-		recharge_speed *= C.maxcharge / 10000
+		var/multiplier = C.maxcharge / 10000
+		recharge_speed *= multiplier
+		recharge_speed_nutrition *= multiplier
 
 /obj/machinery/recharge_station/process()
 	if(!(NOPOWER|BROKEN))
@@ -116,8 +118,7 @@
 			if(!isnull(H.internal_organs_by_name["cell"]) && H.nutrition < 450)
 				H.nutrition = min(H.nutrition+recharge_speed_nutrition, 450)
 				if(repairs)
-					H.adjustBruteLoss(-(repairs))
-					H.adjustFireLoss(-(repairs))
+					H.heal_overall_damage(repairs, repairs, 0, 1)
 					H.updatehealth()
 
 /obj/machinery/recharge_station/proc/go_out()
@@ -145,20 +146,23 @@
 				for(var/obj/O in um)
 					// Engineering
 					if(istype(O,/obj/item/stack/sheet/metal) || istype(O,/obj/item/stack/sheet/rglass) || istype(O,/obj/item/stack/cable_coil))
-						if(O:amount < 50)
-							O:amount += 1 * coeff
+						var/obj/item/stack/sheet/S = O
+						if(S.amount < 50)
+							S.amount += 1 * coeff
 					// Security
 					if(istype(O,/obj/item/device/flash))
-						if(O:broken)
-							O:broken = 0
-							O:times_used = 0
-							O:icon_state = "flash"
+						var/obj/item/device/flash/F = O
+						if(F.broken)
+							F.broken = 0
+							F.times_used = 0
+							F.icon_state = "flash"
 					if(istype(O,/obj/item/weapon/gun/energy/disabler/cyborg))
-						if(O:power_supply.charge < O:power_supply.maxcharge)
-							O:power_supply.give(O:charge_cost)
-							O:update_icon()
+						var/obj/item/weapon/gun/energy/disabler/cyborg/D = O
+						if(D.power_supply.charge < D.power_supply.maxcharge)
+							D.power_supply.give(D.charge_cost)
+							D.update_icon()
 						else
-							O:charge_tick = 0
+							D.charge_tick = 0
 					if(istype(O,/obj/item/weapon/melee/baton))
 						var/obj/item/weapon/melee/baton/B = O
 						if(B.bcell)
@@ -178,15 +182,6 @@
 						var/i = 1
 						for(1, i <= coeff, i++)
 							LR.Charge(occupant)
-					//Alien
-					if(istype(O,/obj/item/weapon/reagent_containers/spray/alien/smoke))
-						if(O.reagents.get_reagent_amount("water") < 50)
-							O.reagents.add_reagent("water", 2 * coeff)
-					if(istype(O,/obj/item/weapon/reagent_containers/spray/alien/stun))
-						if(O.reagents.get_reagent_amount("ether") < 250)
-							O.reagents.add_reagent("ether", 2 * coeff)
-
-
 				if(R)
 					if(R.module)
 						R.module.respawn_consumable(R)

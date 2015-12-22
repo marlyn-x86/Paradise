@@ -59,13 +59,11 @@
 		user << "<span class='notice'>You have to go closer if you want to read it.</span>"
 
 /obj/item/weapon/paper/proc/show_content(var/mob/user, var/forceshow = 0, var/forcestars = 0, var/infolinks = 0, var/view = 1)
-	set src in oview(1)
-	if(user.client) // Send the paper images to the client
-		var/datum/asset/simple/S = new/datum/asset/simple/paper()
-		send_asset_list(user.client, S.assets)
+	var/datum/asset/assets = get_asset_datum(/datum/asset/simple/paper)
+	assets.send(user)
 
 	var/data
-	if((!(istype(usr, /mob/living/carbon/human) || istype(usr, /mob/dead/observer) || istype(usr, /mob/living/silicon)) && !forceshow) || forcestars)
+	if((!user.say_understands(null, all_languages["Galactic Common"]) && !forceshow) || forcestars) //assuming all paper is written in common is better than hardcoded type checks
 		data = "<HTML><HEAD><TITLE>[name]</TITLE></HEAD><BODY>[stars(info)][stamps]</BODY></HTML>"
 		if(view)
 			usr << browse(data, "window=[name]")
@@ -418,10 +416,11 @@
 		B.update_icon()
 
 	else if(istype(P, /obj/item/weapon/pen) || istype(P, /obj/item/toy/crayon))
-		if ( istype(P, /obj/item/weapon/pen/robopen) && P:mode == 2 )
-			P:RenamePaper(user,src)
+		var/obj/item/weapon/pen/robopen/RP = P
+		if(istype(P, /obj/item/weapon/pen/robopen) && RP.mode == 2)
+			RP.RenamePaper(user,src)
 		else
-			show_content(user, forceshow = 1, infolinks = 1)
+			show_content(user, infolinks = 1)
 		//openhelp(user)
 		return
 

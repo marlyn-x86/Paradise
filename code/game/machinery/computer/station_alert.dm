@@ -1,6 +1,6 @@
 
 /obj/machinery/computer/station_alert
-	name = "Station Alert Console"
+	name = "station alert console"
 	desc = "Used to access the station's automated alert system."
 	icon_keyboard = "tech_key"
 	icon_screen = "alert:0"
@@ -25,6 +25,7 @@
 /obj/machinery/computer/station_alert/Destroy()
 	alarm_monitor.unregister(src)
 	qdel(alarm_monitor)
+	alarm_monitor = null
 	return ..()
 
 /obj/machinery/computer/station_alert/attack_ai(mob/user)

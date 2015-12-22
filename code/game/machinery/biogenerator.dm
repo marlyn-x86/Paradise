@@ -1,5 +1,5 @@
 /obj/machinery/biogenerator
-	name = "Biogenerator"
+	name = "biogenerator"
 	desc = "Converts plants into biomass, which can be used to construct useful items."
 	icon = 'icons/obj/biogenerator.dmi'
 	icon_state = "biogen-empty"
@@ -70,8 +70,10 @@
 			user << "<span class='warning'>A container is already loaded into the machine.</span>"
 			return
 		else
-			user.unEquip(O)
-			O.loc = src
+			if(!user.drop_item())
+				user << "<span class='warning'>\The [O] is stuck to you!</span>"
+				return
+			O.forceMove(src)
 			beaker = O
 			user << "<span class='notice'>You add the container to the machine.</span>"
 			updateUsrDialog()
@@ -82,7 +84,7 @@
 		if(default_deconstruction_screwdriver(user, "biogen-empty-o", "biogen-empty", O))
 			if(beaker)
 				var/obj/item/weapon/reagent_containers/glass/B = beaker
-				B.loc = loc
+				B.forceMove(loc)
 				beaker = null
 			return
 
@@ -104,7 +106,7 @@
 			for(var/obj/item/weapon/reagent_containers/food/snacks/grown/G in O.contents)
 				if(i >= max_items)
 					break
-				G.loc = src
+				G.forceMove(src)
 				i++
 			if(i < max_items)
 				user << "<span class='info'>You empty the plant bag into the biogenerator.</span>"
@@ -123,7 +125,7 @@
 			user << "<span class='warning'>The biogenerator is full! Activate it.</span>"
 		else
 			user.unEquip(O)
-			O.loc = src
+			O.forceMove(src)
 			user << "<span class='info'>You put [O.name] in [src.name]</span>"
 
 
@@ -174,7 +176,9 @@
 			dat += "Wallet: <A href='?src=\ref[src];create=wallet;amount=1'>Make</A> ([100/efficiency])<BR>"
 			dat += "Book bag: <A href='?src=\ref[src];create=bkbag;amount=1'>Make</A> ([200/efficiency])<BR>"
 			dat += "Plant bag: <A href='?src=\ref[src];create=ptbag;amount=1'>Make</A> ([200/efficiency])<BR>"
+			dat += "Rag: <A href='?src=\ref[src];create=rag;amount=1'>Make</A> ([200/efficiency])<BR>"
 			dat += "Mining satchel: <A href='?src=\ref[src];create=mnbag;amount=1'>Make</A> ([200/efficiency])<BR>"
+			dat += "Chemistry bag: <A href='?src=\ref[src];create=chbag;amount=1'>Make</A> ([200/efficiency])<BR>"
 			dat += "Botanical gloves: <A href='?src=\ref[src];create=gloves;amount=1'>Make</A> ([250/efficiency])<BR>"
 			dat += "Leather Satchel: <A href='?src=\ref[src];create=satchel;amount=1'>Make</A> ([400/efficiency])<BR>"
 			dat += "Cash Bag: <A href='?src=\ref[src];create=cashbag;amount=1'>Make</A> ([400/efficiency])<BR>"
@@ -301,6 +305,12 @@
 		if("mnbag")
 			if (check_cost(200/efficiency)) return 0
 			else new/obj/item/weapon/storage/bag/ore(src.loc)
+		if("chbag")
+			if (check_cost(200/efficiency)) return 0
+			else new/obj/item/weapon/storage/bag/chemistry(src.loc)
+		if("rag")
+			if (check_cost(200/efficiency)) return 0
+			else new/obj/item/weapon/reagent_containers/glass/rag(src.loc)
 		if("gloves")
 			if (check_cost(250/efficiency)) return 0
 			else new/obj/item/clothing/gloves/botanic_leather(src.loc)
@@ -339,7 +349,7 @@
 
 /obj/machinery/biogenerator/proc/detach()
 	if(beaker)
-		beaker.loc = src.loc
+		beaker.forceMove(src.loc)
 		beaker = null
 		update_icon()
 

@@ -203,7 +203,7 @@
 	icon_state = "snappop"
 
 	Bump(atom/A as mob|obj|turf|area)
-		var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+		var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 		s.set_up(3, 1, src)
 		s.start()
 		new /obj/effect/decal/cleanable/ash(src.loc)
@@ -218,6 +218,16 @@
 	damage_type = BRUTE
 	flag = "bomb"
 	range = 3
+	var/splash = 0
+
+/obj/item/projectile/kinetic/super
+	damage = 11
+	range = 4
+
+/obj/item/projectile/kinetic/hyper
+	damage = 12
+	range = 5
+	splash = 1
 
 obj/item/projectile/kinetic/New()
 	var/turf/proj_turf = get_turf(src)
@@ -243,6 +253,11 @@ obj/item/projectile/kinetic/New()
 		var/turf/simulated/mineral/M = target_turf
 		M.gets_drilled(firer)
 	new /obj/item/effect/kinetic_blast(target_turf)
+	if(src.splash)
+		for(var/turf/T in range(splash, target_turf))
+			if(istype(T, /turf/simulated/mineral))
+				var/turf/simulated/mineral/M = T
+				M.gets_drilled(firer)
 
 /obj/item/effect/kinetic_blast
 	name = "kinetic explosion"
@@ -269,15 +284,17 @@ obj/item/projectile/kinetic/New()
 	icon_state = "bluespace"
 	damage = 0
 	nodamage = 1
+	var/obj/item/weapon/gun/energy/telegun/T = null
+	var/teleport_target = null
+
+	OnFired()
+		T = shot_from
+		teleport_target = T.teleport_target
 
 /obj/item/projectile/energy/teleport/on_hit(var/atom/target, var/blocked = 0)
 	if(isliving(target))
-		var/obj/item/device/radio/beacon/teletarget = null
-		for(var/obj/machinery/computer/teleporter/com in machines)
-			if(com.target)
-				teletarget = com.target
-		if(teletarget)
-			do_teleport(target, teletarget, 0)//teleport what's in the tile to the beacon
+		if(teleport_target)
+			do_teleport(target, teleport_target, 0)//teleport what's in the tile to the beacon
 		else
 			do_teleport(target, target, 15) //Otherwise it just warps you off somewhere.
 
@@ -314,3 +331,27 @@ obj/item/projectile/kinetic/New()
 /obj/item/projectile/plasma/adv/mech
 	damage = 10
 	range = 6
+
+/obj/item/projectile/beam/wormhole
+	name = "bluespace beam"
+	icon_state = "spark"
+	hitsound = "sparks"
+	damage = 3
+	var/obj/item/weapon/gun/energy/wormhole_projector/gun = null
+	color = "#33CCFF"
+
+/obj/item/projectile/beam/wormhole/orange
+	name = "orange bluespace beam"
+	color = "#FF6600"
+
+/obj/item/projectile/beam/wormhole/OnFired()
+	gun = shot_from
+
+/obj/item/projectile/beam/wormhole/on_hit(atom/target)
+	if(ismob(target))
+		var/turf/portal_destination = pick(orange(6, src))
+		do_teleport(target, portal_destination)
+		return ..()
+	if(!gun)
+		qdel(src)
+	gun.create_portal(src)

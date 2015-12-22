@@ -120,10 +120,11 @@
 		if(!H)	return 0
 		switch(H.backbag)
 			if(1) H.equip_to_slot_or_del(new /obj/item/weapon/storage/box/survival(H), slot_r_hand)
-			if(2) H.equip_to_slot_or_del(new /obj/item/weapon/storage/backpack(H), slot_back)
+			if(2) H.equip_to_slot_or_del(new /obj/item/weapon/storage/backpack/chemistry(H), slot_back)
 			if(3) H.equip_to_slot_or_del(new /obj/item/weapon/storage/backpack/satchel_chem(H), slot_back)
 			if(4) H.equip_to_slot_or_del(new /obj/item/weapon/storage/backpack/satchel(H), slot_back)
 		H.equip_to_slot_or_del(new /obj/item/device/radio/headset/headset_med(H), slot_l_ear)
+		H.equip_or_collect(new /obj/item/clothing/glasses/science(H), slot_glasses)
 		H.equip_to_slot_or_del(new /obj/item/clothing/under/rank/chemist(H), slot_w_uniform)
 		H.equip_to_slot_or_del(new /obj/item/clothing/shoes/white(H), slot_shoes)
 		H.equip_to_slot_or_del(new /obj/item/device/pda/chemist(H), slot_wear_pda)
@@ -150,7 +151,7 @@
 		if(!H)	return 0
 		switch(H.backbag)
 			if(1) H.equip_to_slot_or_del(new /obj/item/weapon/storage/box/survival(H), slot_r_hand)
-			if(2) H.equip_to_slot_or_del(new /obj/item/weapon/storage/backpack(H), slot_back)
+			if(2) H.equip_to_slot_or_del(new /obj/item/weapon/storage/backpack/genetics(H), slot_back)
 			if(3) H.equip_to_slot_or_del(new /obj/item/weapon/storage/backpack/satchel_gen(H), slot_back)
 			if(4) H.equip_to_slot_or_del(new /obj/item/weapon/storage/backpack/satchel(H), slot_back)
 		H.equip_to_slot_or_del(new /obj/item/device/radio/headset/headset_medsci(H), slot_l_ear)
@@ -180,8 +181,8 @@
 		if(!H)	return 0
 		H.equip_or_collect(new /obj/item/device/radio/headset/headset_med(H), slot_l_ear)
 		switch(H.backbag)
-			if(2) H.equip_or_collect(new /obj/item/weapon/storage/backpack/medic(H), slot_back)
-			if(3) H.equip_or_collect(new /obj/item/weapon/storage/backpack/satchel_med(H), slot_back)
+			if(2) H.equip_or_collect(new /obj/item/weapon/storage/backpack/virology(H), slot_back)
+			if(3) H.equip_or_collect(new /obj/item/weapon/storage/backpack/satchel_vir(H), slot_back)
 			if(4) H.equip_or_collect(new /obj/item/weapon/storage/backpack/satchel(H), slot_back)
 		H.equip_or_collect(new /obj/item/clothing/under/rank/virologist(H), slot_w_uniform)
 		H.equip_or_collect(new /obj/item/device/pda/viro(H), slot_wear_pda)

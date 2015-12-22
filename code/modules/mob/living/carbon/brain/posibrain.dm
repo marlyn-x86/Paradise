@@ -25,16 +25,15 @@
 		spawn(600)
 			if(ghost_volunteers.len)
 				var/mob/dead/observer/O = pick(ghost_volunteers)
-				if(istype(O) && O.client && O.key)
+				if(check_observer(O))
 					transfer_personality(O)
 			reset_search()
 
 /obj/item/device/mmi/posibrain/proc/request_player()
 	for(var/mob/dead/observer/O in player_list)
-		if(O.client && O.client.prefs.be_special & BE_PAI && !jobban_isbanned(O, "Cyborg") && !jobban_isbanned(O,"nonhumandept"))
-			if(check_observer(O))
-				O << "\blue <b>\A [src] has been activated. (<a href='?src=\ref[O];jump=\ref[src]'>Teleport</a> | <a href='?src=\ref[src];signup=\ref[O]'>Sign Up</a>)"
-				//question(O.client)
+		if(check_observer(O))
+			O << "\blue <b>\A [src] has been activated. (<a href='?src=\ref[O];jump=\ref[src]'>Teleport</a> | <a href='?src=\ref[src];signup=\ref[O]'>Sign Up</a>)"
+			//question(O.client)
 
 /obj/item/device/mmi/posibrain/proc/check_observer(var/mob/dead/observer/O)
 	if(O.has_enabled_antagHUD == 1 && config.antag_hud_restricted)
@@ -55,27 +54,30 @@
 		else if (response == "Never for this round")
 			C.prefs.be_special ^= BE_PAI
 
+// This should not ever happen, but let's be safe
+/obj/item/device/mmi/posibrain/dropbrain(var/turf/dropspot)
+	log_to_dd("[src] at [loc] attempted to drop brain without a contained brain.")
+	return
 
 /obj/item/device/mmi/posibrain/transfer_identity(var/mob/living/carbon/H)
 	name = "positronic brain ([H])"
-	brainmob.name = H.real_name
-	brainmob.real_name = H.real_name
-	brainmob.dna = H.dna
+	if(isnull(brainmob.dna))
+		brainmob.dna = H.dna.Clone()
+	brainmob.name = brainmob.dna.real_name
+	brainmob.real_name = brainmob.name
 	brainmob.timeofhostdeath = H.timeofdeath
-	brainmob.stat = 0
+	brainmob.stat = CONSCIOUS
 	if(brainmob.mind)
 		brainmob.mind.assigned_role = "Positronic Brain"
 	if(H.mind)
 		H.mind.transfer_to(brainmob)
-	brainmob << "\blue You feel slightly disoriented. That's normal when you're just a metal cube."
+	brainmob << "<span class='notice'>You feel slightly disoriented. That's normal when you're just a metal cube.</span>"
 	icon_state = "posibrain-occupied"
 	return
 
 /obj/item/device/mmi/posibrain/proc/transfer_personality(var/mob/candidate)
 	src.searching = 0
-	src.brainmob.mind = candidate.mind
-	//src.brainmob.key = candidate.key
-	src.brainmob.ckey = candidate.ckey
+	src.brainmob.key = candidate.key
 	src.name = "positronic brain ([src.brainmob.name])"
 
 	src.brainmob << "<b>You are a positronic brain, brought into existence on [station_name()].</b>"

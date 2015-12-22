@@ -18,10 +18,8 @@ var/global/list/obj/cortical_stacks = list() //Stacks for 'leave nobody behind' 
 	recommended_enemies = 5
 	votable = 0
 
-	var/const/waittime_l = 600 //lower bound on time before intercept arrives (in tenths of seconds)
-	var/const/waittime_h = 1800 //upper bound on time before intercept arrives (in tenths of seconds)
-
 	var/list/obj/cortical_stacks = list() //Stacks for 'leave nobody behind' objective.
+	var/win_button_triggered = 0
 
 /datum/game_mode/heist/announce()
 	world << "<B>The current game mode is - Heist!</B>"
@@ -83,9 +81,6 @@ var/global/list/obj/cortical_stacks = list() //Stacks for 'leave nobody behind' 
 		if(raid_objectives)
 			raider.objectives = raid_objectives
 
-	spawn (rand(waittime_l, waittime_h))
-		send_intercept()
-		
 	return ..()
 
 /datum/game_mode/proc/create_vox(var/datum/mind/newraider)
@@ -261,7 +256,7 @@ datum/game_mode/proc/auto_declare_completion_heist()
 			text += "<br>[vox.key] was [vox.name] ("
 			if(check_return)
 				var/obj/stack = raiders[vox]
-				if(get_area(stack.loc) != locate(/area/shuttle/vox/station))
+				if(get_area(stack.loc) != locate(/area/shuttle/vox))
 					text += "left behind)"
 					continue
 			if(vox.current)
@@ -276,20 +271,40 @@ datum/game_mode/proc/auto_declare_completion_heist()
 			text += ")"
 
 		world << text
-		
+
 	return 1
 
 /datum/game_mode/heist/check_finished()
-	var/datum/shuttle/multi_shuttle/skipjack = shuttle_controller.shuttles["Vox Skipjack"]
-	if (!(is_raider_crew_alive()) || (skipjack && skipjack.returned_home))
+	if(!(is_raider_crew_alive()))
+		return 1
+	if(win_button_triggered)
 		return 1
 	return ..()
 
-/datum/game_mode/heist/cleanup()
-	//the skipjack and everything in it have left and aren't coming back, so get rid of them.
-	var/area/skipjack = locate(/area/shuttle/vox/station)
-	for (var/mob/living/M in skipjack.contents)
-		//maybe send the player a message that they've gone home/been kidnapped? Someone responsible for vox lore should write that.
-		qdel(M)
-	for (var/obj/O in skipjack.contents)
-		qdel(O)	//no hiding in lockers or anything
+
+/obj/vox/win_button
+	name = "shoal contact computer"
+	desc = "Used to contact the Vox Shoal, generally to arrange for pickup."
+	icon = 'icons/obj/computer.dmi'
+	icon_state = "tcstation"
+
+/obj/vox/win_button/New()
+	. = ..()
+	overlays += icon('icons/obj/computer.dmi', "syndie")
+
+/obj/vox/win_button/attack_hand(mob/user)
+	if(!istype(ticker.mode, /datum/game_mode/heist) || (world.time < 10 MINUTES)) //has to be heist, and at least ten minutes into the round
+		user << "<span class='warning'>\The [src] does not appear to have a connection.</span>"
+		return 0
+
+	if(alert(user, "Warning: This will end the round. Are you sure you wish to end the round?", "Vox End", "Yes", "No") == "No")
+		return 0
+
+	if(alert(user, "Are you *absolutely* sure you want to end the round?", "!!WARNING!!", "Yes", "No") == "No")
+		return 0
+
+	message_admins("[key_name_admin(user)] has pressed the vox win button.")
+	log_admin("[key_name(user)] pressed the vox win button during a vox round.")
+
+	var/datum/game_mode/heist/H = ticker.mode
+	H.win_button_triggered = 1

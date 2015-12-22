@@ -103,7 +103,7 @@ var/global/datum/controller/gameticker/ticker
 	can_continue = src.mode.pre_setup()//Setup special modes
 	job_master.DivideOccupations() //Distribute jobs
 	if(!can_continue)
-		del(mode)
+		qdel(mode)
 		current_state = GAME_STATE_PREGAME
 		world << "<B>Error setting up [master_mode].</B> Reverting to pre-game lobby."
 		job_master.ResetOccupations()
@@ -130,7 +130,7 @@ var/global/datum/controller/gameticker/ticker
 	//here to initialize the random events nicely at round start
 	setup_economy()
 
-	shuttle_controller.setup_shuttle_docks()
+	//shuttle_controller.setup_shuttle_docks()
 
 	spawn(0)//Forking here so we dont have to wait for this to finish
 		mode.post_setup()
@@ -138,7 +138,7 @@ var/global/datum/controller/gameticker/ticker
 		for(var/obj/effect/landmark/start/S in landmarks_list)
 			//Deleting Startpoints but we need the ai point to AI-ize people later
 			if (S.name != "AI")
-				del(S)
+				qdel(S)
 
 		// take care of random spesspod spawning
 		var/list/obj/effect/landmark/spacepod/random/L = list()
@@ -149,7 +149,7 @@ var/global/datum/controller/gameticker/ticker
 			var/obj/effect/landmark/spacepod/random/S = pick(L)
 			new /obj/spacepod/random(S.loc)
 			for(var/obj/effect/landmark/spacepod/random/R in L)
-				del(R)
+				qdel(R)
 
 		world << "<FONT color='blue'><B>Enjoy the game!</B></FONT>"
 		world << sound('sound/AI/welcome.ogg') // Skie
@@ -225,7 +225,7 @@ var/global/datum/controller/gameticker/ticker
 
 	if(config.sql_enabled)
 		spawn(3000)
-		statistic_cycle() // Polls population totals regularly and stores them in an SQL DB -- TLE
+			statistic_cycle() // Polls population totals regularly and stores them in an SQL DB
 
 	votetimer()
 
@@ -367,7 +367,6 @@ var/global/datum/controller/gameticker/ticker
 				if(player.mind.assigned_role == "Captain")
 					captainless=0
 				if(player.mind.assigned_role != "MODE")
-					EquipRacialItems(player)
 					job_master.EquipRank(player, player.mind.assigned_role, 0)
 					EquipCustomItems(player)
 		if(captainless)
@@ -388,10 +387,10 @@ var/global/datum/controller/gameticker/ticker
 		var/game_finished = 0
 		var/mode_finished = 0
 		if (config.continous_rounds)
-			game_finished = (emergency_shuttle.returned() || mode.station_was_nuked)
+			game_finished = (mode.station_was_nuked)
 			mode_finished = (!post_game && mode.check_finished())
 		else
-			game_finished = (mode.check_finished() || (emergency_shuttle.returned() && emergency_shuttle.evac == 1))
+			game_finished = (mode.check_finished())
 			mode_finished = game_finished
 
 		if(!mode.explosion_in_progress && game_finished && (mode_finished || post_game))
@@ -487,13 +486,11 @@ var/global/datum/controller/gameticker/ticker
 		world << "<b>There [dronecount>1 ? "were" : "was"] [dronecount] industrious maintenance [dronecount>1 ? "drones" : "drone"] this round."
 
 	mode.declare_completion()//To declare normal completion.
-	
+
 	//calls auto_declare_completion_* for all modes
 	for(var/handler in typesof(/datum/game_mode/proc))
 		if (findtext("[handler]","auto_declare_completion_"))
 			call(mode, handler)()
-
-	mode.declare_job_completion()
 
 	scoreboard()
 	karmareminder()

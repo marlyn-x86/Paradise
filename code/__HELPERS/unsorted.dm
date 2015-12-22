@@ -169,93 +169,6 @@ Turf and target are seperate in case you want to teleport some distance from a t
 
 	return destination
 
-///////////////////
-//A* helpers procs
-///////////////////
-
-// Returns true if a link between A and B is blocked
-// Movement through doors allowed if ID has access
-/proc/LinkBlockedWithAccess(turf/A, turf/B, obj/item/weapon/card/id/ID)
-
-	if(A == null || B == null) return 1
-	var/adir = get_dir(A,B)
-	var/rdir = get_dir(B,A)
-	if(adir & (adir-1))	//	diagonal
-		var/turf/iStep = get_step(A,adir&(NORTH|SOUTH))
-		if(!iStep.density && !LinkBlockedWithAccess(A,iStep, ID) && !LinkBlockedWithAccess(iStep,B,ID))
-			return 0
-
-		var/turf/pStep = get_step(A,adir&(EAST|WEST))
-		if(!pStep.density && !LinkBlockedWithAccess(A,pStep,ID) && !LinkBlockedWithAccess(pStep,B,ID))
-			return 0
-
-		return 1
-
-	if(DirBlockedWithAccess(A,adir, ID))
-		return 1
-
-	if(DirBlockedWithAccess(B,rdir, ID))
-		return 1
-
-	for(var/obj/O in B)
-		if(O.density && !istype(O, /obj/machinery/door) && !(O.flags & ON_BORDER))
-			return 1
-
-	return 0
-
-// Returns true if direction is blocked from loc
-// Checks doors against access with given ID
-/proc/DirBlockedWithAccess(turf/loc,var/dir,var/obj/item/weapon/card/id/ID)
-	for(var/obj/structure/window/D in loc)
-		if(!D.density)			continue
-		if(D.dir == SOUTHWEST)	return 1 //full-tile window
-		if(D.dir == dir)		return 1 //matching border window
-
-	for(var/obj/machinery/door/D in loc)
-		if(!D.CanAStarPass(ID,dir))
-			return 1
-	return 0
-
-// Returns true if a link between A and B is blocked
-// Movement through doors allowed if door is open
-/proc/LinkBlocked(turf/A, turf/B)
-	if(A == null || B == null)
-		return 1
-	var/adir = get_dir(A,B)
-	var/rdir = get_dir(B,A)
-	if(adir & (adir-1)) //diagonal
-		var/turf/iStep = get_step(A,adir & (NORTH|SOUTH)) //check the north/south component
-		if(!iStep.density && !LinkBlocked(A,iStep) && !LinkBlocked(iStep,B))
-			return 0
-
-		var/turf/pStep = get_step(A,adir & (EAST|WEST)) //check the east/west component
-		if(!pStep.density && !LinkBlocked(A,pStep) && !LinkBlocked(pStep,B))
-			return 0
-
-		return 1
-
-	if(DirBlocked(A,adir)) return 1
-	if(DirBlocked(B,rdir)) return 1
-
-	for(var/obj/O in B)
-		if(O.density && !istype(O, /obj/machinery/door) && !(O.flags & ON_BORDER))
-			return 1
-
-	return 0
-
-// Returns true if a link is blocked and neither location has something climbable on
-// Used for inventory checks
-/proc/LinkBlockedUnclimbable(turf/A, turf/B)
-	if (!LinkBlocked(A, B))
-		return 0
-	for (var/obj/structure/S in A.contents)
-		if(S.climbable)
-			return 0
-	for (var/obj/structure/S in B.contents)
-		if(S.climbable)
-			return 0
-	return 1
-
 // Returns true if direction is blocked from loc
 // Checks if doors are open
 /proc/DirBlocked(turf/loc,var/dir)
@@ -334,7 +247,7 @@ Turf and target are seperate in case you want to teleport some distance from a t
 
 /obj/proc/atmosanalyzer_scan(var/datum/gas_mixture/air_contents, mob/user, var/obj/target = src)
 	var/obj/icon = target
-	user.visible_message("[user] has used the analyzer on \icon[icon] [target].", "<span class='notice'>You use the analyzer on \icon[icon] [target].</span>")
+	user.visible_message("[user] has used the analyzer on [target].", "<span class='notice'>You use the analyzer on [target].</span>")
 	var/pressure = air_contents.return_pressure()
 	var/total_moles = air_contents.total_moles()
 
@@ -621,6 +534,17 @@ Turf and target are seperate in case you want to teleport some distance from a t
 		loc = loc.loc
 	return loc
 
+/*
+Returns 1 if the chain up to the area contains the given typepath
+0 otherwise
+*/
+/atom/proc/is_found_within(var/typepath)
+	var/atom/A = src
+	while(A.loc)
+		if(istype(A.loc, typepath))
+			return 1
+		A = A.loc
+	return 0
 
 // the on-close client verb
 // called when a browser popup window is closed after registering with proc/onclose()
@@ -1681,6 +1605,15 @@ atom/proc/GetTypeInAllContents(typepath)
 			colour += temp_col
 	return colour
 
+/proc/get_random_chemical(var/is_plant = 0)
+	var/list/blocked = blocked_chems.Copy()		//blocked_chems list is found in code/_globalvars/lists/reagents.dm
+	if(is_plant)
+		blocked.Add(plant_blocked_chems.Copy())	//plant_blocked_chems list is found in code/_globalvars/lists/reagents.dm
+	var/picked_chem = pick(chemical_reagents_list)
+	if(blocked.Find(picked_chem))
+		return get_random_chemical(is_plant)
+	return picked_chem
+
 /proc/get_distant_turf(var/turf/T,var/direction,var/distance)
 	if(!T || !direction || !distance)	return
 
@@ -1766,7 +1699,7 @@ var/mob/dview/dview_mob = new
 	if(orbiting)
 		loc = get_turf(orbiting)
 		orbiting = null
-		
+
 //Centers an image.
 //Requires:
 //The Image
@@ -1807,4 +1740,15 @@ var/mob/dview/dview_mob = new
 		if(A.simulated)
 			return 0
 	return 1
-	
+
+/proc/screen_loc2turf(scr_loc, turf/origin)
+	var/tX = text2list(scr_loc, ",")
+	var/tY = text2list(tX[2], ":")
+	var/tZ = origin.z
+	tY = tY[1]
+	tX = text2list(tX[1], ":")
+	tX = tX[1]
+	tX = max(1, min(world.maxx, origin.x + (text2num(tX) - (world.view + 1))))
+	tY = max(1, min(world.maxy, origin.y + (text2num(tY) - (world.view + 1))))
+	return locate(tX, tY, tZ)
+

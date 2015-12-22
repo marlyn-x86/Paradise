@@ -95,7 +95,7 @@
 /datum/chemical_reaction/crank/on_reaction(var/datum/reagents/holder, var/created_volume)
 	var/turf/T = get_turf(holder.my_atom)
 	for(var/turf/turf in range(1,T))
-		PoolOrNew(/obj/effect/hotspot, turf)
+		new /obj/effect/hotspot(turf)
 	explosion(T,0,0,2)
 	return
 
@@ -370,11 +370,14 @@
 	var/high_message = pick("You feel like you're made of steel!", "You feel invigorated!", "You feel really buff!", "You feel on top of the world!", "You feel full of energy!")
 	if(prob(5))
 		M << "<span class='notice'>[high_message]</span>"
-	M.adjustStaminaLoss(-35)
-	M.adjustToxLoss(1)
-	if(prob(3))
-		M.losebreath += 2
-		M.Stun(2)
+	M.adjustStaminaLoss(-40)
+	if(prob(90))
+		M.adjustToxLoss(1)
+	if(prob(5))
+		M << "<span class='danger'>You cannot breathe!</span>"
+		M.losebreath += 1
+		M.adjustOxyLoss(15)
+		M.Stun(1)
 	..()
 	return
 
@@ -521,7 +524,7 @@
 			M.drop_item()
 	..()
 	if(prob(50))
-		M.adjustToxLoss(10)
+		M.adjustFireLoss(10)
 	M.adjustBrainLoss(pick(0.5, 0.6, 0.7, 0.8, 0.9, 1))
 	return
 
@@ -551,7 +554,7 @@
 /datum/reagent/lube/ultra/addiction_act_stage4(var/mob/living/carbon/human/M as mob)
 	M.Jitter(20)
 	M.Dizzy(20)
-	M.adjustToxLoss(5)
+	M.adjustBrainLoss(2)
 	if(prob(50))
 		M.emote(pick("twitch","buzz","moan"))
 	..()
@@ -605,7 +608,7 @@
 
 /datum/reagent/surge/addiction_act_stage1(var/mob/living/M as mob)
 	M.adjustBrainLoss(rand(1,5)*REM)
-	M.adjustToxLoss(rand(1,5)*REM)
+	M.hallucination += rand(1,5)
 	..()
 	return
 /datum/reagent/surge/addiction_act_stage2(var/mob/living/M as mob)

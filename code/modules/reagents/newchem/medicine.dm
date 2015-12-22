@@ -96,7 +96,7 @@ datum/reagent/synthflesh/reaction_mob(var/mob/living/M, var/method=TOUCH, var/vo
 datum/reagent/synthflesh/reaction_turf(var/turf/T, var/volume) //let's make a mess!
 	src = null
 	if(volume >= 5)
-		new /obj/effect/decal/cleanable/blood/gibs(T)
+		new /obj/effect/decal/cleanable/blood/gibs/cleangibs(T)
 		playsound(T, 'sound/effects/splat.ogg', 50, 1, -3)
 		return
 
@@ -278,13 +278,18 @@ datum/reagent/sal_acid
 	description = "This is a is a standard salicylate pain reliever and fever reducer."
 	reagent_state = LIQUID
 	color = "#B3B3B3"
-	shock_reduction = 40
+	metabolization_rate = 0.1
+	shock_reduction = 25
 	overdose_threshold = 25
 
 datum/reagent/sal_acid/on_mob_life(var/mob/living/M as mob)
 	if(!M) M = holder.my_atom
 	if(prob(55))
 		M.adjustBruteLoss(-2*REM)
+	if(ishuman(M))
+		var/mob/living/carbon/human/H = M
+		if(H.traumatic_shock < 100)
+			H.shock_stage = 0
 	..()
 	return
 
@@ -444,7 +449,7 @@ datum/reagent/morphine
 	color = "#C8A5DC"
 	overdose_threshold = 30
 	addiction_threshold = 25
-	shock_reduction = 60
+	shock_reduction = 50
 
 datum/reagent/morphine/on_mob_life(var/mob/living/M as mob)
 	if(!M) M = holder.my_atom
@@ -458,6 +463,10 @@ datum/reagent/morphine/on_mob_life(var/mob/living/M as mob)
 		if(36 to INFINITY)
 			M.Paralyse(10)
 			M.drowsyness = max(M.drowsyness, 15)
+	if(ishuman(M))
+		var/mob/living/carbon/human/H = M
+		if(H.traumatic_shock < 100)
+			H.shock_stage = 0
 	..()
 	return
 
@@ -513,16 +522,25 @@ datum/reagent/morphine/addiction_act_stage4(var/mob/living/M as mob)
 
 datum/reagent/oculine/on_mob_life(var/mob/living/M as mob)
 	if(!M) M = holder.my_atom
-	M.eye_blurry = max(M.eye_blurry-5 , 0)
-	M.eye_blind = max(M.eye_blind-5 , 0)
-	if(ishuman(M))
-		var/mob/living/carbon/human/H = M
-		var/obj/item/organ/eyes/E = H.internal_organs_by_name["eyes"]
-		if(istype(E))
-			if(E.damage > 0)
-				E.damage -= 1
+	if(prob(80))
+		if(ishuman(M))
+			var/mob/living/carbon/human/H = M
+			var/obj/item/organ/eyes/E = H.internal_organs_by_name["eyes"]
+			if(istype(E))
+				E.damage = max(E.damage-1, 0)
+		M.eye_blurry = max(M.eye_blurry-1 , 0)
+		M.ear_damage = max(M.ear_damage-1, 0)
+	if(prob(50))
+		M.disabilities &= ~NEARSIGHTED
+	if(prob(30))
+		M.sdisabilities &= ~BLIND
+		M.eye_blind = 0
+	if(M.ear_damage <= 25)
+		if(prob(30))
+			M.ear_deaf = 0
 	..()
 	return
+
 /datum/chemical_reaction/oculine
 	name = "Oculine"
 	id = "oculine"
@@ -633,6 +651,7 @@ datum/reagent/strange_reagent/reaction_mob(var/mob/living/M as mob, var/method=T
 		if(method == TOUCH)
 			if(M.stat == DEAD)
 				M.health = M.maxHealth
+				M.update_revive()
 				M.visible_message("<span class='warning'>[M] seems to rise from the dead!</span>")
 	if(istype(M, /mob/living/carbon))
 		if(method == INGEST)
@@ -648,13 +667,12 @@ datum/reagent/strange_reagent/reaction_mob(var/mob/living/M as mob, var/method=T
 					M.visible_message("<span class='notice'>[M] doesn't appear to respond, perhaps try again later?</span>")
 				if(!M.suiciding && !ghost && !(NOCLONE in M.mutations))
 					M.visible_message("<span class='warning'>[M] seems to rise from the dead!</span>")
-					M.stat = 1
 					M.setOxyLoss(0)
 					M.adjustBruteLoss(rand(0,15))
 					M.adjustToxLoss(rand(0,15))
 					M.adjustFireLoss(rand(0,15))
-					dead_mob_list -= M
-					living_mob_list |= list(M)
+					M.update_revive()
+					M.stat = UNCONSCIOUS
 					add_logs(M, M, "revived", object="strange reagent")
 	..()
 	return
@@ -785,7 +803,7 @@ datum/reagent/antihol/on_mob_life(var/mob/living/M as mob)
 	M.drowsyness = 0
 	M.slurring = 0
 	M.confused = 0
-	M.reagents.remove_reagent("ethanol", 8)
+	M.reagents.remove_all_type(/datum/reagent/ethanol, 8, 0, 1)
 	if(M.health < 25)
 		M.adjustToxLoss(-2.0)
 	..()
@@ -978,7 +996,7 @@ datum/reagent/haloperidol/on_mob_life(var/mob/living/M as mob)
 //		Synth-Meds			//
 //////////////////////////////
 
-//Degreaser: Anti-toxin / Lube Remover
+//Degreaser: Mild Purgative / Lube Remover
 /datum/reagent/degreaser
 	name = "Degreaser"
 	id = "degreaser"
@@ -1007,7 +1025,11 @@ datum/reagent/haloperidol/on_mob_life(var/mob/living/M as mob)
 
 /datum/reagent/degreaser/on_mob_life(var/mob/living/M as mob)
 	if(!M) M = holder.my_atom
-	M.adjustToxLoss(-1.5*REM)
+	if(prob(50))		//Same effects as coffee, to help purge ill effects like paralysis
+		M.AdjustParalysis(-1)
+		M.AdjustStunned(-1)
+		M.AdjustWeakened(-1)
+		M.confused -= 5
 	for(var/datum/reagent/R in M.reagents.reagent_list)
 		if(R != src)
 			if(R.id == "ultralube" || R.id == "lube")
@@ -1040,3 +1062,21 @@ datum/reagent/haloperidol/on_mob_life(var/mob/living/M as mob)
 	result_amount = 3
 	min_temp = 370
 	mix_message = "The solution gently swirls with a metallic sheen."
+
+
+datum/reagent/medicine/syndicate_nanites //Used exclusively by Syndicate medical cyborgs
+	name = "Restorative Nanites"
+	id = "syndicate_nanites"
+	description = "Miniature medical robots that swiftly restore bodily damage. May begin to attack their host's cells in high amounts."
+	reagent_state = SOLID
+	color = "#555555"
+
+datum/reagent/medicine/syndicate_nanites/on_mob_life(mob/living/M)
+	M.adjustBruteLoss(-5*REM) //A ton of healing - this is a 50 telecrystal investment.
+	M.adjustFireLoss(-5*REM)
+	M.adjustOxyLoss(-15*REM)
+	M.adjustToxLoss(-5*REM)
+	M.adjustBrainLoss(-15*REM)
+	M.adjustCloneLoss(-3*REM)
+	..()
+	return

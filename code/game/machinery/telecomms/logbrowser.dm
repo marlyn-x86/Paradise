@@ -4,7 +4,7 @@
 	light_color = LIGHT_COLOR_DARKGREEN
 
 /obj/machinery/computer/telecomms/server
-	name = "Telecommunications Server Monitor"
+	name = "telecommunications server monitor"
 	icon_screen = "comm_logs"
 
 
@@ -18,7 +18,7 @@
 	var/universal_translate = 0 // set to 1 if it can translate nonhuman speech
 
 	req_access = list(access_tcomsat)
-	circuit = "/obj/item/weapon/circuitboard/comm_server"
+	circuit = /obj/item/weapon/circuitboard/comm_server
 
 	attack_hand(mob/user as mob)
 		if(stat & (BROKEN|NOPOWER))
@@ -224,7 +224,7 @@
 				if (src.stat & BROKEN)
 					user << "\blue The broken glass falls out."
 					var/obj/structure/computerframe/A = new /obj/structure/computerframe( src.loc )
-					PoolOrNew(/obj/item/weapon/shard, loc)
+					new /obj/item/weapon/shard(loc)
 					var/obj/item/weapon/circuitboard/comm_server/M = new /obj/item/weapon/circuitboard/comm_server( A )
 					for (var/obj/C in src)
 						C.loc = src.loc

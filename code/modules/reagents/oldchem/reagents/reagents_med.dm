@@ -9,6 +9,10 @@
 
 /datum/reagent/hydrocodone/on_mob_life(var/mob/living/M as mob)
 	if(!M) M = holder.my_atom
+	if(ishuman(M))
+		var/mob/living/carbon/human/H = M
+		if(H.traumatic_shock < 100)
+			H.shock_stage = 0
 	..()
 	return
 
@@ -61,20 +65,6 @@
 	..()
 	return
 
-/datum/reagent/audioline
-	name = "Audioline"
-	id = "audioline"
-	description = "Heals ear damage."
-	reagent_state = LIQUID
-	color = "#6600FF" // rgb: 100, 165, 255
-
-/datum/reagent/audioline/on_mob_life(var/mob/living/M as mob)
-	if(!M) M = holder.my_atom
-	M.ear_damage = 0
-	M.ear_deaf = 0
-	..()
-	return
-
 /datum/reagent/mitocholide
 	name = "Mitocholide"
 	id = "mitocholide"
@@ -91,7 +81,7 @@
 		for(var/name in H.internal_organs_by_name)
 			var/obj/item/organ/I = H.internal_organs_by_name[name]
 			if(I.damage > 0)
-				I.damage -= 0.20
+				I.damage = max(I.damage-0.4, 0)
 	..()
 	return
 
@@ -116,27 +106,22 @@
 /datum/reagent/rezadone
 	name = "Rezadone"
 	id = "rezadone"
-	description = "A powder derived from fish toxin, this substance can effectively treat genetic damage in humanoids, though excessive consumption has side effects."
+	description = "A powder derived from fish toxin, Rezadone can effectively treat genetic damage as well as restoring minor wounds. Overdose will cause intense nausea and minor toxin damage."
 	reagent_state = SOLID
 	color = "#669900" // rgb: 102, 153, 0
+	overdose_threshold = 30
 
-/datum/reagent/rezadone/on_mob_life(var/mob/living/M as mob)
-	if(!M) M = holder.my_atom
-	if(!data) data = 1
-	data++
-	switch(data)
-		if(1 to 15)
-			M.adjustCloneLoss(-1)
-			M.heal_organ_damage(1,1)
-		if(15 to 35)
-			M.adjustCloneLoss(-2)
-			M.heal_organ_damage(2,1)
-			M.status_flags &= ~DISFIGURED
-		if(35 to INFINITY)
-			M.adjustToxLoss(1)
-			M.Dizzy(5)
-			M.Jitter(5)
+/datum/reagent/rezadone/on_mob_life(mob/living/M)
+	M.setCloneLoss(0) //Rezadone is almost never used in favor of cryoxadone. Hopefully this will change that.
+	M.heal_organ_damage(1,1)
+	M.status_flags &= ~DISFIGURED
+	..()
+	return
 
+/datum/reagent/rezadone/overdose_process(mob/living/M)
+	M.adjustToxLoss(1)
+	M.Dizzy(5)
+	M.Jitter(5)
 	..()
 	return
 
@@ -146,6 +131,7 @@
 	description = "An all-purpose antibiotic agent extracted from space fungus."
 	reagent_state = LIQUID
 	color = "#0AB478"
+	metabolization_rate = 0.2
 
 /datum/reagent/spaceacillin/on_mob_life(var/mob/living/M as mob)
 	..()

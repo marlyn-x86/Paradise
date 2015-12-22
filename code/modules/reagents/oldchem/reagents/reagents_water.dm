@@ -278,7 +278,7 @@
 			M.stuttering = 0
 			M.confused = 0
 			return
-	if(ishuman(M))				.
+	if(ishuman(M) && M.mind)				.
 		if(((M.mind in ticker.mode.vampires) || M.mind.vampire) && (!(VAMP_FULL in M.mind.vampire.powers)) && prob(80))
 			switch(data)
 				if(1 to 4)
@@ -325,6 +325,30 @@
 		for(var/obj/effect/rune/R in T)
 			qdel(R)
 	T.Bless()
+
+
+/datum/reagent/liquidgibs
+	name = "Liquid gibs"
+	id = "liquidgibs"
+	color = "#FF9966"
+	description = "You don't even want to think about what's in here."
+	reagent_state = LIQUID
+
+/datum/reagent/liquidgibs/reaction_turf(var/turf/T, var/volume) //yes i took it from synthflesh...
+	src = null
+	if(volume >= 5)
+		new /obj/effect/decal/cleanable/blood/gibs/cleangibs(T)
+		playsound(T, 'sound/effects/splat.ogg', 50, 1, -3)
+		return
+
+
+
+/datum/reagent/lye
+	name = "Lye"
+	id = "lye"
+	description = "Also known as sodium hydroxide."
+	reagent_state = LIQUID
+	color = "#FFFFD6" // very very light yellow
 
 /*
 /datum/reagent/vaccine

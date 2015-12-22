@@ -192,7 +192,7 @@
 
 
 /obj/structure/flora/kirbyplants
-	name = "Potted plant"
+	name = "potted plant"
 	icon = 'icons/obj/flora/plants.dmi'
 	icon_state = "plant-1"
 	anchored = 0
@@ -200,12 +200,14 @@
 
 /obj/structure/flora/kirbyplants/New()
 	..()
-	icon_state = "plant-[rand(1,25)]"
+	icon_state = "plant-[rand(1,35)]"
+	if(prob(1))
+		icon_state = "plant-36"
 
 /obj/structure/flora/kirbyplants/dead
-	name = "RD's potted plant"
+	name = "\improper RD's potted plant"
 	desc = "A gift from the botanical staff, presented after the RD's reassignment. There's a tag on it that says \"Y'all come back now, y'hear?\"\nIt doesn't look very healthy..."
-	icon_state = "plant-25"
+	icon_state = "plant-dead"
 
 //a rock is flora according to where the icon file is
 //and now these defines
@@ -228,3 +230,29 @@
 /obj/structure/flora/rock/pile/New()
 	..()
 	icon_state = "rockpile[rand(1,5)]"
+
+/obj/structure/flora/corn_stalk
+	name = "corn stalk"
+	icon = 'icons/obj/flora/plants.dmi'
+	icon_state = "cornstalk1"
+	anchored = 0
+	layer = 5
+
+/obj/structure/flora/corn_stalk/alt_1
+	icon_state = "cornstalk2"
+
+/obj/structure/flora/corn_stalk/alt_2
+	icon_state = "cornstalk3"
+
+/obj/structure/flora/straw_bail
+	name = "straw bail"
+	icon = 'icons/obj/flora/plants.dmi'
+	icon_state = "strawbail1"
+	density = 1
+	climbable = 1 // you can climb all over them.
+
+/obj/structure/flora/straw_bail/alt_1
+	icon_state = "strawbail2"
+
+/obj/structure/flora/straw_bail/alt_2
+	icon_state = "strawbail3"

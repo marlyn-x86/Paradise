@@ -198,6 +198,9 @@
 			update_equip_info()
 		return
 
+	container_resist(var/mob/living/L)
+		go_out()
+
 	update_equip_info()
 		if(..())
 			send_byjax(chassis.occupant,"msleeper.browser","lossinfo",get_occupant_dam())
@@ -383,6 +386,9 @@
 	desc = "Exosuit-mounted chem synthesizer with syringe gun. Reagents inside are held in stasis, so no reactions will occur. (Can be attached to: Medical Exosuits)"
 	icon = 'icons/obj/gun.dmi'
 	icon_state = "syringegun"
+	item_state = "syringegun"
+	lefthand_file = 'icons/mob/inhands/guns_lefthand.dmi'
+	righthand_file = 'icons/mob/inhands/guns_righthand.dmi'
 	var/list/syringes
 	var/list/known_reagents
 	var/list/processed_reagents

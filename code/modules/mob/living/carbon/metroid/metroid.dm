@@ -152,7 +152,7 @@
 			step(AM, t)
 		now_pushing = null
 
-/mob/living/carbon/slime/Process_Spacemove()
+/mob/living/carbon/slime/Process_Spacemove(var/movement_dir = 0)
 	return 2
 
 /mob/living/carbon/slime/Stat()
@@ -252,7 +252,7 @@
 
 /mob/living/carbon/slime/attack_animal(mob/living/simple_animal/M as mob)
 	if(M.melee_damage_upper == 0)
-		M.emote("[M.friendly] [src]")
+		M.custom_emote(1, "[M.friendly] [src]")
 	else
 		M.do_attack_animation(src)
 		if(M.attack_sound)
@@ -554,7 +554,6 @@
 /mob/living/carbon/slime/restrained()
 	return 0
 
-mob/living/carbon/slime/var/co2overloadtime = null
 mob/living/carbon/slime/var/temperature_resistance = T0C+75
 
 /mob/living/carbon/slime/show_inv(mob/user)
@@ -587,7 +586,7 @@ mob/living/carbon/slime/var/temperature_resistance = T0C+75
 	throw_speed = 3
 	throw_range = 6
 	origin_tech = "biotech=4"
-	_color = "grey"
+	item_color = "grey"
 	var/Uses = 1 // uses before it goes inert
 	var/enhanced = 0 //has it been enhanced before?
 
@@ -603,6 +602,8 @@ mob/living/carbon/slime/var/temperature_resistance = T0C+75
 			Uses = 3
 			enhanced = 1
 			qdel(O)
+		if(istype(O,/obj/item/weapon/storage/bag))
+			..()
 
 /obj/item/slime_extract/New()
 		..()
@@ -612,87 +613,87 @@ mob/living/carbon/slime/var/temperature_resistance = T0C+75
 /obj/item/slime_extract/grey
 	name = "grey slime extract"
 	icon_state = "grey slime extract"
-	_color = "grey"
+	item_color = "grey"
 
 /obj/item/slime_extract/gold
 	name = "gold slime extract"
 	icon_state = "gold slime extract"
-	_color = "gold"
+	item_color = "gold"
 
 /obj/item/slime_extract/silver
 	name = "silver slime extract"
 	icon_state = "silver slime extract"
-	_color = "silver"
+	item_color = "silver"
 
 /obj/item/slime_extract/metal
 	name = "metal slime extract"
 	icon_state = "metal slime extract"
-	_color = "metal"
+	item_color = "metal"
 
 /obj/item/slime_extract/purple
 	name = "purple slime extract"
 	icon_state = "purple slime extract"
-	_color = "purple"
+	item_color = "purple"
 
 /obj/item/slime_extract/darkpurple
 	name = "dark purple slime extract"
 	icon_state = "dark purple slime extract"
-	_color = "darkpurple"
+	item_color = "darkpurple"
 
 /obj/item/slime_extract/orange
 	name = "orange slime extract"
 	icon_state = "orange slime extract"
-	_color = "orange"
+	item_color = "orange"
 
 /obj/item/slime_extract/yellow
 	name = "yellow slime extract"
 	icon_state = "yellow slime extract"
-	_color = "yellow"
+	item_color = "yellow"
 
 /obj/item/slime_extract/red
 	name = "red slime extract"
 	icon_state = "red slime extract"
-	_color = "red"
+	item_color = "red"
 
 /obj/item/slime_extract/blue
 	name = "blue slime extract"
 	icon_state = "blue slime extract"
-	_color = "blue"
+	item_color = "blue"
 
 /obj/item/slime_extract/darkblue
 	name = "dark blue slime extract"
 	icon_state = "dark blue slime extract"
-	_color = "darkblue"
+	item_color = "darkblue"
 
 /obj/item/slime_extract/pink
 	name = "pink slime extract"
 	icon_state = "pink slime extract"
-	_color = "pink"
+	item_color = "pink"
 
 /obj/item/slime_extract/green
 	name = "green slime extract"
 	icon_state = "green slime extract"
-	_color = "green"
+	item_color = "green"
 
 /obj/item/slime_extract/lightpink
 	name = "light pink slime extract"
 	icon_state = "light pink slime extract"
-	_color = "lightpink"
+	item_color = "lightpink"
 
 /obj/item/slime_extract/black
 	name = "black slime extract"
 	icon_state = "black slime extract"
-	_color = "black"
+	item_color = "black"
 
 /obj/item/slime_extract/oil
 	name = "oil slime extract"
 	icon_state = "oil slime extract"
-	_color = "oil"
+	item_color = "oil"
 
 /obj/item/slime_extract/adamantine
 	name = "adamantine slime extract"
 	icon_state = "adamantine slime extract"
-	_color = "adamantine"
+	item_color = "adamantine"
 
 /obj/item/slime_extract/bluespace
 	name = "bluespace slime extract"
@@ -721,43 +722,11 @@ mob/living/carbon/slime/var/temperature_resistance = T0C+75
 	desc = "A potent chemical mix that will nullify a slime's powers, causing it to become docile and tame."
 	icon = 'icons/obj/chemical.dmi'
 	icon_state = "bottle19"
+	w_class = 1
+	origin_tech = "biotech=4"
 
 	attack(mob/living/carbon/slime/M as mob, mob/user as mob)
 		if(!istype(M, /mob/living/carbon/slime))//If target is not a slime.
-			user << "<span class='warning'> The potion only works on baby slimes!</span>"
-			return ..()
-		if(M.is_adult) //Can't tame adults
-			user << "<span class='warning'> Only baby slimes can be tamed!</span>"
-			return..()
-		if(M.stat)
-			user << "<span class='warning'> The slime is dead!</span>"
-			return..()
-		if(M.mind)
-			user << "<span class='warning'> The slime resists!</span>"
-			return ..()
-		var/mob/living/simple_animal/slime/pet = new /mob/living/simple_animal/slime(M.loc)
-		pet.icon_state = "[M.colour] baby slime"
-		pet.icon_living = "[M.colour] baby slime"
-		pet.icon_dead = "[M.colour] baby slime dead"
-		pet.colour = "[M.colour]"
-		user <<"You feed the slime the potion, removing it's powers and calming it."
-		qdel(M)
-		var/newname = sanitize(copytext(input(user, "Would you like to give the slime a name?", "Name your new pet", "pet slime") as null|text,1,MAX_NAME_LEN))
-
-		if (!newname)
-			newname = "pet slime"
-		pet.name = newname
-		pet.real_name = newname
-		qdel(src)
-
-/obj/item/weapon/slimepotion2
-	name = "advanced docility potion"
-	desc = "A potent chemical mix that will nullify a slime's powers, causing it to become docile and tame. This one is meant for adult slimes"
-	icon = 'icons/obj/chemical.dmi'
-	icon_state = "bottle19"
-
-	attack(mob/living/carbon/slime/M as mob, mob/user as mob)
-		if(!istype(M, /mob/living/carbon/slime/))//If target is not a slime.
 			user << "<span class='warning'> The potion only works on slimes!</span>"
 			return ..()
 		if(M.stat)
@@ -766,20 +735,107 @@ mob/living/carbon/slime/var/temperature_resistance = T0C+75
 		if(M.mind)
 			user << "<span class='warning'> The slime resists!</span>"
 			return ..()
-		var/mob/living/simple_animal/adultslime/pet = new /mob/living/simple_animal/adultslime(M.loc)
-		pet.icon_state = "[M.colour] adult slime"
-		pet.icon_living = "[M.colour] adult slime"
-		pet.icon_dead = "[M.colour] baby slime dead"
-		pet.colour = "[M.colour]"
-		user <<"You feed the slime the potion, removing it's powers and calming it."
-		qdel(M)
-		var/newname = sanitize(copytext(input(user, "Would you like to give the slime a name?", "Name your new pet", "pet slime") as null|text,1,MAX_NAME_LEN))
+		if(M.is_adult)
+			var/mob/living/simple_animal/adultslime/pet = new /mob/living/simple_animal/adultslime(M.loc)
+			pet.icon_state = "[M.colour] adult slime"
+			pet.icon_living = "[M.colour] adult slime"
+			pet.icon_dead = "[M.colour] baby slime dead"
+			pet.colour = "[M.colour]"
+			qdel(M)
+			var/newname = sanitize(copytext(input(user, "Would you like to give the slime a name?", "Name your new pet", "pet slime") as null|text,1,MAX_NAME_LEN))
 
-		if (!newname)
-			newname = "pet slime"
-		pet.name = newname
-		pet.real_name = newname
+			if (!newname)
+				newname = "pet slime"
+			pet.name = newname
+			pet.real_name = newname
+			qdel(src)
+		else
+			var/mob/living/simple_animal/slime/pet = new /mob/living/simple_animal/slime(M.loc)
+			pet.icon_state = "[M.colour] baby slime"
+			pet.icon_living = "[M.colour] baby slime"
+			pet.icon_dead = "[M.colour] baby slime dead"
+			pet.colour = "[M.colour]"
+			qdel(M)
+			var/newname = sanitize(copytext(input(user, "Would you like to give the slime a name?", "Name your new pet", "pet slime") as null|text,1,MAX_NAME_LEN))
+
+			if (!newname)
+				newname = "pet slime"
+			pet.name = newname
+			pet.real_name = newname
+			qdel(src)
+		user <<"You feed the slime the potion, removing it's powers and calming it."
+
+/obj/item/weapon/sentience_potion
+	name = "sentience potion"
+	desc = "A miraculous chemical mix that can raise the intelligence of creatures to human levels. Unlike normal slime potions, it can be absorbed by any nonsentient being."
+	icon = 'icons/obj/chemical.dmi'
+	icon_state = "bottle19"
+	origin_tech = "biotech=5"
+	var/list/not_interested = list()
+	var/being_used = 0
+	w_class = 1
+
+
+/obj/item/weapon/sentience_potion/afterattack(mob/living/M, mob/user)
+	if(being_used || !ismob(M))
+		return
+	if(!isslime(M) && !isanimal(M) || M.ckey) //only works on animals that aren't player controlled
+		user << "<span class='warning'>[M] is already too intelligent for this to work!</span>"
+		return ..()
+	if(M.stat)
+		user << "<span class='warning'>[M] is dead!</span>"
+		return..()
+
+	user << "<span class='notice'>You offer the sentience potion to [M]...</span>"
+	being_used = 1
+
+	var/list/candidates = get_candidates(BE_ALIEN, ALIEN_AFK_BRACKET)
+
+	shuffle(candidates)
+
+	var/time_passed = world.time
+	var/list/consenting_candidates = list()
+
+	for(var/candidate in candidates)
+
+		if(candidate in not_interested)
+			continue
+
+		spawn(0)
+			switch(alert(candidate, "Would you like to play as [M.name]? Please choose quickly!","Confirmation","Yes","No"))
+				if("Yes")
+					if((world.time-time_passed)>=50 || !src)
+						return
+					consenting_candidates += candidate
+				if("No")
+					if(!src)
+						return
+					not_interested += candidate
+
+	sleep(50)
+
+	if(!src)
+		return
+
+	listclearnulls(consenting_candidates) //some candidates might have left during sleep(50)
+
+	if(consenting_candidates.len)
+		var/client/C = null
+		C = pick(consenting_candidates)
+		M.key = C.key
+		M.universal_speak = 1
+		M.faction |= "sentient"
+		M << "<span class='warning'>All at once it makes sense: you know what you are and who you are! Self awareness is yours!</span>"
+		M << "<span class='userdanger'>You are grateful to be self aware and owe [user] a great debt. Serve [user], and assist them in completing their goals at any cost.</span>"
+		user << "<span class='notice'>[M] accepts the potion and suddenly becomes attentive and aware. It worked!</span>"
+		if(isanimal(M))
+			var/mob/living/simple_animal/S = M
+			S.master_commander = user
 		qdel(src)
+	else
+		user << "<span class='notice'>[M] looks interested for a moment, but then looks back down. Maybe you should try again later.</span>"
+		being_used = 0
+		..()
 
 
 /obj/item/weapon/slimesteroid
@@ -787,6 +843,9 @@ mob/living/carbon/slime/var/temperature_resistance = T0C+75
 	desc = "A potent chemical mix that will cause a slime to generate more extract."
 	icon = 'icons/obj/chemical.dmi'
 	icon_state = "bottle16"
+	w_class = 1
+	origin_tech = "biotech=4"
+
 
 	attack(mob/living/carbon/slime/M as mob, mob/user as mob)
 		if(!istype(M, /mob/living/carbon/slime))//If target is not a slime.
@@ -811,6 +870,60 @@ mob/living/carbon/slime/var/temperature_resistance = T0C+75
 	desc = "A potent chemical mix that will give a slime extract three uses."
 	icon = 'icons/obj/chemical.dmi'
 	icon_state = "bottle17"
+	w_class = 1
+	origin_tech = "biotech=4"
+
+
+/obj/item/weapon/slimespeed
+	name = "slime speed potion"
+	desc = "A potent chemical mix that will remove the slowdown from any item."
+	icon = 'icons/obj/chemical.dmi'
+	icon_state = "bottle3"
+	w_class = 1
+	origin_tech = "biotech=4"
+
+/obj/item/weapon/slimespeed/afterattack(obj/item/C, mob/user)
+	..()
+	if(!istype(C))
+		user << "<span class='warning'>The potion can only be used on items!</span>"
+		return
+	if(C.slowdown <= 0)
+		user << "<span class='warning'>The [C] can't be made any faster!</span>"
+		return..()
+	user <<"<span class='notice'>You slather the red gunk over the [C], making it faster.</span>"
+	C.color = "#FF0000"
+	C.slowdown = 0
+	qdel(src)
+
+/obj/item/weapon/slimefireproof
+	name = "slime chill potion"
+	desc = "A potent chemical mix that will fireproof any article of clothing. Has three uses."
+	icon = 'icons/obj/chemical.dmi'
+	icon_state = "bottle17"
+	var/uses = 3
+	w_class = 1
+	origin_tech = "biotech=4"
+
+
+/obj/item/weapon/slimefireproof/afterattack(obj/item/clothing/C, mob/user)
+	..()
+	if(!uses)
+		qdel(src)
+		return
+	if(!istype(C))
+		user << "<span class='warning'>The potion can only be used on clothing!</span>"
+		return
+	if(C.max_heat_protection_temperature == FIRE_IMMUNITY_SUIT_MAX_TEMP_PROTECT)
+		user << "<span class='warning'>The [C] is already fireproof!</span>"
+		return..()
+	user <<"<span class='notice'>You slather the blue gunk over the [C], fireproofing it.</span>"
+	C.name = "fireproofed [C.name]"
+	C.color = "#000080"
+	C.max_heat_protection_temperature = FIRE_IMMUNITY_SUIT_MAX_TEMP_PROTECT
+	C.heat_protection = C.body_parts_covered
+	uses --
+	if(!uses)
+		qdel(src)
 
 
 /obj/effect/goleRUNe

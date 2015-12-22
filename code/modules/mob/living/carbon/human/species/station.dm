@@ -53,13 +53,16 @@
 	heat_level_3_breathe = 1100 //Default 1000
 
 	flesh_color = "#34AF10"
-
 	reagent_tag = PROCESS_ORG
 	base_color = "#066000"
 
 /datum/species/unathi/handle_death(var/mob/living/carbon/human/H)
-
 	H.stop_tail_wagging(1)
+
+/datum/species/unathi/equip(var/mob/living/carbon/human/H)
+	if(H.mind.assigned_role != "Clown")
+		H.unEquip(H.shoes)
+		H.equip_or_collect(new /obj/item/clothing/shoes/sandal(H), slot_shoes)
 
 /datum/species/tajaran
 	name = "Tajaran"
@@ -94,14 +97,17 @@
 	clothing_flags = HAS_UNDERWEAR | HAS_UNDERSHIRT | HAS_SOCKS
 	bodyflags = FEET_PADDED | HAS_TAIL | HAS_SKIN_COLOR | TAIL_WAGGING
 	dietflags = DIET_OMNI
-
 	reagent_tag = PROCESS_ORG
 	flesh_color = "#AFA59E"
 	base_color = "#333333"
 
 /datum/species/tajaran/handle_death(var/mob/living/carbon/human/H)
-
 	H.stop_tail_wagging(1)
+
+/datum/species/tajaran/equip(var/mob/living/carbon/human/H)
+	if(H.mind.assigned_role != "Clown")
+		H.unEquip(H.shoes)
+		H.equip_or_collect(new /obj/item/clothing/shoes/sandal(H), slot_shoes)
 
 /datum/species/vulpkanin
 	name = "Vulpkanin"
@@ -126,13 +132,11 @@
 	clothing_flags = HAS_UNDERWEAR | HAS_UNDERSHIRT | HAS_SOCKS
 	bodyflags = FEET_PADDED | HAS_TAIL | HAS_SKIN_COLOR | TAIL_WAGGING
 	dietflags = DIET_OMNI
-
 	reagent_tag = PROCESS_ORG
 	flesh_color = "#966464"
 	base_color = "#BE8264"
 
 /datum/species/vulpkanin/handle_death(var/mob/living/carbon/human/H)
-
 	H.stop_tail_wagging(1)
 
 /datum/species/skrell
@@ -156,7 +160,6 @@
 	clothing_flags = HAS_UNDERWEAR | HAS_UNDERSHIRT | HAS_SOCKS
 	bodyflags = HAS_SKIN_COLOR
 	dietflags = DIET_HERB
-
 	flesh_color = "#8CD7A3"
 	blood_color = "#1D2CBF"
 	reagent_tag = PROCESS_ORG
@@ -172,7 +175,6 @@
 	language = "Vox-pidgin"
 	speech_sounds = list('sound/voice/shriek1.ogg')
 	speech_chance = 20
-
 	unarmed_type = /datum/unarmed_attack/claws	//I dont think it will hurt to give vox claws too.
 
 	blurb = "The Vox are the broken remnants of a once-proud race, now reduced to little more than \
@@ -203,23 +205,38 @@
 
 	reagent_tag = PROCESS_ORG
 
-	makeName(var/gender,var/mob/living/carbon/human/H=null)
-		var/sounds = rand(2,8)
-		var/i = 0
-		var/newname = ""
+/datum/species/vox/makeName(var/gender,var/mob/living/carbon/human/H=null)
+	var/sounds = rand(2,8)
+	var/i = 0
+	var/newname = ""
 
-		while(i<=sounds)
-			i++
-			newname += pick(vox_name_syllables)
-		return capitalize(newname)
+	while(i<=sounds)
+		i++
+		newname += pick(vox_name_syllables)
+	return capitalize(newname)
+
+/datum/species/vox/equip(var/mob/living/carbon/human/H)
+	if(H.mind.assigned_role != "Clown" && H.mind.assigned_role != "Mime")
+		H.unEquip(H.wear_mask)
+	H.unEquip(H.l_hand)
+
+	H.equip_or_collect(new /obj/item/clothing/mask/breath/vox(H), slot_wear_mask)
+	var/tank_pref = H.client.prefs.speciesprefs
+	if(tank_pref)//Diseasel, here you go
+		H.equip_or_collect(new /obj/item/weapon/tank/nitrogen(H), slot_l_hand)
+	else
+		H.equip_or_collect(new /obj/item/weapon/tank/emergency_oxygen/vox(H), slot_l_hand)
+	H << "<span class='notice'>You are now running on nitrogen internals from the [H.l_hand] in your hand. Your species finds oxygen toxic, so you must breathe nitrogen only.</span>"
+	H.internal = H.l_hand
+	if (H.internals)
+		H.internals.icon_state = "internal1"
+
 /*
 /datum/species/vox/handle_post_spawn(var/mob/living/carbon/human/H)
-
 	H.verbs += /mob/living/carbon/human/proc/leap
 	..() */
 
 /datum/species/vox/armalis/handle_post_spawn(var/mob/living/carbon/human/H)
-
 	H.verbs += /mob/living/carbon/human/proc/gut
 	..()
 
@@ -287,7 +304,6 @@
 	clothing_flags = HAS_SOCKS
 	bodyflags = FEET_CLAWS
 	dietflags = DIET_HERB
-
 	blood_color = "#FB9800"
 	reagent_tag = PROCESS_ORG
 
@@ -303,11 +319,10 @@
 
 	flags = IS_WHITELISTED | NO_BREATHE | HAS_LIPS | NO_INTORGANS | NO_SCAN
 	clothing_flags = HAS_SOCKS
-	bodyflags = HAS_SKIN_COLOR
-	bloodflags = BLOOD_SLIME
+	bodyflags = HAS_SKIN_COLOR | NO_EYES
 	dietflags = DIET_CARN
-
 	reagent_tag = PROCESS_ORG
+	exotic_blood = "water"
 	//ventcrawler = 1 //ventcrawling commented out
 
 	has_organ = list(
@@ -333,7 +348,6 @@
 	flags = IS_WHITELISTED | HAS_LIPS | CAN_BE_FAT
 	clothing_flags = HAS_UNDERWEAR | HAS_UNDERSHIRT | HAS_SOCKS
 	dietflags = DIET_HERB
-
 	reagent_tag = PROCESS_ORG
 	blood_color = "#A200FF"
 
@@ -346,6 +360,7 @@
 		C.dna.SetSEState(REMOTETALKBLOCK,0,1)
 		C.mutations -= REMOTE_TALK
 		genemutcheck(C,REMOTETALKBLOCK,null,MUTCHK_FORCED)
+	C.mutations.Add(GREY)
 	C.update_mutations()
 	..()
 
@@ -386,7 +401,6 @@
 	dietflags = 0		//Diona regenerate nutrition in light, no diet necessary
 
 	body_temperature = T0C + 15		//make the plant people have a bit lower body temperature, why not
-
 	blood_color = "#004400"
 	flesh_color = "#907E4A"
 
@@ -440,30 +454,31 @@
 		if(D.client)
 			D.loc = H.loc
 		else
-			del(D)
+			qdel(D)
 
 	H.visible_message("<span class='danger">[H] splits apart with a wet slithering noise!"</span>) */
 
 /datum/species/machine
 	name = "Machine"
 	name_plural = "Machines"
-	
+
 	blurb = "Positronic intelligence really took off in the 26th century, and it is not uncommon to see independant, free-willed \
 	robots on many human stations, particularly in fringe systems where standards are slightly lax and public opinion less relevant \
 	to corporate operations. IPCs (Integrated Positronic Chassis) are a loose category of self-willed robots with a humanoid form, \
 	generally self-owned after being 'born' into servitude; they are reliable and dedicated workers, albeit more than slightly \
-	inhuman in outlook and perspective."	
-	
+	inhuman in outlook and perspective."
+
 	icobase = 'icons/mob/human_races/r_machine.dmi'
 	deform = 'icons/mob/human_races/r_machine.dmi'
 	path = /mob/living/carbon/human/machine
 	default_language = "Galactic Common"
 	language = "Trinary"
 	unarmed_type = /datum/unarmed_attack/punch
-	
+
 	eyes = "blank_eyes"
 	brute_mod = 2.5 // 100% * 2.5 * 0.6 (robolimbs) ~= 150%
 	burn_mod = 2.5  // So they take 50% extra damage from brute/burn overall.
+	death_message = "gives one shrill beep before falling limp, their monitor flashing blue before completely shutting off..."
 
 	cold_level_1 = 50
 	cold_level_2 = -1
@@ -476,22 +491,23 @@
 
 	passive_temp_gain = 10 //this should cause IPCs to stabilize at ~80 C in a 20 C environment.
 
-	flags = IS_WHITELISTED | NO_BREATHE | NO_SCAN | NO_BLOOD | NO_PAIN | NO_DNA_RAD
+	flags = IS_WHITELISTED | NO_BREATHE | NO_SCAN | NO_BLOOD | NO_PAIN | NO_DNA_RAD | NO_POISON
 	clothing_flags = HAS_SOCKS
+	bodyflags = HAS_SKIN_COLOR
 	dietflags = 0		//IPCs can't eat, so no diet
 	blood_color = "#1F181F"
 	flesh_color = "#AAAAAA"
 	virus_immune = 1
 	can_revive_by_healing = 1
 	reagent_tag = PROCESS_SYN
-	
+
 	has_organ = list(
 		"brain" = /obj/item/organ/mmi_holder/posibrain,
 		"cell" = /obj/item/organ/cell,
 		"optics" = /obj/item/organ/optical_sensor
 		)
 
-	vision_organ = "optics"	
+	vision_organ = "optics"
 	has_limbs = list(
 		"chest" =  list("path" = /obj/item/organ/external/chest/ipc),
 		"groin" =  list("path" = /obj/item/organ/external/groin/ipc),
@@ -510,7 +526,7 @@
 	H.h_style = ""
 	spawn(100)
 		if(H) H.update_hair()
-	
+
 /datum/species/machine/handle_post_spawn(var/mob/living/carbon/human/H)
 	..()
 	H.verbs += /mob/living/carbon/human/proc/change_monitor

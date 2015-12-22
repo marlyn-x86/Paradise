@@ -401,20 +401,15 @@
 		dat += "Current Game Mode: <B>[ticker.mode.name]</B><BR>"
 		dat += "Round Duration: <B>[round(world.time / 36000)]:[add_zero(num2text(world.time / 600 % 60), 2)]:[add_zero(num2text(world.time / 10 % 60), 2)]</B><BR>"
 		dat += "<B>Emergency shuttle</B><BR>"
-		if (!emergency_shuttle.online())
+		if(shuttle_master.emergency.mode < SHUTTLE_CALL)
 			dat += "<a href='?src=\ref[src];call_shuttle=1'>Call Shuttle</a><br>"
 		else
-			if (emergency_shuttle.wait_for_launch)
-				var/timeleft = emergency_shuttle.estimate_launch_time()
-				dat += "ETL: <a href='?src=\ref[src];edit_shuttle_time=1'>[(timeleft / 60) % 60]:[add_zero(num2text(timeleft % 60), 2)]</a><BR>"
-
-			else if (emergency_shuttle.shuttle.has_arrive_time())
-				var/timeleft = emergency_shuttle.estimate_arrival_time()
-				dat += "ETA: <a href='?src=\ref[src];edit_shuttle_time=1'>[(timeleft / 60) % 60]:[add_zero(num2text(timeleft % 60), 2)]</a><BR>"
-				dat += "<a href='?src=\ref[src];call_shuttle=2'>Send Back</a><br>"
-
-			if (emergency_shuttle.shuttle.moving_status == SHUTTLE_WARMUP)
-				dat += "Launching now..."
+			var/timeleft = shuttle_master.emergency.timeLeft()
+			if(shuttle_master.emergency.mode < SHUTTLE_DOCKED)
+				dat += "ETA: <a href='?_src_=holder;edit_shuttle_time=1'>[(timeleft / 60) % 60]:[add_zero(num2text(timeleft % 60), 2)]</a><BR>"
+				dat += "<a href='?_src_=holder;call_shuttle=2'>Send Back</a><br>"
+			else
+				dat += "ETA: <a href='?_src_=holder;edit_shuttle_time=1'>[(timeleft / 60) % 60]:[add_zero(num2text(timeleft % 60), 2)]</a><BR>"
 
 		dat += "<a href='?src=\ref[src];delay_round_end=1'>[ticker.delay_end ? "End Round Normally" : "Delay Round End"]</a><br>"
 		if(ticker.mode.syndicates.len)
@@ -475,22 +470,6 @@
 						dat += "<td>[mob_loc.loc]</td></tr>"
 					else
 						dat += "<tr><td><i>Head not found!</i></td></tr>"
-			dat += "</table>"
-
-		if(ticker.mode.name == "nations")
-			dat += "</table><br><table><tr><td><B>Flags(s)</B></td></tr>"
-			for(var/obj/item/flag/nation/N in world)
-				dat += "<tr><td>[N.name], "
-				var/atom/flag_loc = N.loc
-				while(!istype(flag_loc, /turf))
-					if(istype(flag_loc, /mob))
-						var/mob/M = flag_loc
-						dat += "carried by <a href='?src=\ref[src];adminplayeropts=\ref[M]'>[M.real_name]</a> "
-					if(istype(flag_loc, /obj))
-						var/obj/O = flag_loc
-						dat += "in \a [O.name] "
-					flag_loc = flag_loc.loc
-				dat += "in [flag_loc.loc] at ([flag_loc.x], [flag_loc.y], [flag_loc.z])</td></tr>"
 			dat += "</table>"
 
 		if(istype(ticker.mode, /datum/game_mode/blob))

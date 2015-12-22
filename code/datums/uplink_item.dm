@@ -147,6 +147,16 @@ var/list/uplink_items = list()
 	cost = 2
 	job = list("Chef")
 
+//Chaplain
+
+/datum/uplink_item/jobspecific/voodoo
+	name = "Voodoo Doll"
+	desc = "A doll created by Syndicate Witch Doctors. Ingredients: Something of the Thread, Something of the Head, Something of the Body, Something of the Dead, Secret Voodoo herbs, and Monosodium glutamate."
+	reference = "VD"
+	item = /obj/item/voodoo
+	cost = 13
+	job = list("Chaplain")
+
 //Janitor
 
 /datum/uplink_item/jobspecific/cautionsign
@@ -197,6 +207,17 @@ var/list/uplink_items = list()
 	cost = 6
 	job = list("Bartender")
 
+
+//Barber
+
+/datum/uplink_item/jobspecific/safety_scissors  //Hue
+	name = "Safety Scissors"
+	desc = "A pair of scissors that are anything but what their name implies; can easily cut right into someone's throat."
+	reference = "CTS"
+	item = /obj/item/weapon/scissors/safety
+	cost = 5
+	job = list("Barber")
+
 //Engineer
 
 /datum/uplink_item/jobspecific/powergloves
@@ -211,7 +232,7 @@ var/list/uplink_items = list()
 
 /datum/uplink_item/jobspecific/telegun
 	name = "Telegun"
-	desc = "An extremely high-tech energy gun that utilizes bluespace technology to teleport away living targets; will teleport targets to the same beacon a teleporter is locked onto."
+	desc = "An extremely high-tech energy gun that utilizes bluespace technology to teleport away living targets. Select the target beacon on the telegun itself; projectiles will send targets to the beacon locked onto."
 	reference = "TG"
 	item = /obj/item/weapon/gun/energy/telegun
 	cost = 12
@@ -307,7 +328,7 @@ var/list/uplink_items = list()
 	name = "Energy Sword"
 	desc = "The energy sword is an edged weapon with a blade of pure energy. The sword is small enough to be pocketed when inactive. Activating it produces a loud, distinctive noise."
 	reference = "ES"
-	item = /obj/item/weapon/melee/energy/sword
+	item = /obj/item/weapon/melee/energy/sword/saber
 	cost = 8
 
 /datum/uplink_item/dangerous/chainsaw
@@ -390,6 +411,13 @@ var/list/uplink_items = list()
 	var/obj/item/weapon/antag_spawner/borg_tele/T = ..()
 	if(istype(T))
 		T.TC_cost = cost
+
+/datum/uplink_item/dangerous/guardian
+	name = "Holoparasites"
+	desc = "Though capable of near sorcerous feats via use of hardlight holograms and nanomachines, they require an organic host as a home base and source of fuel."
+	item = /obj/item/weapon/storage/box/syndie_kit/guardian
+	excludefrom = list("nuclear emergency")
+	cost = 12
 
 // Ammunition
 
@@ -510,6 +538,14 @@ var/list/uplink_items = list()
 	reference = "SOAP"
 	item = /obj/item/weapon/soap/syndie
 	cost = 1
+	surplus = 50
+
+/datum/uplink_item/stealthy_weapons/dart_pistol
+	name = "Dart Pistol"
+	desc = "A miniaturized version of a normal syringe gun. It is very quiet when fired and can fit into any space a small item can."
+	reference = "DART"
+	item = /obj/item/weapon/gun/syringe/syndicate
+	cost = 4
 	surplus = 50
 
 /datum/uplink_item/stealthy_weapons/detomatix
@@ -759,11 +795,11 @@ var/list/uplink_items = list()
 	cost = 3
 	gamemodes = list("nuclear emergency")
 
-/datum/uplink_item/device_tools/pdapinpointer
-	name = "PDA Pinpointer"
-	desc = "A pinpointer that tracks any PDA on the station. Useful for locating assassination targets or other high-value targets that you can't find. WARNING: Can only set once."
-	reference = "PDAP"
-	item = /obj/item/weapon/pinpointer/pdapinpointer
+/datum/uplink_item/device_tools/advpinpointer
+	name = "Advanced Pinpointer"
+	desc = "A pinpointer that tracks any specified coordinates, DNA string, high value item or the nuclear authentication disk."
+	reference = "ADVP"
+	item = /obj/item/weapon/pinpointer/advpinpointer
 	cost = 4
 
 /datum/uplink_item/device_tools/ai_detector
@@ -790,6 +826,15 @@ var/list/uplink_items = list()
 	cost = 16
 	gamemodes = list("nuclear emergency")
 	surplus = 20
+
+/datum/uplink_item/device_tools/medgun
+	name = "Medbeam Gun"
+	desc = "Medical Beam Gun, useful in prolonged firefights."
+	item = /obj/item/weapon/gun/medbeam
+	reference = "MBG"
+	cost = 15
+	gamemodes = list("nuclear emergency")
+
 
 // IMPLANTS
 

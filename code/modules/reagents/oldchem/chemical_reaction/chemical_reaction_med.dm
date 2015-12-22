@@ -30,13 +30,6 @@
 		result_amount = 2
 		mix_message = "The solvent extracts an antibiotic compound from the fungus."
 
-	audioline
-		name = "Audioline"
-		id = "audioline"
-		result = "audioline"
-		required_reagents = list("spaceacillin" = 1, "salglu_solution" = 1, "epinephrine" = 1)
-		result_amount = 3
-
 	rezadone
 		name = "Rezadone"
 		id = "rezadone"
@@ -94,5 +87,5 @@
 		name = "Sterilizine"
 		id = "sterilizine"
 		result = "sterilizine"
-		required_reagents = list("ethanol" = 1, "charcoal" = 1, "chlorine" = 1)
+		required_reagents = list("antihol" = 2, "chlorine" = 1)
 		result_amount = 3

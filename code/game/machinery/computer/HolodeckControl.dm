@@ -1,5 +1,5 @@
 /obj/machinery/computer/HolodeckControl
-	name = "Holodeck Control Computer"
+	name = "holodeck control computer"
 	desc = "A computer used to control a nearby holodeck."
 	icon_keyboard = "tech_key"
 	icon_screen = "holocontrol"
@@ -19,7 +19,7 @@
 /obj/machinery/computer/HolodeckControl/attack_hand(var/mob/user as mob)
 	if(..())
 		return 1
-		
+
 	user.set_machine(src)
 	var/dat
 
@@ -195,7 +195,7 @@
 
 	if(!..())
 		return
-		
+
 	if(active)
 		if(!checkInteg(linkedholodeck))
 			damaged = 1
@@ -209,7 +209,7 @@
 
 			for(var/turf/T in linkedholodeck)
 				if(prob(30))
-					var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+					var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 					s.set_up(2, 1, T)
 					s.start()
 				T.ex_act(3)
@@ -249,7 +249,7 @@
 				if(L.name=="Atmospheric Test Start")
 					spawn(20)
 						var/turf/T = get_turf(L)
-						var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+						var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 						s.set_up(2, 1, T)
 						s.start()
 						if(T)
@@ -298,7 +298,7 @@
 /*			if(L.name=="Atmospheric Test Start")
 				spawn(20)
 					var/turf/T = get_turf(L)
-					var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+					var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 					s.set_up(2, 1, T)
 					s.start()
 					if(T)
@@ -348,10 +348,10 @@
 /obj/structure/table/holotable
 	name = "table"
 
-/obj/structure/table/holotable/attack_alien(mob/user as mob) 
+/obj/structure/table/holotable/attack_alien(mob/user as mob)
 	return attack_hand(user)
 
-/obj/structure/table/holotable/attack_animal(mob/living/simple_animal/user as mob) 
+/obj/structure/table/holotable/attack_animal(mob/living/simple_animal/user as mob)
 	return attack_hand(user)
 
 /obj/structure/table/holotable/attack_hand(mob/user as mob)
@@ -387,11 +387,11 @@
 	pressure_resistance = 4*ONE_ATMOSPHERE
 	anchored = 1.0
 	flags = ON_BORDER
-	
+
 /obj/structure/rack/holorack
 	name = "rack"
 
-/obj/structure/rack/holorack/attack_alien(mob/user as mob) 
+/obj/structure/rack/holorack/attack_alien(mob/user as mob)
 	return attack_hand(user)
 
 /obj/structure/rack/holorack/attack_animal(mob/living/simple_animal/user as mob)
@@ -420,10 +420,10 @@
 	var/active = 0
 
 /obj/item/weapon/holo/esword/green/New()
-	_color = "green"
+	item_color = "green"
 
 /obj/item/weapon/holo/esword/red/New()
-	_color = "red"
+	item_color = "red"
 
 /obj/item/weapon/holo/esword/IsShield()
 	if(active)
@@ -431,13 +431,13 @@
 	return 0
 
 /obj/item/weapon/holo/esword/New()
-	_color = pick("red","blue","green","purple")
+	item_color = pick("red","blue","green","purple")
 
 /obj/item/weapon/holo/esword/attack_self(mob/living/user as mob)
 	active = !active
 	if (active)
 		force = 30
-		icon_state = "sword[_color]"
+		icon_state = "sword[item_color]"
 		w_class = 4
 		playsound(user, 'sound/weapons/saberon.ogg', 50, 1)
 		user << "<span class='notice'>[src] is now active.</span>"
@@ -480,12 +480,12 @@
 			return
 		G.affecting.loc = src.loc
 		G.affecting.Weaken(5)
-		visible_message("<span class='warning'>[G.assailant] dunks [G.affecting] into the [src]!</span>", 3)
+		visible_message("<span class='warning'>[G.assailant] dunks [G.affecting] into the [src]!</span>")
 		qdel(W)
 		return
 	else if (istype(W, /obj/item) && get_dist(src,user)<2)
 		user.drop_item(src)
-		visible_message("<span class='notice'>[user] dunks [W] into the [src]!</span>", 3)
+		visible_message("<span class='notice'>[user] dunks [W] into the [src]!</span>")
 		return
 
 /obj/structure/holohoop/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
@@ -495,9 +495,9 @@
 			return
 		if(prob(50))
 			I.loc = src.loc
-			visible_message("<span class='notice'>Swish! \the [I] lands in \the [src].</span>", 3)
+			visible_message("<span class='notice'>Swish! \the [I] lands in \the [src].</span>")
 		else
-			visible_message("<span class='alert'>\The [I] bounces off of \the [src]'s rim!</span>", 3)
+			visible_message("<span class='alert'>\The [I] bounces off of \the [src]'s rim!</span>")
 		return 0
 	else
 		return ..(mover, target, height, air_group)

@@ -21,9 +21,6 @@
 		if(!action_checks(target)) return
 		if(!cargo_holder) return
 		if(istype(target, /obj/structure/stool)) return
-		for(var/M in target.contents)
-			if(istype(M, /mob/living))
-				return
 
 		if(istype(target,/obj))
 			var/obj/O = target
@@ -287,7 +284,7 @@
 
 	Destroy()
 		rcd_list -= src
-		..()
+		return ..()
 
 	action(atom/target)
 		if(istype(target, /turf/space/transit))//>implying these are ever made -Sieve
@@ -432,9 +429,7 @@
 			return
 		chassis.use_power(energy_drain)
 		set_ready_state(0)
-		var/obj/effect/portal/P = new /obj/effect/portal(get_turf(target))
-		P.target = target_turf
-		P.creator = null
+		var/obj/effect/portal/P = new /obj/effect/portal(get_turf(target), target_turf)
 		P.icon = 'icons/obj/objects.dmi'
 		P.failchance = 0
 		P.icon_state = "anom"
@@ -999,10 +994,7 @@
 	process(var/obj/item/mecha_parts/mecha_equipment/generator/nuclear/EG)
 		if(..())
 			for(var/mob/living/carbon/M in view(EG.chassis))
-				if(istype(M,/mob/living/carbon/human))
-					M.apply_effect((EG.rad_per_cycle*3),IRRADIATE,0)
-				else
-					M.radiation += EG.rad_per_cycle
+				M.apply_effect((EG.rad_per_cycle*3),IRRADIATE,0)
 		return 1
 
 
@@ -1096,7 +1088,9 @@
 			return
 		var/list/occupant = list()
 		occupant |= mecha.occupant
+		mecha.occupant.sight |= SEE_TURFS
 		scanning = 1
 		mineral_scan_pulse(occupant,get_turf(loc))
 		spawn(equip_cooldown)
 			scanning = 0
+			mecha.occupant.sight -= SEE_TURFS

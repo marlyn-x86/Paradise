@@ -11,6 +11,8 @@
 //	mouse_drag_pointer = MOUSE_ACTIVE_POINTER	//???
 	var/rigged = 0
 	var/obj/item/weapon/paper/manifest/manifest
+	// A list of beacon names that the crate will announce the arrival of, when delivered.
+	var/list/announce_beacons = list()
 
 /obj/structure/closet/crate/New()
 	..()
@@ -38,7 +40,7 @@
 		if(isliving(usr))
 			var/mob/living/L = usr
 			if(L.electrocute_act(17, src))
-				var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+				var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 				s.set_up(5, 1, src)
 				s.start()
 				return 2
@@ -81,7 +83,7 @@
 /obj/structure/closet/crate/attackby(obj/item/weapon/W as obj, mob/user as mob, params)
 	if(istype(W, /obj/item/weapon/rcs) && !src.opened)
 		var/obj/item/weapon/rcs/E = W
-		if(E.rcharges != 0)
+		if(E.rcell && (E.rcell.charge >= E.chargecost))
 			if(!(src.z in config.player_levels))
 				user << "<span class='warning'>The rapid-crate-sender can't locate any telepads!</span>"
 				return
@@ -103,20 +105,16 @@
 					playsound(E.loc, 'sound/machines/click.ogg', 50, 1)
 					user << "\blue Teleporting [src.name]..."
 					E.teleporting = 1
-					sleep(50)
+					if(!do_after(user, 50, target = src))
+						E.teleporting = 0
+						return
 					E.teleporting = 0
-					var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+					var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 					s.set_up(5, 1, src)
 					s.start()
 					do_teleport(src, E.pad, 0)
-					E.rcharges--
-					if(E.rcharges != 1)
-						user << "\blue Teleport successful. [E.rcharges] charges left."
-						E.desc = "Use this to send crates and closets to cargo telepads. There are [E.rcharges] charges left."
-						return
-					else
-						user << "\blue Teleport successful. [E.rcharges] charge left."
-						E.desc = "Use this to send crates and closets to cargo telepads. There is [E.rcharges] charge left."
+					E.rcell.use(E.chargecost)
+					user << "<span class='notice'>Teleport successful. [round(E.rcell.charge/E.chargecost)] charge\s left.</span>"
 					return
 			else
 				E.rand_x = rand(50,200)
@@ -125,23 +123,19 @@
 				playsound(E.loc, 'sound/machines/click.ogg', 50, 1)
 				user << "\blue Teleporting [src.name]..."
 				E.teleporting = 1
-				sleep(50)
+				if(!do_after(user, 50, target = src))
+					E.teleporting = 0
+					return
 				E.teleporting = 0
-				var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+				var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 				s.set_up(5, 1, src)
 				s.start()
 				do_teleport(src, L)
-				E.rcharges--
-				if(E.rcharges != 1)
-					user << "\blue Teleport successful. [E.rcharges] charges left."
-					E.desc = "Use this to send crates and closets to cargo telepads. There are [E.rcharges] charges left."
-					return
-				else
-					user << "\blue Teleport successful. [E.rcharges] charge left."
-					E.desc = "Use this to send crates and closets to cargo telepads. There is [E.rcharges] charge left."
-					return
+				E.rcell.use(E.chargecost)
+				user << "<span class='notice'>Teleport successful. [round(E.rcell.charge/E.chargecost)] charge\s left.</span>"
+				return
 		else
-			user << "\red Out of charges."
+			user << "<span class='warning'>Out of charges.</span>"
 			return
 
 	if(opened)
@@ -212,13 +206,21 @@
 			if(isliving(user))
 				var/mob/living/L = user
 				if(L.electrocute_act(17, src))
-					var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+					var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 					s.set_up(5, 1, src)
 					s.start()
 					return
 		src.add_fingerprint(user)
 		src.toggle(user)
 	return
+
+// Called when a crate is delivered by MULE at a location, for notifying purposes
+/obj/structure/closet/crate/proc/notifyRecipient(var/destination)
+	var/msg = "[capitalize(name)] has arrived at [destination]."
+	if(destination in announce_beacons)
+		for(var/obj/machinery/requests_console/D in allConsoles)
+			if(D.department in src.announce_beacons[destination])
+				D.createMessage(name, "Your Crate has Arrived!", msg, 1)
 
 /obj/structure/closet/crate/secure
 	desc = "A secure crate."
@@ -295,7 +297,7 @@
 
 
 /obj/structure/closet/crate/secure/attackby(obj/item/weapon/W as obj, mob/user as mob, params)
-	if(is_type_in_list(W, list(/obj/item/stack/packageWrap, /obj/item/stack/cable_coil, /obj/item/device/radio/electropack, /obj/item/weapon/wirecutters)))
+	if(is_type_in_list(W, list(/obj/item/stack/packageWrap, /obj/item/stack/cable_coil, /obj/item/device/radio/electropack, /obj/item/weapon/wirecutters,/obj/item/weapon/rcs)))
 		return ..()
 	if((istype(W, /obj/item/weapon/card/emag) || istype(W, /obj/item/weapon/melee/energy/blade)))
 		emag_act(user)
@@ -345,14 +347,14 @@
 
 /obj/structure/closet/crate/internals
 	desc = "A internals crate."
-	name = "Internals crate"
+	name = "internals crate"
 	icon_state = "o2crate"
 	icon_opened = "o2crateopen"
 	icon_closed = "o2crate"
 
 /obj/structure/closet/crate/trashcart
 	desc = "A heavy, metal trashcart with wheels."
-	name = "Trash Cart"
+	name = "trash Cart"
 	icon_state = "trashcart"
 	icon_opened = "trashcartopen"
 	icon_closed = "trashcart"
@@ -375,14 +377,14 @@
 
 /obj/structure/closet/crate/medical
 	desc = "A medical crate."
-	name = "Medical crate"
+	name = "medical crate"
 	icon_state = "medicalcrate"
 	icon_opened = "medicalcrateopen"
 	icon_closed = "medicalcrate"
 
 /obj/structure/closet/crate/rcd
 	desc = "A crate for the storage of the RCD."
-	name = "RCD crate"
+	name = "\improper RCD crate"
 	icon_state = "crate"
 	icon_opened = "crateopen"
 	icon_closed = "crate"
@@ -424,14 +426,14 @@
 
 /obj/structure/closet/crate/bin
 	desc = "A large bin."
-	name = "Large bin"
+	name = "large bin"
 	icon_state = "largebin"
 	icon_opened = "largebinopen"
 	icon_closed = "largebin"
 
 /obj/structure/closet/crate/radiation
 	desc = "A crate with a radiation sign on it."
-	name = "Radioactive gear crate"
+	name = "radioactive gear crate"
 	icon_state = "radiation"
 	icon_opened = "radiationopen"
 	icon_closed = "radiation"
@@ -449,21 +451,21 @@
 
 /obj/structure/closet/crate/secure/weapon
 	desc = "A secure weapons crate."
-	name = "Weapons crate"
+	name = "weapons crate"
 	icon_state = "weaponcrate"
 	icon_opened = "weaponcrateopen"
 	icon_closed = "weaponcrate"
 
 /obj/structure/closet/crate/secure/plasma
 	desc = "A secure plasma crate."
-	name = "Plasma crate"
+	name = "plasma crate"
 	icon_state = "plasmacrate"
 	icon_opened = "plasmacrateopen"
 	icon_closed = "plasmacrate"
 
 /obj/structure/closet/crate/secure/gear
 	desc = "A secure gear crate."
-	name = "Gear crate"
+	name = "gear crate"
 	icon_state = "secgearcrate"
 	icon_opened = "secgearcrateopen"
 	icon_closed = "secgearcrate"
@@ -477,7 +479,7 @@
 
 /obj/structure/closet/crate/secure/bin
 	desc = "A secure bin."
-	name = "Secure bin"
+	name = "secure bin"
 	icon_state = "largebins"
 	icon_opened = "largebinsopen"
 	icon_closed = "largebins"
@@ -548,7 +550,7 @@
 	icon_closed = "largermetal"
 
 /obj/structure/closet/crate/hydroponics
-	name = "Hydroponics crate"
+	name = "hydroponics crate"
 	desc = "All you need to destroy those pesky weeds and pests."
 	icon_state = "hydrocrate"
 	icon_opened = "hydrocrateopen"
@@ -559,11 +561,19 @@
 
 	New()
 		..()
-		new /obj/item/weapon/reagent_containers/spray/plantbgone(src)
-		new /obj/item/weapon/reagent_containers/spray/plantbgone(src)
-		new /obj/item/weapon/minihoe(src)
-//		new /obj/item/weapon/weedspray(src)
-//		new /obj/item/weapon/weedspray(src)
-//		new /obj/item/weapon/pestspray(src)
-//		new /obj/item/weapon/pestspray(src)
-//		new /obj/item/weapon/pestspray(src)
+		new /obj/item/weapon/reagent_containers/glass/bucket(src)
+		new /obj/item/weapon/reagent_containers/glass/bucket(src)
+		new /obj/item/weapon/screwdriver(src)
+		new /obj/item/weapon/screwdriver(src)
+		new /obj/item/weapon/wrench(src)
+		new /obj/item/weapon/wrench(src)
+		new /obj/item/weapon/wirecutters(src)
+		new /obj/item/weapon/wirecutters(src)
+		new /obj/item/weapon/shovel/spade(src)
+		new /obj/item/weapon/shovel/spade(src)
+		new /obj/item/weapon/storage/box/botanydisk(src)
+		new /obj/item/weapon/storage/box/botanydisk(src)
+		new /obj/item/weapon/storage/box/beakers(src)
+		new /obj/item/weapon/storage/box/beakers(src)
+		new /obj/item/weapon/hand_labeler(src)
+		new /obj/item/weapon/hand_labeler(src)

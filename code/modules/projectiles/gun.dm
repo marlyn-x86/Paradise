@@ -27,6 +27,7 @@
 	var/ghettomodded = 0
 	var/recoil = 0
 	var/can_suppress = 0
+	var/can_unsuppress = 1
 	var/clumsy_check = 1
 	var/sawn_desc = null
 	var/sawn_state = SAWN_INTACT
@@ -45,7 +46,7 @@
 	var/can_flashlight = 0
 	var/heavy_weapon = 0
 	var/randomspread = 0
-	
+
 	var/burst_size = 1
 
 	proc/ready_to_fire()
@@ -186,6 +187,7 @@
 					user.drop_item()
 					break
 
+		user.newtonian_move(get_dir(target, user))
 		update_icon()
 		if(user.hand)
 			user.update_inv_l_hand()

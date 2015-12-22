@@ -85,10 +85,28 @@
 	else if(istype(I, /obj/item/clothing/head/helmet/space/rig))
 		var/obj/item/clothing/head/helmet/space/rig/R = I
 		if(R.on)
-			R.on = 0
-			R.icon_state = "rig[R.on]-[R._color]"
+			R.toggle_light()
 			R.visible_message("<span class='danger'>[R]'s light fades and turns off.</span>")
-			R.set_light(0)
+	else if(istype(I, /obj/item/clothing/head/helmet/space/eva/plasmaman))
+		var/obj/item/clothing/head/helmet/space/eva/plasmaman/P = I
+		if(P.on)
+			P.toggle_light()
+			P.visible_message("<span class='danger'>[P]'s light fades and turns off.</span>")
+	else if(istype(I, /obj/item/weapon/gun))
+		var/obj/item/weapon/gun/G = I
+		if(G.F)
+			var/obj/item/device/flashlight/F = G.F
+			if(F.on)
+				G.toggle_gunlight()
+				G.visible_message("<span class='danger'>[G]'s light fades and turns off.</span>")
+	else if(istype(I, /obj/item/clothing/head/hardhat)) //There really needs to be a better way to handle this.
+		var/obj/item/clothing/head/hardhat/hhat = I
+		if(hhat.on)
+			hhat.on = 0
+			hhat.set_light(0)
+			hhat.icon_state = "hardhat0_[hhat.item_color]"
+			hhat.item_state = "hardhat0_[hhat.item_color]"
+			hhat.visible_message("<span class='danger'>[hhat]'s light fades and turns off.</span>")
 	return I.light_range
 
 /obj/effect/proc_holder/spell/aoe_turf/veil/proc/extinguishMob(var/mob/living/H)
@@ -139,7 +157,7 @@
 		user.incorporeal_move = 1
 		user.alpha = 0
 		if(user.buckled)
-			user.buckled.unbuckle()
+			user.buckled.unbuckle_mob()
 		sleep(40) //4 seconds
 		user.visible_message("<span class='warning'>[user] suddenly manifests!</span>", "<span class='shadowling'>The pressure becomes too much and you vacate the interdimensional darkness.</span>")
 		user.incorporeal_move = 0
@@ -170,32 +188,34 @@
 		user.visible_message("<span class='warning'>[user] appears from nowhere!</span>", "<span class='shadowling'>Your shadowy guise slips away.</span>")
 		user.alpha = initial(user.alpha)
 
-/*
-/obj/effect/proc_holder/spell/targeted/thrall_vision //Uncomment this if we ever update our vision code to not be absolute garbage.
-	name = "Darksight"
-	desc = "Gives you night vision."
-	panel = "Thrall Abilities"
+
+/obj/effect/proc_holder/spell/targeted/shadow_vision
+	name = "Shadowling Darksight"
+	desc = "Gives you night and thermal vision."
+	panel = "Shadowling Abilities"
 	charge_max = 0
 	range = -1
 	include_user = 1
 	clothes_req = 0
-	var/active = 0
+	var/datum/vision_override/vision_path = /datum/vision_override/nightvision/thermals
 
-/obj/effect/proc_holder/spell/targeted/thrall_vision/cast(list/targets)
+/obj/effect/proc_holder/spell/targeted/shadow_vision/cast(list/targets)
 	for(var/mob/living/user in targets)
 		if(!istype(user) || !ishuman(user))
 			return
 		var/mob/living/carbon/human/H = user
-		active = !active
-		if(active)
-			user << "<span class='notice'>You shift the nerves in your eyes, allowing you to see in the dark.</span>"
-			H.see_in_dark = 8
-			H.dna.species.invis_sight = SEE_INVISIBLE_MINIMUM
+		if(!H.vision_type)
+			H << "<span class='notice'>You shift the nerves in your eyes, allowing you to see in the dark.</span>"
+			H.vision_type = new vision_path
 		else
-			user << "<span class='notice'>You return your vision to normal.</span>"
-			H.see_in_dark = 0
-			H.dna.species.invis_sight = initial(H.dna.species.invis_sight)
-*/
+			H << "<span class='notice'>You return your vision to normal.</span>"
+			H.vision_type = null
+
+/obj/effect/proc_holder/spell/targeted/shadow_vision/thrall
+	desc = "Thrall Darksight"
+	desc = "Gives you night vision."
+	panel = "Thrall Abilities"
+	vision_path = /datum/vision_override/nightvision
 
 /obj/effect/proc_holder/spell/aoe_turf/flashfreeze
 	name = "Icy Veins"
@@ -407,7 +427,7 @@
 		B.reagents.clear_reagents() //Just in case!
 		B.icon_state = null //Invisible
 		B.reagents.add_reagent("blindness_smoke", 10)
-		var/datum/effect/effect/system/chem_smoke_spread/S = new /datum/effect/effect/system/chem_smoke_spread
+		var/datum/effect/system/chem_smoke_spread/S = new /datum/effect/system/chem_smoke_spread
 		S.attach(B)
 		if(S)
 			S.set_up(B.reagents, 10, 0, B.loc)
@@ -471,7 +491,7 @@ datum/reagent/shadowling_blindness_smoke/on_mob_life(var/mob/living/M as mob)
 				S << "<span class='warning'><b>ERROR $!(@ ERROR )#^! SENSORY OVERLOAD \[$(!@#</b></span>"
 				S << 'sound/misc/interference.ogg'
 				playsound(S, 'sound/machines/warning-buzzer.ogg', 50, 1)
-				var/datum/effect/effect/system/spark_spread/sp = new /datum/effect/effect/system/spark_spread
+				var/datum/effect/system/spark_spread/sp = new /datum/effect/system/spark_spread
 				sp.set_up(5, 1, S)
 				sp.start()
 				S.Weaken(6)

@@ -12,7 +12,7 @@
 */
 /mob/living/proc/run_armor_check(var/def_zone = null, var/attack_flag = "melee", var/absorb_text = null, var/soften_text = null, armour_penetration, penetrated_text)
 	var/armor = getarmor(def_zone, attack_flag)
-	
+
 	//the if "armor" check is because this is used for everything on /living, including humans
 	if(armor && armor < 100 && armour_penetration) // Armor with 100+ protection can not be penetrated for admin items
 		armor = max(0, armor - armour_penetration)
@@ -64,21 +64,6 @@
 	if(!P.nodamage)
 		apply_damage(P.damage, P.damage_type, def_zone, armor)
 	return P.on_hit(src, armor, def_zone)
-
-//Handles the effects of "stun" weapons
-/mob/living/proc/stun_effect_act(var/stun_amount, var/agony_amount, var/def_zone, var/used_weapon=null)
-	flash_pain()
-
-	if (stun_amount)
-		Stun(stun_amount)
-		Weaken(stun_amount)
-		apply_effect(STUTTER, stun_amount)
-		apply_effect(EYE_BLUR, stun_amount)
-
-	if (agony_amount)
-		apply_damage(agony_amount, HALLOSS, def_zone, 0, used_weapon)
-		apply_effect(STUTTER, agony_amount/10)
-		apply_effect(EYE_BLUR, agony_amount/10)
 
 /mob/living/proc/electrocute_act(var/shock_damage, var/obj/source, var/siemens_coeff = 1.0, var/def_zone = null)
 	  return 0 //only carbon liveforms have this proc
@@ -228,94 +213,7 @@
 	if(volume >= 20)	fire_stacks -= 0.5
 	if(volume >= 50)	fire_stacks -= 1
 
-/mob/living/regular_hud_updates()
-	..()
-	update_action_buttons()
 
-/mob/living/proc/handle_actions()
-	//Pretty bad, i'd use picked/dropped instead but the parent calls in these are nonexistent
-	for(var/datum/action/A in actions)
-		if(A.CheckRemoval(src))
-			A.Remove(src)
-	for(var/obj/item/I in src)
-		if(istype(I,/obj/item/clothing/under))
-			var/obj/item/clothing/under/U = I
-			for(var/obj/item/IU in U)
-				if(istype(IU, /obj/item/clothing/accessory))
-					var/obj/item/clothing/accessory/A = IU
-					if(A.action_button_name)
-						if(!A.action)
-							if(A.action_button_is_hands_free)
-								A.action = new/datum/action/item_action/hands_free
-							else
-								A.action = new/datum/action/item_action
-							A.action.name = A.action_button_name
-							A.action.target = A
-						A.action.check_flags &= ~AB_CHECK_INSIDE
-						A.action.Grant(src)
-		if(I.action_button_name)
-			if(!I.action)
-				if(I.action_button_is_hands_free)
-					I.action = new/datum/action/item_action/hands_free
-				else
-					I.action = new/datum/action/item_action
-				I.action.name = I.action_button_name
-				I.action.target = I
-			I.action.Grant(src)
-	return
-
-/mob/living/update_action_buttons()
-	if(!hud_used) return
-	if(!client) return
-
-	if(hud_used.hud_shown != 1)	//Hud toggled to minimal
-		return
-
-	client.screen -= hud_used.hide_actions_toggle
-	for(var/datum/action/A in actions)
-		if(A.button)
-			client.screen -= A.button
-
-	if(hud_used.action_buttons_hidden)
-		if(!hud_used.hide_actions_toggle)
-			hud_used.hide_actions_toggle = new(hud_used)
-			hud_used.hide_actions_toggle.UpdateIcon()
-
-		if(!hud_used.hide_actions_toggle.moved)
-			hud_used.hide_actions_toggle.screen_loc = hud_used.ButtonNumberToScreenCoords(1)
-			//hud_used.SetButtonCoords(hud_used.hide_actions_toggle,1)
-
-		client.screen += hud_used.hide_actions_toggle
-		return
-
-	var/button_number = 0
-	for(var/datum/action/A in actions)
-		button_number++
-		if(A.button == null)
-			var/obj/screen/movable/action_button/N = new(hud_used)
-			N.owner = A
-			A.button = N
-
-		var/obj/screen/movable/action_button/B = A.button
-
-		B.UpdateIcon()
-
-		B.name = A.UpdateName()
-
-		client.screen += B
-
-		if(!B.moved)
-			B.screen_loc = hud_used.ButtonNumberToScreenCoords(button_number)
-			//hud_used.SetButtonCoords(B,button_number)
-
-	if(button_number > 0)
-		if(!hud_used.hide_actions_toggle)
-			hud_used.hide_actions_toggle = new(hud_used)
-			hud_used.hide_actions_toggle.InitialiseIcon(src)
-		if(!hud_used.hide_actions_toggle.moved)
-			hud_used.hide_actions_toggle.screen_loc = hud_used.ButtonNumberToScreenCoords(button_number+1)
-			//hud_used.SetButtonCoords(hud_used.hide_actions_toggle,button_number+1)
-		client.screen += hud_used.hide_actions_toggle
 
 //This is called when the mob is thrown into a dense turf
 /mob/living/proc/turf_collision(var/turf/T, var/speed)
@@ -368,3 +266,7 @@
 	else*///This is an example of how you can make special types of grabs simply based on direction.
 	if(!supress_message)
 		visible_message("<span class='warning'>[user] has grabbed [src] passively!</span>")
+
+/mob/living/incapacitated()
+	if(stat || paralysis || stunned || weakened || restrained())
+		return 1

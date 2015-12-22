@@ -40,25 +40,9 @@
 	projectile_type = "/obj/item/projectile/energy/floramut"
 	origin_tech = "materials=2;biotech=3;powerstorage=3"
 	modifystate = "floramut"
-	var/charge_tick = 0
 	var/mode = 0 //0 = mutate, 1 = yield boost
 
-/obj/item/weapon/gun/energy/floragun/New()
-	..()
-	processing_objects.Add(src)
-
-/obj/item/weapon/gun/energy/floragun/Destroy()
-	processing_objects.Remove(src)
-	return ..()
-
-/obj/item/weapon/gun/energy/floragun/process()
-	charge_tick++
-	if(charge_tick < 4) return 0
-	charge_tick = 0
-	if(!power_supply) return 0
-	power_supply.give(1000)
-	update_icon()
-	return 1
+	self_recharge = 1
 
 /obj/item/weapon/gun/energy/floragun/attack_self(mob/living/user as mob)
 	switch(mode)
@@ -98,27 +82,9 @@
 	projectile_type = "/obj/item/projectile/meteor"
 	cell_type = "/obj/item/weapon/stock_parts/cell/potato"
 	clumsy_check = 0 //Admin spawn only, might as well let clowns use it.
-	var/charge_tick = 0
-	var/recharge_time = 5 //Time it takes for shots to recharge (in ticks)
 
-	New()
-		..()
-		processing_objects.Add(src)
-
-
-	Destroy()
-		processing_objects.Remove(src)
-		return ..()
-
-	process()
-		charge_tick++
-		if(charge_tick < recharge_time) return 0
-		charge_tick = 0
-		if(!power_supply) return 0
-		power_supply.give(1000)
-
-	update_icon()
-		return
+	self_recharge = 1
+	recharge_time = 5 //Time it takes for shots to recharge (in ticks)
 
 
 /obj/item/weapon/gun/energy/meteorgun/pen
@@ -241,6 +207,24 @@ modules/mob/living/carbon/human/life.dm if you die, you will be zoomed out.
 	var/overheat_time = 16
 	var/recent_reload = 1
 
+/obj/item/weapon/gun/energy/kinetic_accelerator/super
+	name = "super-kinetic accelerator"
+	desc = "An upgraded, superior version of the proto-kinetic accelerator."
+	icon_state = "kineticgun_u"
+	projectile_type = "/obj/item/projectile/kinetic/super"
+	overheat_time = 15
+	fire_delay = 15
+	origin_tech = "combat=3;powerstorage=2"
+
+/obj/item/weapon/gun/energy/kinetic_accelerator/hyper
+	name = "hyper-kinetic accelerator"
+	desc = "An upgraded, even more superior version of the proto-kinetic accelerator."
+	icon_state = "kineticgun_h"
+	projectile_type = "/obj/item/projectile/kinetic/hyper"
+	overheat_time = 13
+	fire_delay = 13
+	origin_tech = "combat=4;powerstorage=3"
+
 /obj/item/weapon/gun/energy/kinetic_accelerator/cyborg
 	flags = NODROP
 
@@ -351,48 +335,11 @@ modules/mob/living/carbon/human/life.dm if you die, you will be zoomed out.
 /obj/item/weapon/gun/energy/disabler/cyborg
 	name = "cyborg disabler"
 	desc = "An integrated disabler that draws from a cyborg's power cell. This weapon contains a limiter to prevent the cyborg's power cell from overheating."
-	var/charge_tick = 0
-	var/recharge_time = 2.5
 
-/obj/item/weapon/gun/energy/disabler/cyborg/New()
-	..()
-	processing_objects.Add(src)
+	self_recharge = 1
+	use_external_power = 1
+	recharge_time = 2.5
 
-
-/obj/item/weapon/gun/energy/disabler/cyborg/Destroy()
-	processing_objects.Remove(src)
-	return ..()
-
-/obj/item/weapon/gun/energy/disabler/cyborg/process() //Every [recharge_time] ticks, recharge a shot for the cyborg
-	if(power_supply.charge == power_supply.maxcharge)
-		return 0
-	charge_tick++
-	if(charge_tick < recharge_time)
-		return 0
-	charge_tick = 0
-
-	if(!power_supply) return 0 //sanity
-	if(isrobot(src.loc))
-		var/mob/living/silicon/robot/R = src.loc
-		if(R && R.cell)
-			if(R.cell.use(charge_cost/10)) 		//Take power from the borg...
-				power_supply.give(charge_cost)	//... to recharge the shot
-
-	update_icon()
-	return 1
-
-// Telegun for Tator RDs
-
-/obj/item/weapon/gun/energy/telegun
-	name = "Teleporter Gun"
-	desc = "An extremely high-tech bluespace energy gun capable of teleporting targets to far off locations."
-	icon_state = "telegun"
-	item_state = "ionrifle"
-	fire_sound = 'sound/weapons/wave.ogg'
-	origin_tech = "combat=6;materials=7;powerstorage=5;bluespace=5;syndicate=4"
-	cell_type = "/obj/item/weapon/stock_parts/cell/crap"
-	projectile_type = "/obj/item/projectile/energy/teleport"
-	charge_cost = 1250
 
 /* 3d printer 'pseudo guns' for borgs */
 
@@ -405,32 +352,72 @@ modules/mob/living/carbon/human/life.dm if you die, you will be zoomed out.
 	cell_type = "/obj/item/weapon/stock_parts/cell/secborg"
 	projectile_type = "/obj/item/projectile/bullet/midbullet3"
 	charge_cost = 200 //Yeah, let's NOT give them a 300 round clip that recharges, 20 is more reasonable and will actually hurt the borg's battery for overuse.
-	var/charge_tick = 0
-	var/recharge_time = 5
 
-/obj/item/weapon/gun/energy/printer/update_icon()
-	return
+	self_recharge = 1
+	use_external_power = 1
+	recharge_time = 5
 
-/obj/item/weapon/gun/energy/printer/New()
+/obj/item/weapon/gun/energy/wormhole_projector
+	name = "bluespace wormhole projector"
+	desc = "A projector that emits high density quantum-coupled bluespace beams."
+	projectile_type = "/obj/item/projectile/beam/wormhole"
+	charge_cost = 0
+	fire_sound = "sound/weapons/pulse3.ogg"
+	item_state = null
+	icon_state = "wormhole_projector100"
+	modifystate = "wormhole_projector"
+	var/obj/effect/portal/blue
+	var/obj/effect/portal/orange
+
+	var/mode = 0 //0 = blue 1 = orange
+
+
+/obj/item/weapon/gun/energy/wormhole_projector/attack_self(mob/living/user as mob)
+	switch_modes()
+
+/obj/item/weapon/gun/energy/wormhole_projector/proc/switch_modes(mob/living/user as mob)
+	switch(mode)
+		if(0)
+			mode = 1
+			user << "<span class='warning'>[name] is now set to orange.</span>"
+			projectile_type = "/obj/item/projectile/beam/wormhole/orange"
+			modifystate = "wormhole_projector_orange"
+		if(1)
+			mode = 0
+			user << "<span class='warning'>[name] is now set to blue.</span>"
+			projectile_type = "/obj/item/projectile/beam/wormhole"
+			modifystate = "wormhole_projector"
+	update_icon()
+	if(user.hand)
+		user.update_inv_l_hand()
+	else
+		user.update_inv_r_hand()
+
+/obj/item/weapon/gun/energy/wormhole_projector/Fire(atom/target as mob|obj|turf|area, mob/living/user as mob|obj, params, reflex = 0)
 	..()
-	processing_objects.Add(src)
+	switch_modes(user)
 
-/obj/item/weapon/gun/energy/printer/Destroy()
-	processing_objects.Remove(src)
-	return ..()
+/obj/item/weapon/gun/energy/wormhole_projector/proc/portal_destroyed(obj/effect/portal/P)
+	if(P.icon_state == "portal")
+		blue = null
+		if(orange)
+			orange.target = null
+	else
+		orange = null
+		if(blue)
+			blue.target = null
 
-/obj/item/weapon/gun/energy/printer/process()
-	if(power_supply.charge == power_supply.maxcharge)
-		return 0
-	charge_tick++
-	if(charge_tick < recharge_time)
-		return 0
-	charge_tick = 0
-
-	if(!power_supply) return 0 //sanity
-	if(isrobot(src.loc))
-		var/mob/living/silicon/robot/R = src.loc
-		if(R && R.cell)
-			if(R.cell.use(charge_cost/10)) 		//Take power from the borg...
-				power_supply.give(charge_cost)	//...to recharge the shot
-	return 1
+/obj/item/weapon/gun/energy/wormhole_projector/proc/create_portal(obj/item/projectile/beam/wormhole/W)
+	var/obj/effect/portal/P = new /obj/effect/portal(get_turf(W), null, src)
+	P.precision = 0
+	P.failchance = 0
+	if(W.name == "bluespace beam")
+		qdel(blue)
+		blue = P
+	else
+		qdel(orange)
+		P.icon_state = "portal1"
+		orange = P
+	if(orange && blue)
+		blue.target = get_turf(orange)
+		orange.target = get_turf(blue)

@@ -44,6 +44,14 @@ var/list/wood_icons = list("wood","wood-broken")
 	else
 		icon_regular_floor = icon_state
 
+
+/turf/simulated/floor/Destroy()
+	if(floor_tile)
+		qdel(floor_tile)
+		floor_tile = null
+	return ..()
+
+
 //turf/simulated/floor/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
 //	if ((istype(mover, /obj/machinery/vehicle) && !(src.burnt)))
 //		if (!( locate(/obj/machinery/mass_driver, src) ))
@@ -107,6 +115,12 @@ var/list/wood_icons = list("wood","wood-broken")
 	else if(is_plating())
 		if(!broken && !burnt)
 			icon_state = icon_plating //Because asteroids are 'platings' too.
+
+			footstep_sounds = list(
+				"human" = list('sound/effects/footstep/plating_human.ogg'),
+				"xeno"  = list('sound/effects/footstep/plating_xeno.ogg')
+			)
+
 	else if(is_light_floor())
 		var/obj/item/stack/tile/light/T = floor_tile
 		if(T.on)
@@ -185,11 +199,20 @@ var/list/wood_icons = list("wood","wood-broken")
 
 				icon_state = "carpet[connectdir]-[diagonalconnect]"
 
+				footstep_sounds = list(
+					"human" = list('sound/effects/footstep/carpet_human.ogg'),
+					"xeno"  = list('sound/effects/footstep/carpet_xeno.ogg')
+				)
+
 	else if(is_wood_floor())
 		if(!broken && !burnt)
 			if( !(icon_state in wood_icons) )
 				icon_state = "wood"
-				//world << "[icon_state]y's got [icon_state]"
+
+				footstep_sounds = list(
+					"human" = list('sound/effects/footstep/wood_all.ogg'), //@RonaldVanWonderen of Freesound.org
+					"xeno"  = list('sound/effects/footstep/wood_all.ogg')  //@RonaldVanWonderen of Freesound.org
+				)
 
 
 /turf/simulated/floor/return_siding_icon_state()
@@ -210,26 +233,7 @@ var/list/wood_icons = list("wood","wood-broken")
 		var/obj/item/stack/tile/light/T = floor_tile
 		T.on = !T.on
 		update_icon()
-	if ((!( user.canmove ) || user.restrained() || !( user.pulling )))
-		return
-	if (user.pulling.anchored || !isturf(user.pulling.loc))
-		return
-	if ((user.pulling.loc != user.loc && get_dist(user, user.pulling) > 1))
-		return
-	if (ismob(user.pulling))
-		var/mob/M = user.pulling
-
-//		if(M==user)					//temporary hack to stop runtimes. ~Carn
-//			user.stop_pulling()		//but...fixed the root of the problem
-//			return					//shoudn't be needed now, unless somebody fucks with pulling again.
-
-		var/mob/t = M.pulling
-		M.stop_pulling()
-		step(user.pulling, get_dir(user.pulling.loc, src))
-		M.start_pulling(t)
-	else
-		step(user.pulling, get_dir(user.pulling.loc, src))
-	return
+	..()
 
 /turf/simulated/floor/proc/gets_drilled()
 	return
@@ -589,16 +593,14 @@ var/list/wood_icons = list("wood","wood-broken")
 					user << "<span class='notice'>You need more welding fuel to complete this task.</span>"
 
 	if(istype(C,/obj/item/pipe))
-		var/obj/item/pipe/V = C
-		if(V.pipe_type != -1) // ANY PIPE
-			var/obj/item/pipe/P = C
-
+		var/obj/item/pipe/P = C
+		if(P.pipe_type != -1) // ANY PIPE
 			user.visible_message( \
 				"[user] starts sliding [P] along \the [src].", \
 				"<span class='notice'>You slide [P] along \the [src].</span>", \
 				"You hear the scrape of metal against something.")
 			user.drop_item()
-			if (P.pipe_type in list (1,3,12))  // bent pipe rotation fix see construction.dm
+			if (P.is_bent_pipe())  // bent pipe rotation fix see construction.dm
 				P.dir = 5
 				if (user.dir == 1)
 					P.dir = 6
@@ -606,8 +608,6 @@ var/list/wood_icons = list("wood","wood-broken")
 					P.dir = 9
 				if (user.dir == 4)
 					P.dir = 10
-				if (user.dir == 5)
-					P.dir = 8
 			else
 				P.dir = user.dir
 			P.x = src.x

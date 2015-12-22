@@ -28,11 +28,11 @@
 		L[D.name] = D
 
 		switch(D.gender)
-			if(MALE)	male += D.name
-			if(FEMALE)	female += D.name
+			if(MALE)	male[D.name] = D
+			if(FEMALE)	female[D.name] = D
 			else
-				male += D.name
-				female += D.name
+				male[D.name] = D
+				female[D.name] = D
 	return L
 
 /datum/sprite_accessory
@@ -115,21 +115,33 @@
 		icon_state = "hair_halfbang_alt"
 
 	ponytail1
-		name = "Ponytail 1"
-		icon_state = "hair_ponytail"
+		name = "Ponytail male"
+		icon_state = "hair_ponytailm"
+		gender = MALE
 
 	ponytail2
-		name = "Ponytail 2"
-		icon_state = "hair_pa"
+		name = "Ponytail female"
+		icon_state = "hair_ponytailf"
 		gender = FEMALE
 
 	ponytail3
-		name = "Ponytail 3"
+		name = "Ponytail alt"
 		icon_state = "hair_ponytail3"
 
 	sideponytail
 		name = "Side Ponytail"
 		icon_state = "hair_stail"
+		gender = FEMALE
+
+	highponytail
+		name = "High Ponytail"
+		icon_state = "hair_highponytail"
+		gender = FEMALE
+
+
+	wisp
+		name = "Wisp"
+		icon_state = "hair_wisp"
 		gender = FEMALE
 
 	parted
@@ -316,6 +328,7 @@
 		name = "Balding Hair"
 		icon_state = "hair_e"
 		gender = MALE // turnoff!
+
 //////////////////////////////
 //////START VG HAIRSTYLES/////
 //////////////////////////////
@@ -355,79 +368,99 @@
 //////END VG HAIRSTYLES///////
 //////////////////////////////
 
-	icp_screen_pink
+	ipc_screen_pink
 		name = "pink IPC screen"
 		icon_state = "ipc_pink"
 		species_allowed = list("Machine")
 
-	icp_screen_red
+	ipc_screen_red
 		name = "red IPC screen"
 		icon_state = "ipc_red"
 		species_allowed = list("Machine")
 
-	icp_screen_green
+	ipc_screen_green
 		name = "green IPC screen"
 		icon_state = "ipc_green"
 		species_allowed = list("Machine")
 
-	icp_screen_blue
+	ipc_screen_blue
 		name = "blue IPC screen"
 		icon_state = "ipc_blue"
 		species_allowed = list("Machine")
 
-	icp_screen_breakout
+	ipc_screen_breakout
 		name = "breakout IPC screen"
 		icon_state = "ipc_breakout"
 		species_allowed = list("Machine")
 
-	icp_screen_eight
+	ipc_screen_eight
 		name = "eight IPC screen"
 		icon_state = "ipc_eight"
 		species_allowed = list("Machine")
 
-	icp_screen_goggles
+	ipc_screen_goggles
 		name = "goggles IPC screen"
 		icon_state = "ipc_goggles"
 		species_allowed = list("Machine")
 
-	icp_screen_heart
+	ipc_screen_heart
 		name = "heart IPC screen"
 		icon_state = "ipc_heart"
 		species_allowed = list("Machine")
 
-	icp_screen_monoeye
+	ipc_screen_monoeye
 		name = "monoeye IPC screen"
 		icon_state = "ipc_monoeye"
 		species_allowed = list("Machine")
 
-	icp_screen_nature
+	ipc_screen_nature
 		name = "nature IPC screen"
 		icon_state = "ipc_nature"
 		species_allowed = list("Machine")
 
-	icp_screen_orange
+	ipc_screen_orange
 		name = "orange IPC screen"
 		icon_state = "ipc_orange"
 		species_allowed = list("Machine")
 
-	icp_screen_purple
+	ipc_screen_purple
 		name = "purple IPC screen"
 		icon_state = "ipc_purple"
 		species_allowed = list("Machine")
 
-	icp_screen_shower
+	ipc_screen_shower
 		name = "shower IPC screen"
 		icon_state = "ipc_shower"
 		species_allowed = list("Machine")
 
-	icp_screen_static
+	ipc_screen_static
 		name = "static IPC screen"
 		icon_state = "ipc_static"
 		species_allowed = list("Machine")
 
-	icp_screen_yellow
+	ipc_screen_yellow
 		name = "yellow IPC screen"
 		icon_state = "ipc_yellow"
+		species_allowed = list("Machine")
+
+	ipc_screen_scrolling
+		name = "scanline IPC screen"
+		icon_state = "ipc_scroll"
+		species_allowed = list("Machine")
+
+	ipc_screen_console
+		name = "console IPC screen"
+		icon_state = "ipc_console"
+		species_allowed = list("Machine")
+
+	ipc_screen_rgb
+		name = "rgb IPC screen"
+		icon_state = "ipc_rgb"
+		species_allowed = list("Machine")
+
+	ipc_screen_glider
+		name = "glider IPC screen"
+		icon_state = "ipc_gol_glider"
 		species_allowed = list("Machine")
 
 /*
@@ -781,6 +814,36 @@
 		icon_state = "vox_keetquills"
 		species_allowed = list("Vox")
 
+	vox_quills_kingly
+		name = "Kingly Vox Quills"
+		icon_state = "vox_kingly"
+		species_allowed = list("Vox")
+
+	vox_quills_fluff
+		name = "Fluffy Quills"
+		icon_state = "vox_afro"
+		species_allowed = list("Vox")
+
+	vox_quills_mohawk
+		name = "Quill Mohawk"
+		icon_state = "vox_mohawk"
+		species_allowed = list("Vox")
+
+	vox_quills_long
+		name = "Long Vox Quills"
+		icon_state = "vox_yasu"
+		species_allowed = list("Vox")
+
+	vox_horns
+		name = "Vox Spikes"
+		icon_state = "vox_horns"
+		species_allowed = list("Vox")
+
+	vox_nights
+		name = "Vox Pigtails"
+		icon_state = "vox_nights"
+		species_allowed = list("Vox")
+
 // Apollo-specific
 
 	//Wryn antennae
@@ -855,9 +918,30 @@
 		species_allowed = list("Tajaran")
 
 	taj_smallstache
-		name = "Tajara Smallsatche"
+		name = "Tajara Smallstache"
 		icon_state = "facial_smallstache"
 		species_allowed = list("Tajaran")
+
+	vox_colonel
+		name = "Vox Colonel Beard"
+		icon_state = "vox_colonel"
+		species_allowed = list("Vox")
+
+	vox_long
+		name = "Long Mustache"
+		icon_state = "vox_fu"
+		species_allowed = list("Vox")
+
+	vox_neck
+		name = "Neck Quills"
+		icon_state = "vox_neck"
+		species_allowed = list("Vox")
+
+	vox_beard
+		name = "Vox Quill Beard"
+		icon_state = "vox_beard"
+		species_allowed = list("Vox")
+
 
 //Vulpkanin
 
@@ -955,7 +1039,7 @@
 /datum/sprite_accessory/underwear
 	icon = 'icons/mob/underwear.dmi'
 
-	species_allowed = list("Human","Unathi","Vox","Diona","Kidan","Grey","Plasmaman","Skellington")
+	species_allowed = list("Human","Unathi","Vox","Diona","Vulpkanin","Kidan","Grey","Plasmaman","Skellington")
 
 	nude
 		name = "Nude"
@@ -1028,7 +1112,7 @@
 /datum/sprite_accessory/undershirt
 	icon = 'icons/mob/underwear.dmi'
 
-	species_allowed = list("Human","Unathi","Vox","Diona","Kidan","Grey","Plasmaman","Skellington")
+	species_allowed = list("Human","Unathi","Vox","Diona","Vulpkanin","Kidan","Grey","Plasmaman","Skellington")
 
 /datum/sprite_accessory/undershirt/nude
 	name = "Nude"
@@ -1267,6 +1351,7 @@
 ///////////////////////
 /datum/sprite_accessory/socks
 	icon = 'icons/mob/underwear.dmi'
+	species_allowed = list("Human","Unathi","Diona","Grey","Machine","Tajaran","Vulpkanin","Slime People","Skellington")
 
 /datum/sprite_accessory/socks/nude
 	name = "Nude"
@@ -1279,111 +1364,95 @@
 	name = "Normal White"
 	icon_state = "white_norm"
 	gender = NEUTER
-	species_allowed = list("Human","Unathi","Diona","Grey","Machine","Tajaran","Vulpkanin","Slime People","Skellington")
 
 
 /datum/sprite_accessory/socks/black_norm
 	name = "Normal Black"
 	icon_state = "black_norm"
 	gender = NEUTER
-	species_allowed = list("Human","Unathi","Diona","Grey","Machine","Tajaran","Vulpkanin","Slime People","Skellington")
 
 
 /datum/sprite_accessory/socks/white_short
 	name = "Short White"
 	icon_state = "white_short"
 	gender = NEUTER
-	species_allowed = list("Human","Unathi","Diona","Grey","Machine","Tajaran","Vulpkanin","Slime People","Skellington")
 
 
 /datum/sprite_accessory/socks/black_short
 	name = "Short Black"
 	icon_state = "black_short"
 	gender = NEUTER
-	species_allowed = list("Human","Unathi","Diona","Grey","Machine","Tajaran","Vulpkanin","Slime People","Skellington")
 
 
 /datum/sprite_accessory/socks/white_knee
 	name = "Knee-high White"
 	icon_state = "white_knee"
 	gender = NEUTER
-	species_allowed = list("Human","Unathi","Diona","Grey","Machine","Tajaran","Vulpkanin","Slime People","Skellington")
 
 
 /datum/sprite_accessory/socks/black_knee
 	name = "Knee-high Black"
 	icon_state = "black_knee"
 	gender = NEUTER
-	species_allowed = list("Human","Unathi","Diona","Grey","Machine","Tajaran","Vulpkanin","Slime People","Skellington")
 
 
 /datum/sprite_accessory/socks/thin_knee
 	name = "Knee-high Thin"
 	icon_state = "thin_knee"
 	gender = FEMALE
-	species_allowed = list("Human","Unathi","Diona","Grey","Machine","Tajaran","Vulpkanin","Slime People","Skellington")
 
 
 /datum/sprite_accessory/socks/striped_knee
 	name = "Knee-high Striped"
 	icon_state = "striped_knee"
 	gender = NEUTER
-	species_allowed = list("Human","Unathi","Diona","Grey","Machine","Tajaran","Vulpkanin","Slime People","Skellington")
 
 
 /datum/sprite_accessory/socks/rainbow_knee
 	name = "Knee-high Rainbow"
 	icon_state = "rainbow_knee"
 	gender = NEUTER
-	species_allowed = list("Human","Unathi","Diona","Grey","Machine","Tajaran","Vulpkanin","Slime People","Skellington")
 
 
 /datum/sprite_accessory/socks/white_thigh
 	name = "Thigh-high White"
 	icon_state = "white_thigh"
 	gender = NEUTER
-	species_allowed = list("Human","Unathi","Diona","Grey","Machine","Tajaran","Vulpkanin","Slime People","Skellington")
 
 /datum/sprite_accessory/socks/black_thigh
 	name = "Thigh-high Black"
 	icon_state = "black_thigh"
 	gender = NEUTER
-	species_allowed = list("Human","Unathi","Diona","Grey","Machine","Tajaran","Vulpkanin","Slime People","Skellington")
 
 
 /datum/sprite_accessory/socks/thin_thigh
 	name = "Thigh-high Thin"
 	icon_state = "thin_thigh"
 	gender = FEMALE
-	species_allowed = list("Human","Unathi","Diona","Grey","Machine","Tajaran","Vulpkanin","Slime People","Skellington")
 
 
 /datum/sprite_accessory/socks/striped_thigh
 	name = "Thigh-high Striped"
 	icon_state = "striped_thigh"
 	gender = NEUTER
-	species_allowed = list("Human","Unathi","Diona","Grey","Machine","Tajaran","Vulpkanin","Slime People","Skellington")
 
 
 /datum/sprite_accessory/socks/rainbow_thigh
 	name = "Thigh-high Rainbow"
 	icon_state = "rainbow_thigh"
 	gender = NEUTER
-	species_allowed = list("Human","Unathi","Diona","Grey","Machine","Tajaran","Vulpkanin","Slime People","Skellington")
 
 
 /datum/sprite_accessory/socks/pantyhose
 	name = "Pantyhose"
 	icon_state = "pantyhose"
 	gender = FEMALE
-	species_allowed = list("Human","Unathi","Diona","Grey","Machine","Tajaran","Vulpkanin","Slime People","Skellington")
 
 
 /datum/sprite_accessory/socks/black_fishnet
 	name = "Black Fishnet"
 	icon_state = "black_fishnet"
 	gender = NEUTER
-	species_allowed = list("Human","Unathi","Diona","Grey","Machine","Tajaran","Vulpkanin","Slime People","Skellington")
 
 /datum/sprite_accessory/socks/vox_white
 	name = "Vox White"

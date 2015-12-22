@@ -49,11 +49,6 @@
 	examine(mob/user)
 		if(!..(user, 2))
 			return
-		user << "\blue It contains:"
-		if(reagents && reagents.reagent_list.len)
-			user << "\blue [src.reagents.total_volume] units of liquid."
-		else
-			user << "\blue Nothing."
 		if (!is_open_container())
 			user << "\blue Airtight lid seals it completely."
 
@@ -166,7 +161,8 @@
 				user << "\blue You set the label to \"[tmp_label]\"."
 				src.label_text = tmp_label
 				src.update_name_label()
-
+		if(istype(I,/obj/item/weapon/storage/bag))
+			..()
 
 	proc/update_name_label()
 		if(src.label_text == "")
@@ -269,6 +265,10 @@
 /obj/item/weapon/reagent_containers/glass/beaker/hear_talk(mob/living/M, msg)
 	if(assembly)
 		assembly.hear_talk(M, msg)
+
+/obj/item/weapon/reagent_containers/glass/beaker/hear_message(mob/living/M, msg)
+	if(assembly)
+		assembly.hear_message(M, msg)
 
 /obj/item/weapon/reagent_containers/glass/beaker/large
 	name = "large beaker"

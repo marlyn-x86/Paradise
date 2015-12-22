@@ -37,16 +37,23 @@
 
 /mob/living/simple_animal/hostile/poison/bees/New()
 	..()
-	update_bees()
+	var/bees = rand(2, 10)
+	for(var/i, i <= bees, i++)
+		var/N = rand(1, 4)
+		var/image/I = image(icon='icons/mob/animal.dmi',icon_state="bee_[N]", pixel_x = rand(-8, 8), pixel_y = rand(-8, 8))
+		overlays += I
 
-/mob/living/simple_animal/hostile/poison/bees/Die()
+	//update_bees()
+
+/mob/living/simple_animal/hostile/poison/bees/death()
 	..()
 	ghostize()
 	qdel(src)
 	return
 
-/mob/living/simple_animal/hostile/poison/bees/Life()
+/*/mob/living/simple_animal/hostile/poison/bees/Life()
 	..()
+
 	update_bees()
 
 /mob/living/simple_animal/hostile/poison/bees/proc/update_bees()
@@ -56,9 +63,9 @@
 		if(overlays.len < health-1)
 			overlays.Add(I)
 		if(overlays.len > health-1)
-			overlays.Remove(I)
-	poison_per_bite = health * 0.5 //each bee is half a toxin reagent
+			overlays.Remove(I) //REMOVING A RANDOM IMAGE FROM AN OVERLAYS LIST THAT DOES NOT CONTAIN THAT IMAGE
+	poison_per_bite = health * 0.5 //each bee is half a toxin reagent //WHAT A GREAT FUCKING PLAN
 	if(health > 1)
 		desc = "A buzzy swarm of [health] poisonous space bees, renowned for their aggressiveness"
 	else
-		desc = "Although now lonely, this single space bee is still poisonous and very angry at you."
+		desc = "Although now lonely, this single space bee is still poisonous and very angry at you."*///NOVEL IDEA: INFINITE LOOP IMPLEMENTATION
