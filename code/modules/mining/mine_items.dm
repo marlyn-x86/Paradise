@@ -250,3 +250,48 @@
 		colorindex = 0
 	icon_state = "mobcap[colorindex]"
 	update_icon()
+
+/obj/effect/vent
+	name = "weed vent"  // You did something stupid, spawning a parent class
+						// suffer the dank memes
+	desc = "This vent appears to be emitting a dank smoke. 420 blazeit ayylmao"
+	icon = 'icons/effects/effects.dmi'
+	icon_state = "exhaust"
+	var/moles_left = 10000 // haha what am I doing
+	var/leak_rate = 0.01
+	var/gas_type = "dank kush"
+	anchored = 1
+
+/obj/effect/vent/New()
+	..()
+	processing_objects.Add(src)
+
+/obj/effect/vent/process()
+	var/gas_to_eject = leak_rate * moles_left
+	moles_left -= gas_to_eject
+	switch(gas_type)
+		if("plasma")
+			var/turf/simulated/T = get_turf(src)
+			T.atmos_spawn_air(SPAWN_TOXINS|SPAWN_20C,gas_to_eject)
+		if("dank kush")
+			var/datum/reagents/R = new/datum/reagents(50)
+			R.my_atom = src
+			R.add_reagent("space_drugs", 50)
+			var/datum/effect/system/chem_smoke_spread/smoke = new
+			smoke.set_up(R, rand(1, 2), 0, src, 0, silent = 1)
+			smoke.start(3)
+			qdel(R)
+	if(moles_left < 0)
+		become_empty()
+
+/obj/effect/vent/proc/become_empty()
+	processing_objects.Remove(src)
+	name = "depleted gas vent"
+	desc = "This fissure seems to have stopped leaking gas."
+	moles_left = 0
+
+
+/obj/effect/vent/plasma
+	name = "plasma vent"
+	gas_type = "plasma"
+	desc = "This opening in the ground appears to be emitting a purple gas!"
