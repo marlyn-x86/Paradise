@@ -369,16 +369,18 @@ var/global/list/rockTurfEdgeCache = list(
 
 /turf/simulated/mineral/vent
 	name = "gas pocket"
+	scan_state = "rock_Clown"
 	spreadChance = 10
 	spread = 1
 	hidden = 1
 	var/vent_type = /obj/effect/vent
 
 /turf/simulated/mineral/vent/gets_drilled()
+	var/stored_vent_type = vent_type
 	var/turf/simulated/floor/plating/airless/asteroid/N = ChangeTurf(/turf/simulated/floor/plating/airless/asteroid)
 	playsound(src, 'sound/effects/break_stone.ogg', 50, 1) //beautiful destruction
 	N.fullUpdateMineralOverlays()
-	new vent_type(N)
+	new stored_vent_type(N)
 
 /turf/simulated/mineral/vent/plasma
 	name = "gaseous plasma pocket"
