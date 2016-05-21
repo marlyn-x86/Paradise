@@ -110,7 +110,7 @@ var/global/list/rockTurfEdgeCache = list(
 		"Uranium" = 5, "Diamond" = 1, "Gold" = 10,
 		"Silver" = 12, "Plasma" = 20, "Iron" = 40,
 		"Gibtonite" = 4, "Cave" = 2, "BScrystal" = 1,
-		/*, "Adamantine" =5*/)
+		"PlasmaVent" = 30)
 		//Currently, Adamantine won't spawn as it has no uses. -Durandan
 	var/mineralChance = 13
 
@@ -144,6 +144,8 @@ var/global/list/rockTurfEdgeCache = list(
 					M = new/turf/simulated/mineral/mime(src)
 				if("BScrystal")
 					M = new/turf/simulated/mineral/bscrystal(src)
+				if("PlasmaVent")
+					M = new/turf/simulated/mineral/vent/plasma(src)
 			if(M)
 				M.mineralAmt = rand(1, 5)
 				src = M
@@ -157,7 +159,7 @@ var/global/list/rockTurfEdgeCache = list(
 	mineralSpawnChanceList = list(
 		"Uranium" = 35, "Diamond" = 30,
 		"Gold" = 45, "Silver" = 50, "Plasma" = 50,
-		"BScrystal" = 20)
+		"BScrystal" = 20, "PlasmaVent" = 25)
 
 
 /turf/simulated/mineral/random/high_chance_clown
@@ -177,7 +179,7 @@ var/global/list/rockTurfEdgeCache = list(
 	mineralSpawnChanceList = list(
 		"Uranium" = 2, "Diamond" = 1, "Gold" = 4,
 		"Silver" = 6, "Plasma" = 15, "Iron" = 40,
-		"Gibtonite" = 2, "BScrystal" = 1)
+		"Gibtonite" = 2, "BScrystal" = 1, "PlasmaVent" = 30)
 
 /turf/simulated/mineral/random/low_chance/New()
 	icon_state = "rock"
@@ -364,6 +366,26 @@ var/global/list/rockTurfEdgeCache = list(
 	var/stage = 0
 
 ////////////////////////////////End Gibtonite
+
+/turf/simulated/mineral/vent
+	name = "gas pocket"
+	spreadChance = 10
+	spread = 1
+	hidden = 1
+	var/vent_type = /obj/effect/vent
+
+/turf/simulated/mineral/vent/gets_drilled()
+	var/turf/simulated/floor/plating/airless/asteroid/N = ChangeTurf(/turf/simulated/floor/plating/airless/asteroid)
+	playsound(src, 'sound/effects/break_stone.ogg', 50, 1) //beautiful destruction
+	N.fullUpdateMineralOverlays()
+	new vent_type(N)
+
+/turf/simulated/mineral/vent/plasma
+	name = "gaseous plasma pocket"
+	vent_type = /obj/effect/vent/plasma
+
+
+
 
 /turf/simulated/mineral/attackby(var/obj/item/weapon/pickaxe/P as obj, mob/user as mob, params)
 
