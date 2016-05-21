@@ -276,7 +276,7 @@
 		if("dank kush")
 			var/datum/reagents/R = new/datum/reagents(50)
 			R.my_atom = src
-			R.add_reagent("space drugs", 50)
+			R.add_reagent("space_drugs", 50)
 			var/datum/effect/system/chem_smoke_spread/smoke = new
 			smoke.set_up(R, rand(1, 2), 0, src, 0, silent = 1)
 			smoke.start(3)
