@@ -32,7 +32,7 @@
 		"is sucking in warm air!",
 		"is holding their breath!")
 
-	flags = IS_WHITELISTED | HAS_LIPS
+	flags = /*IS_WHITELISTED |*/ HAS_LIPS
 	clothing_flags = HAS_UNDERWEAR | HAS_UNDERSHIRT
 	bodyflags = FEET_CLAWS | HAS_SKIN_TONE
 	dietflags = DIET_OMNI
