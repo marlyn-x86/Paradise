@@ -10,8 +10,7 @@ env:
     - BYOND_MAJOR="510"
     - BYOND_MINOR="1336"
   matrix:
-    - DM_MAPFILE="cyberiad"
-    - DM_MAPFILE="metastation"
+    - DM_MAPFILE="Majid"
     - DM_MAPFILE="test_away_missions"
 
 cache:
