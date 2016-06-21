@@ -31,6 +31,7 @@
 
 /datum/mind
 	var/key
+	var/ckey
 	var/name				//replaces mob/var/original_name
 	var/mob/living/current
 	var/mob/living/original	//TODO: remove.not used in any meaningful way ~Carn. First I'll need to tweak the way silicon-mobs handle minds.
@@ -69,8 +70,9 @@
 	// the world.time since the mob has been brigged, or -1 if not at all
 	var/brigged_since = -1
 
-	New(var/key)
+	New(var/key, var/ckey)
 		src.key = key
+		src.ckey = ckey
 
 	//put this here for easier tracking ingame
 	var/datum/money_account/initial_account
@@ -1522,7 +1524,7 @@
 	if(mind)
 		mind.key = key
 	else
-		mind = new /datum/mind(key)
+		mind = new /datum/mind(key, ckey)
 		if(ticker)
 			ticker.minds += mind
 		else

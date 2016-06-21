@@ -8,7 +8,7 @@ var/global/datum/controller/process/wages/wages_master
 	start_delay = 16
 	log_startup_progress("Wage ticker starting up.")
 	if(wages_master)
-		qdel(wages_master) //only one mob master
+		qdel(wages_master)
 	wages_master = src
 
 /datum/controller/process/wages/started()
