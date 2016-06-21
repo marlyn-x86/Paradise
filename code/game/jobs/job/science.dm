@@ -17,6 +17,7 @@
 			            access_research, access_robotics, access_xenobiology, access_ai_upload,
 			            access_RC_announce, access_keycard_auth, access_tcomsat, access_gateway, access_xenoarch, access_minisat, access_maint_tunnels, access_mineral_storeroom)
 	minimal_player_age = 21
+	wages = 500
 
 	// All science-y guys get bonuses for maxing out their tech.
 	required_objectives=list(
@@ -55,6 +56,7 @@
 	minimal_access = list(access_tox, access_tox_storage, access_research, access_xenobiology, access_xenoarch, access_maint_tunnels, access_mineral_storeroom)
 	alt_titles = list("Xenoarcheologist", "Anomalist", "Plasma Researcher", "Xenobiologist", "Chemical Researcher")
 	minimal_player_age = 3
+	wages = 100 // probably won't exist
 
 	// All science-y guys get bonuses for maxing out their tech.
 	required_objectives=list(
@@ -91,6 +93,10 @@
 	minimal_access = list(access_robotics, access_tech_storage, access_morgue, access_research, access_maint_tunnels, access_mineral_storeroom) //As a job that handles so many corpses, it makes sense for them to have morgue access.
 	alt_titles = list("Biomechanical Engineer","Mechatronic Engineer")
 	minimal_player_age = 3
+	wages = 100 // A cushy job with seldom risk, provides a great service for miners
+	// I might drop this to 50 if they were to charge for their mechs
+	// I might raise this if they have to do something dangerous like moderate
+	// a robot uprising or something
 
 	required_objectives=list(
 		/datum/job_objective/make_cyborg,

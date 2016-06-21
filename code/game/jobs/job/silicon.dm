@@ -8,6 +8,7 @@
 	supervisors = "your laws"
 	req_admin_notify = 1
 	minimal_player_age = 30
+	wages = 0 // robutt oppression
 
 	equip(var/mob/living/carbon/human/H)
 		if(!H)	return 0
@@ -15,7 +16,7 @@
 
 /datum/job/ai/is_position_available()
 	return (empty_playable_ai_cores.len != 0)
-	
+
 
 /datum/job/cyborg
 	title = "Cyborg"
@@ -26,6 +27,7 @@
 	supervisors = "your laws and the AI"	//Nodrak
 	selection_color = "#ddffdd"
 	minimal_player_age = 21
+	wages = 0
 	alt_titles = list("Android", "Robot")
 
 	equip(var/mob/living/carbon/human/H)

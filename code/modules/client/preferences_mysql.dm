@@ -155,7 +155,8 @@
 					nanotrasen_relation,
 					speciesprefs,
 					socks,
-					body_accessory
+					body_accessory,
+					money
 				 	FROM [format_table_name("characters")] WHERE ckey='[C.ckey]' AND slot='[slot]'"})
 	if(!query.Execute())
 		var/err = query.ErrorMsg()
@@ -233,6 +234,7 @@
 		//socks
 		socks = query.item[58]
 		body_accessory = query.item[59]
+
 
 	//Sanitize
 	metadata		= sanitize_text(metadata, initial(metadata))

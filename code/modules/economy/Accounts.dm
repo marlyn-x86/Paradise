@@ -135,6 +135,54 @@ var/global/list/all_money_accounts = list()
 	..()
 	//security_level = pick (0,1) //Stealing is now slightly viable
 
+	/datum/money_account/proc/fmtBalance()
+		return "$[num2septext(money)]"
+
+	/datum/money_account/proc/charge(var/transaction_amount,var/datum/money_account/dest,var/transaction_purpose, var/terminal_name="", var/terminal_id=0, var/dest_name = "UNKNOWN")
+		if(suspended)
+			to_chat(usr, "<span class='warning'>Unable to access source account: account suspended.</span>")
+			return 0
+
+		if(transaction_amount <= money)
+			//transfer the money
+			money -= transaction_amount
+			if(dest)
+				dest.money += transaction_amount
+
+			//create entries in the two account transaction logs
+			var/datum/transaction/T
+			if(dest)
+				T = new()
+				T.target_name = owner_name
+				if(terminal_name!="")
+					T.target_name += " (via [terminal_name])"
+				T.purpose = transaction_purpose
+				if(transaction_amount > 0)
+					T.amount = "([transaction_amount])"
+				else
+					T.amount = "[transaction_amount]"
+				if(terminal_id)
+					T.source_terminal = terminal_id
+				T.date = current_date_string
+				T.time = worldtime2text()
+				dest.transaction_log.Add(T)
+			//
+			T = new()
+			T.target_name = (!dest) ? dest_name : dest.owner_name
+			if(terminal_name!="")
+				T.target_name += " (via [terminal_name])"
+			T.purpose = transaction_purpose
+			T.amount = "[transaction_amount]"
+			if(terminal_id)
+				T.source_terminal = terminal_id
+			T.date = current_date_string
+			T.time = worldtime2text()
+			transaction_log.Add(T)
+			return 1
+		else
+			to_chat(usr, "<span class='warning'>Insufficient funds in account.</span>")
+			return 0
+
 /datum/transaction
 	var/target_name = ""
 	var/purpose = ""
