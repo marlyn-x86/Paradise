@@ -74,7 +74,7 @@
 
 	//put this here for easier tracking ingame
 	var/datum/money_account/initial_account
-	var/wage
+	var/wage = 0
 
 /datum/mind/proc/transfer_to(mob/living/new_character)
 	if(!istype(new_character))

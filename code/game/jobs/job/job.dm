@@ -129,4 +129,4 @@
 /datum/job/proc/do_payments()
 	for(var/mob/living/L in employees)
 		if(L.mind)
-			L.pay(L.mind.wage)
+			L.salary()

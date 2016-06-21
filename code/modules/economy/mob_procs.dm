@@ -8,8 +8,5 @@
   if(mind && mind.initial_account && mind.assigned_job)
     var/datum/money_account/D = department_accounts[mind.assigned_job.department]
     var/term_id = rand(111,333)
-    payment_success = D.charge(M.mind.wage, M.mind.initial_account, "Job Payroll", "\[CLASSIFIED\] Terminal #[term_id]", term_id)
+    payment_success = D.charge(mind.wage, mind.initial_account, "Job Payroll", "\[CLASSIFIED\] Terminal #[term_id]", term_id)
   return payment_success
-
-/mob/living/proc/serialize_money()
-  

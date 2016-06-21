@@ -18,6 +18,4 @@ var/global/datum/controller/process/wages/wages_master
 /datum/controller/process/wages/doWork()
   // holla holla get dolla
 	for(var/datum/job/J in job_master.occupations)
-		for(var/mob/living/nerd in J.employees)
-			// This is probably super circumlocutious and nonsensical
-			nerd.salary()
+		J.do_payments()

@@ -9,7 +9,7 @@
 	access = list()			//See /datum/job/assistant/get_access()
 	minimal_access = list()	//See /datum/job/assistant/get_access()
 	alt_titles = list("Tourist","Businessman","Trader","Assistant")
-	wages = 0
+	wage = 0
 
 /datum/job/civilian/equip(var/mob/living/carbon/human/H)
 	if(!H)	return 0

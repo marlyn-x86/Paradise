@@ -17,7 +17,7 @@
 			            access_heads, access_construction, access_sec_doors,
 			            access_ce, access_RC_announce, access_keycard_auth, access_tcomsat, access_minisat, access_mechanic, access_mineral_storeroom)
 	minimal_player_age = 21
-	wages =  500
+	wage =  500
 
 
 	equip(var/mob/living/carbon/human/H)
@@ -55,7 +55,7 @@
 	minimal_access = list(access_eva, access_engine, access_engine_equip, access_tech_storage, access_maint_tunnels, access_external_airlocks, access_construction)
 	alt_titles = list("Maintenance Technician","Engine Technician","Electrician")
 	minimal_player_age = 7
-	wages = 100
+	wage = 100
 
 	equip(var/mob/living/carbon/human/H)
 		if(!H)	return 0
@@ -91,7 +91,7 @@
 	minimal_access = list(access_eva, access_atmospherics, access_maint_tunnels, access_external_airlocks, access_emergency_storage, access_construction)
 	alt_titles = list("Atmospheric Technician")
 	minimal_player_age = 7
-	wages = 150 // These people will be going out occasionally with the miners
+	wage = 150 // These people will be going out occasionally with the miners
 	// to collect plasma gas - still dangerous, but since they're in cleared
 	// areas, they won't get nearly as much as the miners do
 
@@ -123,7 +123,7 @@
 	idtype = /obj/item/weapon/card/id/engineering
 	access = list(access_engine, access_engine_equip, access_tech_storage, access_maint_tunnels, access_mechanic, access_external_airlocks, access_mineral_storeroom)
 	minimal_access = list(access_maint_tunnels, access_emergency_storage, access_mechanic, access_external_airlocks, access_mineral_storeroom)
-	wages = 50	// A non-vital service that consumes resources, probably not worth much
+	wage = 50	// A non-vital service that consumes resources, probably not worth much
 
 	equip(var/mob/living/carbon/human/H)
 		if(!H)	return 0
