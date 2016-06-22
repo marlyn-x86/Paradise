@@ -1114,6 +1114,7 @@
 #include "code\modules\client\client procs.dm"
 #include "code\modules\client\message.dm"
 #include "code\modules\client\persistence.dm"
+#include "code\modules\client\persistence_mysql.dm"
 #include "code\modules\client\preferences.dm"
 #include "code\modules\client\preferences_mysql.dm"
 #include "code\modules\client\preferences_spawnpoints.dm"
