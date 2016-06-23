@@ -234,6 +234,7 @@
 		socks = query.item[58]
 		body_accessory = query.item[59]
 
+
 	//Sanitize
 	metadata		= sanitize_text(metadata, initial(metadata))
 	real_name		= reject_bad_name(real_name)

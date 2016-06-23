@@ -114,16 +114,12 @@
 						pay=objective.completion_payment
 						msg="Task #[count] completed! "
 				if(pay>0)
-					if(M.mind.initial_account)
-						M.mind.initial_account.money += pay
-						var/datum/transaction/T = new()
-						T.target_name = "[command_name()] Payroll"
-						T.purpose = "Payment"
-						T.amount = pay
-						T.date = current_date_string
-						T.time = worldtime2text()
-						T.source_terminal = "\[CLASSIFIED\] Terminal #[rand(111,333)]"
-						M.mind.initial_account.transaction_log.Add(T)
+					var/pay_succeeded = 0
+					if(M.mind.initial_account && M.mind.assigned_job)
+						var/datum/money_account/D = department_accounts[M.mind.assigned_job.department]
+						var/term_id = rand(111,333)
+						pay_succeeded = D.charge(pay, M.mind.initial_account, "Job Payroll", "\[CLASSIFIED\] Terminal #[term_id]", term_id)
+					if(pay_succeeded)
 						msg += "You have been sent the $[pay], as agreed."
 					else
 						msg += "However, we were unable to send you the $[pay] you're entitled."

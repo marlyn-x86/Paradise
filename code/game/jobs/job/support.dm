@@ -9,6 +9,7 @@
 	selection_color = "#dddddd"
 	access = list(access_hydroponics, access_bar, access_kitchen, access_morgue, access_weapons, access_mineral_storeroom)
 	minimal_access = list(access_bar, access_maint_tunnels, access_weapons, access_mineral_storeroom)
+	wage = 50 // The bar's your main income
 
 
 	equip(var/mob/living/carbon/human/H)
@@ -51,6 +52,7 @@
 	access = list(access_hydroponics, access_bar, access_kitchen, access_morgue)
 	minimal_access = list(access_kitchen, access_maint_tunnels)
 	alt_titles = list("Cook","Culinary Artist","Butcher")
+	wage = 50 // sell food
 
 
 	equip(var/mob/living/carbon/human/H)
@@ -84,6 +86,7 @@
 	access = list(access_hydroponics, access_bar, access_kitchen, access_morgue) // Removed tox and chem access because STOP PISSING OFF THE CHEMIST GUYS // //Removed medical access because WHAT THE FUCK YOU AREN'T A DOCTOR YOU GROW WHEAT //Given Morgue access because they have a viable means of cloning.
 	minimal_access = list(access_hydroponics, access_morgue, access_maint_tunnels) // Removed tox and chem access because STOP PISSING OFF THE CHEMIST GUYS // //Removed medical access because WHAT THE FUCK YOU AREN'T A DOCTOR YOU GROW WHEAT //Given Morgue access because they have a viable means of cloning.
 	alt_titles = list("Hydroponicist", "Botanical Researcher")
+	wage = 50 // sell plants
 
 
 	equip(var/mob/living/carbon/human/H)
@@ -117,7 +120,7 @@
 	idtype = /obj/item/weapon/card/id/supply
 	access = list(access_maint_tunnels, access_mailsorting, access_cargo, access_cargo_bot, access_qm, access_mint, access_mining, access_mining_station, access_mineral_storeroom)
 	minimal_access = list(access_maint_tunnels, access_mailsorting, access_cargo, access_cargo_bot, access_qm, access_mint, access_mining, access_mining_station, access_mineral_storeroom)
-
+	wage = 150 // Not a particularly dangerous job
 
 	equip(var/mob/living/carbon/human/H)
 		if(!H)	return 0
@@ -150,7 +153,7 @@
 	idtype = /obj/item/weapon/card/id/supply
 	access = list(access_maint_tunnels, access_mailsorting, access_cargo, access_cargo_bot, access_qm, access_mint, access_mining, access_mining_station, access_mineral_storeroom)
 	minimal_access = list(access_maint_tunnels, access_cargo, access_cargo_bot, access_mailsorting, access_mineral_storeroom)
-
+	wage = 100
 
 	equip(var/mob/living/carbon/human/H)
 		if(!H)	return 0
@@ -182,6 +185,7 @@
 	access = list(access_maint_tunnels, access_mailsorting, access_cargo, access_cargo_bot, access_qm, access_mint, access_mining, access_mining_station, access_mineral_storeroom)
 	minimal_access = list(access_mining, access_mint, access_mining_station, access_mailsorting, access_maint_tunnels, access_mineral_storeroom)
 	alt_titles = list("Spelunker")
+	wage = 300 // it's dangerous out there
 
 	equip(var/mob/living/carbon/human/H)
 		if(!H)	return 0
@@ -222,6 +226,7 @@
 	idtype = /obj/item/weapon/card/id/clown
 	access = list(access_clown, access_theatre, access_maint_tunnels)
 	minimal_access = list(access_clown, access_theatre, access_maint_tunnels)
+	wage = -1 // no
 
 
 	equip(var/mob/living/carbon/human/H)
@@ -262,6 +267,7 @@
 	idtype = /obj/item/weapon/card/id/mime
 	access = list(access_mime, access_theatre, access_maint_tunnels)
 	minimal_access = list(access_mime, access_theatre, access_maint_tunnels)
+	wage = -1
 
 
 	equip(var/mob/living/carbon/human/H)
@@ -302,6 +308,7 @@
 	access = list(access_janitor, access_maint_tunnels)
 	minimal_access = list(access_janitor, access_maint_tunnels)
 	alt_titles = list("Custodial Technician")
+	wage = 75
 
 
 	equip(var/mob/living/carbon/human/H)
@@ -334,6 +341,7 @@
 	access = list(access_library, access_maint_tunnels)
 	minimal_access = list(access_library, access_maint_tunnels)
 	alt_titles = list("Journalist")
+	wage = 50 // Better bilk people on overdue books
 
 
 	equip(var/mob/living/carbon/human/H)
@@ -365,6 +373,7 @@
 	alt_titles = list("Hair Stylist","Beautician")
 	access = list(access_maint_tunnels)
 	minimal_access = list(access_maint_tunnels)
+	wage = 50 // Charge for haircuts I guess. Will probably not exist
 
 
 	equip(var/mob/living/carbon/human/H)

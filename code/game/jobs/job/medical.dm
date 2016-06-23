@@ -15,6 +15,7 @@
 			access_chemistry, access_virology, access_cmo, access_surgery, access_RC_announce,
 			access_keycard_auth, access_sec_doors, access_psychiatrist, access_maint_tunnels, access_paramedic, access_mineral_storeroom)
 	minimal_player_age = 21
+	wage = 500 // I mean these jobs will likely not exist but whatever
 
 	equip(var/mob/living/carbon/human/H)
 		if(!H)	return 0
@@ -51,6 +52,7 @@
 	minimal_access = list(access_medical, access_morgue, access_surgery, access_maint_tunnels)
 	alt_titles = list("Surgeon","Nurse","Coroner")
 	minimal_player_age = 3
+	wage = 200 // Look at me I have a MD
 
 	equip(var/mob/living/carbon/human/H)
 		if(!H)	return 0
@@ -114,7 +116,7 @@
 	minimal_access = list(access_medical, access_chemistry, access_maint_tunnels, access_mineral_storeroom)
 	alt_titles = list("Pharmacist","Pharmacologist")
 	minimal_player_age = 7
-
+	wage = 150 // Given how powerful medchems are these will likely not exist
 
 	equip(var/mob/living/carbon/human/H)
 		if(!H)	return 0
@@ -146,6 +148,7 @@
 	access = list(access_medical, access_morgue, access_surgery, access_chemistry, access_virology, access_genetics, access_research, access_mineral_storeroom)
 	minimal_access = list(access_medical, access_morgue, access_genetics, access_research, access_maint_tunnels)
 	minimal_player_age = 3
+	wage = 150 // Another job the way of the dodo, probably
 
 	equip(var/mob/living/carbon/human/H)
 		if(!H)	return 0
@@ -176,6 +179,7 @@
 	minimal_access = list(access_medical, access_virology, access_maint_tunnels, access_mineral_storeroom)
 	alt_titles = list("Pathologist","Microbiologist")
 	minimal_player_age = 7
+	wage = 100 // Haha no
 
 	equip(var/mob/living/carbon/human/H)
 		if(!H)	return 0
@@ -208,6 +212,8 @@
 	access = list(access_medical, access_morgue, access_surgery, access_chemistry, access_virology, access_genetics, access_psychiatrist)
 	minimal_access = list(access_medical, access_psychiatrist, access_maint_tunnels)
 	alt_titles = list("Psychologist","Therapist")
+	wage = 50 // Sure, let's make them appointment-based or something
+	// or just leave them out entirely
 
 	equip(var/mob/living/carbon/human/H)
 		if(!H)	return 0
@@ -248,7 +254,8 @@
 	access = list(access_paramedic, access_medical, access_sec_doors, access_maint_tunnels, access_external_airlocks, access_morgue)
 	minimal_access=list(access_paramedic, access_medical, access_sec_doors, access_maint_tunnels, access_external_airlocks, access_morgue)
 	minimal_player_age = 3
-
+	wage = 150 // A job with occasional high-risk activity - though the job itself
+	// is probably too much of a luxury for a station like this
 
 	equip(var/mob/living/carbon/human/H)
 		if(!H)  return 0

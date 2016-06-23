@@ -72,6 +72,9 @@ var/global/datum/controller/occupations/job_master
 
 				unassigned -= player
 				job.current_positions++
+				job.employees |= player
+				player.mind.wage = job.wage
+				player.mind.assigned_job = job
 				return 1
 		Debug("AR has failed, Player: [player], Rank: [rank]")
 		return 0

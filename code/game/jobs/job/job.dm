@@ -26,8 +26,11 @@
 	//Supervisors, who this person answers to directly
 	var/supervisors = ""
 
-	//Sellection screen color
+	//Selection screen color
 	var/selection_color = "#ffffff"
+
+	//Default Wage
+	var/wage = 0
 
 	//the type of the ID the player will have
 	var/idtype = /obj/item/weapon/card/id
@@ -40,6 +43,9 @@
 
 	//If you have use_age_restriction_for_jobs config option enabled and the database set up, this option will add a requirement for players to be at least minimal_player_age days old. (meaning they first signed in at least that many days before.)
 	var/minimal_player_age = 0
+
+	//A list of members with said job
+	var/list/employees = list()
 
 	/////////////////////////////////
 	// /vg/ feature: Job Objectives!
@@ -77,7 +83,7 @@
 		return 0
 
 	return max(0, minimal_player_age - C.player_age)
-	
+
 /datum/job/proc/apply_fingerprints(var/mob/living/carbon/human/H)
 	if(!istype(H))
 		return
@@ -116,6 +122,11 @@
 	if(H.r_store)
 		H.r_store.add_fingerprint(H,1)
 	return 1
-	
+
 /datum/job/proc/is_position_available()
 	return (current_positions < total_positions) || (total_positions == -1)
+
+/datum/job/proc/do_payments()
+	for(var/mob/living/L in employees)
+		if(L.mind)
+			L.salary()
