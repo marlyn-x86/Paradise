@@ -1,8 +1,6 @@
 var/kill_air = 0
 
 var/global/datum/controller/process/air_system/air_master
-/turf/var/activeturf_airmastercycle = 0
-/datum/excited_group/var/excitedturf_airmastercycle = 0
 /datum/controller/process/air_system
 	var/list/excited_groups = list()
 	var/list/active_turfs = list()
@@ -27,7 +25,7 @@ var/global/datum/controller/process/air_system/air_master
 
 /datum/controller/process/air_system/setup()
 	name = "air"
-	schedule_interval = 5 // every 2 seconds
+	schedule_interval = 20 // every 2 seconds
 	start_delay = 4
 	air_master = src
 
@@ -78,14 +76,7 @@ var/global/datum/controller/process/air_system/air_master
 
 /datum/controller/process/air_system/proc/process_active_turfs()
 	last_active = active_turfs.len
-	var/count = 0
 	for(var/turf/simulated/T in active_turfs)
-		if (T.activeturf_airmastercycle == current_cycle)
-			continue
-		if (count > last_active/4 && sub_cycle < 4) //do at most 1/4 every subcycle, unless its the last one, then do whatever is left (to cover those added etc)
-			break
-		count++
-		T.activeturf_airmastercycle = current_cycle
 		T.process_cell()
 
 		SCHECK
@@ -133,14 +124,7 @@ var/global/datum/controller/process/air_system/air_master
 
 /datum/controller/process/air_system/proc/process_excited_groups()
 	last_excited = excited_groups.len
-	var/count = 0
 	for(var/datum/excited_group/EG in excited_groups)
-		if (EG.excitedturf_airmastercycle == current_cycle)
-			continue
-		if (count > last_excited/4 && sub_cycle < 4) //do at most 1/4 every subcycle, unless its the last one, then do whatever is left (to cover those added etc)
-			break
-		count++
-		EG.excitedturf_airmastercycle = current_cycle
 		EG.breakdown_cooldown++
 		if(EG.breakdown_cooldown == 10)
 			EG.self_breakdown()
