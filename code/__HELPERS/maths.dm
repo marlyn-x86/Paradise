@@ -85,3 +85,16 @@ var/gaussian_next
 		gaussian_next = R2 * working
 	return (mean + stddev * R1)
 #undef ACCURACY
+
+#define k1 0.934
+#define k2 0.427
+/proc/cheap_hypotenuse(const/Ax, const/Ay, const/Bx, const/By)
+	var/dx = abs(Ax - Bx) // Sides of right-angled triangle.
+	var/dy = abs(Ay - By)
+
+	if (dx >= dy)
+		return (k1*dx) + (k2*dy) // No sqrt or powers :).
+	else
+		return (k2*dx) + (k1*dy)
+#undef k1
+#undef k2
