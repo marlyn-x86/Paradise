@@ -238,6 +238,7 @@ var/world_topic_spam_protect_time = world.timeofday
 	sleep(delay)
 	if(blackbox)
 		blackbox.save_all_data_to_sql()
+	write_save_data_to_disk()
 	if(ticker.delay_end)
 		to_chat(world, "<span class='boldannounce'>Reboot was cancelled by an admin.</span>")
 		return
@@ -451,3 +452,27 @@ proc/establish_db_connection()
 		return 1
 
 #undef FAILED_DB_CONNECTION_CUTOFF
+
+var/list/created_characters = list()
+// Persistence stuff goes here
+/world/proc/write_save_data_to_disk()
+	for(var/datum/mind/M in created_characters)
+		var/mob/living/L = M.current
+		var/datum/preferences/P = preferences_datums[M.ckey]
+		var/survived = 1 // The kid gloves are on for now
+		if(!P)
+			log_debug("Somebody didn't have a preferences datum when unloading! Name: [M.name]")
+			continue
+
+		// To survive: You must exist, and be inside a cryo pod
+		if(istype(L) && istype(L.loc, /obj/machinery/cryopod))
+			survived = 1
+
+		// Live or die?
+		if(!survived)
+			log_debug("Wiping progress of [M.name]")
+			P.persist.wipe()
+		else
+			log_debug("Saving progress of [M.name]")
+			P.persist.sync_info(L)
+		P.persist.save(L)

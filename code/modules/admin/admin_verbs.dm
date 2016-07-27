@@ -111,7 +111,8 @@ var/list/admin_verbs_event = list(
 
 var/list/admin_verbs_spawn = list(
 	/datum/admins/proc/spawn_atom,		/*allows us to spawn instances*/
-	/client/proc/respawn_character
+	/client/proc/respawn_character,
+	/client/proc/admin_deserialize
 	)
 var/list/admin_verbs_server = list(
 	/client/proc/ToRban,
@@ -156,7 +157,9 @@ var/list/admin_verbs_debug = list(
 	/client/proc/cinematic,
 	/proc/machine_upgrade,
 	/client/proc/map_template_load,
-	/client/proc/map_template_upload
+	/client/proc/map_template_upload,
+	/client/proc/admin_serialize,
+	/client/proc/admin_deserialize
 	)
 var/list/admin_verbs_possess = list(
 	/proc/possess,

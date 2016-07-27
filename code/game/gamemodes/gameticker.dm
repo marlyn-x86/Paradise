@@ -486,4 +486,3 @@ var/round_start_time = 0
 	event_manager.RoundEnd()
 
 	return 1
-

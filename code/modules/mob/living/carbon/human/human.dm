@@ -1926,3 +1926,61 @@
 
 /mob/living/carbon/human/is_mechanical()
 	return ..() || (species.flags & ALL_RPARTS) != 0
+
+/mob/living/carbon/human/serialize()
+	// Currently: Limbs/organs only
+	var/list/data = ..()
+	var/list/limbs_list = list()
+	var/list/organs_list = list()
+	data["limbs"] = limbs_list
+	data["iorgans"] = organs_list
+	data["dna"] = dna.serialize()
+	data["ushirt"] = undershirt
+	for(var/limb in organs_by_name)
+		var/obj/item/organ/O = organs_by_name[limb]
+		if(!O)
+			limbs_list[limb] = "missing"
+			continue
+
+		limbs_list[limb] = O.serialize()
+
+	for(var/organ in internal_organs)
+		var/obj/item/organ/O = organ
+		organs_list[O.name] = O.serialize()
+
+	return json_encode(data)
+
+/mob/living/carbon/human/deserialize(list/data)
+	for(var/blarg in data)
+		log_debug(blarg)
+	var/list/limbs_list = data["limbs"]
+	var/list/organs_list = data["iorgans"]
+	if(!islist(data["limbs"]))
+		throw EXCEPTION("Expected a limbs list, but found none")
+
+	if(islist(data["dna"]))
+		dna.deserialize(data["dna"])
+		real_name = dna.real_name
+		name = real_name
+		UpdateAppearance()
+		set_species(dna.species)
+	undershirt = data["ushirt"]
+	for(var/obj/item/organ/internal/iorgan in internal_organs)
+		qdel(iorgan)
+
+	for(var/obj/item/organ/external/organ in organs)
+		qdel(organ)
+
+	for(var/limb in limbs_list)
+		// Missing means skip this part - it's missing
+		if(limbs_list[limb] == "missing")
+			continue
+		// "New" code handles insertion and DNA sync'ing
+		var/obj/item/organ/external/E = list_to_object(limbs_list[limb], src)
+		E.sync_colour_to_dna()
+
+	for(var/organ in organs_list)
+		// As above, "New" code handles insertion, DNA sync
+		list_to_object(organs_list[organ], src)
+	update_icons()
+	..()

@@ -192,7 +192,11 @@ var/global/list/special_role_times = list( //minimum age (in days) for accounts 
 	// BYOND membership
 	var/unlock_content = 0
 
+	var/datum/persistent_data/persist
+
 /datum/preferences/New(client/C)
+	persist = new
+	persist.P = src
 	b_type = pick(4;"O-", 36;"O+", 3;"A-", 28;"A+", 1;"B-", 20;"B+", 1;"AB-", 5;"AB+")
 	if(istype(C))
 		if(!IsGuestKey(C.key))
@@ -1853,6 +1857,16 @@ var/global/list/special_role_times = list( //minimum age (in days) for accounts 
 	character.force_update_limbs()
 	character.update_eyes()
 	character.regenerate_icons()
+
+/datum/preferences/proc/load_to_human(mob/living/carbon/human/H)
+	// Makes a human into a copy of the persistent body data
+	if(persist.body_data != "")
+		var/body_list = json_decode(persist.body_data)
+		log_debug("Body data found: [body_list]")
+		H.deserialize(body_list)
+	else
+		log_debug("No body data found!")
+		copy_to(H)
 
 /datum/preferences/proc/open_load_dialog(mob/user)
 

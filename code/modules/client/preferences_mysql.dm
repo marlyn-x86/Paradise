@@ -296,7 +296,7 @@
 	if(!player_alt_titles) player_alt_titles = new()
 	if(!organ_data) src.organ_data = list()
 	if(!rlimb_data) src.rlimb_data = list()
-
+	persist.load(C, slot)
 	return 1
 
 /datum/preferences/proc/save_character(client/C)

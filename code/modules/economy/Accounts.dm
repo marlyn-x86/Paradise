@@ -183,6 +183,18 @@ var/global/list/all_money_accounts = list()
 		to_chat(usr, "<span class='warning'>Insufficient funds in account.</span>")
 		return 0
 
+/datum/money_account/proc/serialize()
+	var/list/data = list()
+	data["money"] = money
+	// Later I can bother making account logs persistent
+	return data
+
+/datum/money_account/proc/deserialize(list/data)
+	if(isnum(data["money"]))
+		money = data["money"]
+	else
+		log_debug("Account [src] did not have a valid money value when deserializing")
+
 /datum/transaction
 	var/target_name = ""
 	var/purpose = ""

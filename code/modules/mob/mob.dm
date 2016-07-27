@@ -980,9 +980,7 @@ var/list/slot_equipment_priority = list( \
 
 // this function displays the shuttles ETA in the status panel if the shuttle has been called
 /mob/proc/show_stat_emergency_shuttle_eta()
-	var/ETA = shuttle_master.emergency.getModeStr()
-	if(ETA)
-		stat(null, "[ETA] [shuttle_master.emergency.getTimerStr()]")
+		stat(null, "Shuttle not implemented")
 
 /mob/proc/add_stings_to_statpanel(var/list/stings)
 	for(var/obj/effect/proc_holder/changeling/S in stings)

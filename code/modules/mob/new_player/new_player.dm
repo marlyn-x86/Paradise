@@ -418,7 +418,7 @@
 	if(ticker.random_players || appearance_isbanned(new_character))
 		client.prefs.random_character()
 		client.prefs.real_name = random_name(client.prefs.gender)
-	client.prefs.copy_to(new_character)
+	client.prefs.load_to_human(new_character)
 
 	to_chat(src, sound(null, repeat = 0, wait = 0, volume = 85, channel = 1))// MAD JAMS cant last forever yo
 

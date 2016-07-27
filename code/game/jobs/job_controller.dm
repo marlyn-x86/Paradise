@@ -420,6 +420,8 @@ var/global/datum/controller/occupations/job_master
 			H.mind.store_memory(remembered_info)
 
 			H.mind.initial_account = M
+			if(H.client)
+				H.mind.initial_account.money = H.client.prefs.persist.money
 
 		// If they're head, give them the account info for their department
 		if(H.mind && job.head_position)

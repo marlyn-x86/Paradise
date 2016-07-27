@@ -71,14 +71,15 @@
 	// the world.time since the mob has been brigged, or -1 if not at all
 	var/brigged_since = -1
 
-	New(var/key, var/ckey, var/slot)
-		src.key = key
-		src.ckey = ckey
-		src.slot = slot
-
 	//put this here for easier tracking ingame
 	var/datum/money_account/initial_account
 	var/wage = 0
+
+/datum/mind/New(var/key, var/ckey, var/slot)
+	src.key = key
+	src.ckey = ckey
+	src.slot = slot
+	created_characters |= src
 
 /datum/mind/proc/transfer_to(mob/living/new_character)
 	if(!istype(new_character))
@@ -1525,6 +1526,8 @@
 /mob/proc/mind_initialize()
 	if(mind)
 		mind.key = key
+		mind.ckey = ckey
+		mind.slot = client.prefs.default_slot
 	else
 		mind = new /datum/mind(key, ckey, client.prefs.default_slot)
 		if(ticker)

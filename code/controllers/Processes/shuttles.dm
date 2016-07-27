@@ -58,7 +58,8 @@ var/const/CALL_SHUTTLE_REASON_LENGTH = 12
 		var/datum/supply_packs/P = new typepath()
 		if(P.name == "HEADER") continue		// To filter out group headers
 		supply_packs["[P.type]"] = P
-	initial_move()
+// disabled, for now
+//	initial_move()
 
 /datum/controller/process/shuttle/doWork()
 	points += points_per_decisecond * schedule_interval

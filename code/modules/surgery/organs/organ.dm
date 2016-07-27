@@ -63,6 +63,11 @@ var/list/organ_cache = list()
 			blood_DNA = list()
 		blood_DNA[dna.unique_enzymes] = dna.b_type
 
+/obj/item/organ/proc/sync_to_human(var/mob/living/carbon/human/H)
+	set_dna(H.dna)
+	species = all_species[dna.species]
+
+
 /obj/item/organ/proc/die()
 	if(status & ORGAN_ROBOT)
 		return
@@ -335,3 +340,31 @@ I use this so that this can be made better once the organ overhaul rolls out -- 
 	if (!istype(owner)) // You're not the primary organ of ANYTHING, bucko
 		return 0
 	return src == O.get_int_organ(organ_tag)
+
+/obj/item/organ/serialize()
+	var/data = ..()
+	if(status != 0)
+		data["status"] = status
+	if(robotic > 0)
+		data["robotic"] = robotic
+
+	// Save the DNA datum if: The owner doesn't exist, or the dna doesn't match
+	// the owner
+	if(!(owner && dna.unique_enzymes == owner.dna.unique_enzymes))
+		data["dna"] = dna.serialize()
+	return data
+
+/obj/item/organ/deserialize(var/data)
+	switch(data["robotic"])
+		if(1)
+			mechassist()
+		if(2)
+			robotize()
+		else
+			// Nothing
+	if(isnum(data["status"]))
+		status = data["status"]
+	if(islist(data["dna"]))
+		dna.deserialize(data["dna"]) // The only thing the official proc does is
+																 // instantiate the list and call this proc
+	..()

@@ -89,16 +89,8 @@
 			return 1
 		if(STATUS_DISPLAY_TRANSFER_SHUTTLE_TIME)				//emergency shuttle timer
 			var/use_warn = 0
-			if(shuttle_master.emergency.timer)
-				use_warn = 1
-				message1 = "-[shuttle_master.emergency.getModeStr()]-"
-				message2 = shuttle_master.emergency.getTimerStr()
-
-				if(length(message2) > CHARS_PER_LINE)
-					message2 = "Error!"
-			else
-				message1 = "TIME"
-				message2 = worldtime2text()
+			message1 = "TIME"
+			message2 = worldtime2text()
 			update_display(message1, message2, use_warn)
 			return 1
 		if(STATUS_DISPLAY_MESSAGE)	//custom messages
