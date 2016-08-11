@@ -640,3 +640,9 @@ proc/dd_sortedObjectList(list/incoming)
 
 // LAZYING PT 2: THE LAZENING
 #define LAZYREINITLIST(L) LAZYCLEARLIST(L); LAZYINITLIST(L);
+
+//Return a list with no duplicate entries
+/proc/uniqueList(list/L)
+	. = list()
+	for(var/i in L)
+		. |= i
