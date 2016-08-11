@@ -46,8 +46,10 @@
 	OpenFire()
 
 /mob/living/simple_animal/hostile/asteroid/hivelord/death(gibbed)
+	. = ..(gibbed)
+	if(!.)
+		return
 	mouse_opacity = 1
-	..(gibbed)
 
 /obj/item/organ/internal/hivelord_core
 	name = "hivelord remains"
@@ -163,9 +165,11 @@
 	color = "#C80000"
 
 /mob/living/simple_animal/hostile/asteroid/hivelordbrood/blood/death()
+	. = ..()
+	if(!.)
+		return
 	if(loc) // Splash the turf we are on with blood
 		reagents.reaction(get_turf(src))
-	..()
 
 /mob/living/simple_animal/hostile/asteroid/hivelordbrood/blood/New()
 	create_reagents(30)
@@ -233,6 +237,9 @@
 	var/mob/living/carbon/human/stored_mob
 
 /mob/living/simple_animal/hostile/asteroid/hivelord/legion/death(gibbed)
+	. = ..(gibbed)
+	if(!.)
+		return
 	visible_message("<span class='warning'>The skulls on [src] wail in anger as they flee from their dying host!</span>")
 	var/turf/T = get_turf(src)
 	if(T)
@@ -241,7 +248,6 @@
 			stored_mob = null
 		else
 			new /obj/effect/landmark/corpse/damaged(T)
-	..(gibbed)
 
 
 /mob/living/simple_animal/hostile/asteroid/hivelordbrood/legion

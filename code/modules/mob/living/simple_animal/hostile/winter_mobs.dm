@@ -42,9 +42,7 @@
 		loot.Add(/obj/structure/snowman)
 		deathmessage = "shimmers as its animating magic fades away!"
 		del_on_death = 1
-		..()		//this is just to make sure it gets properly killed before we qdel it
-	else
-		..()
+	. = ..()
 
 /mob/living/simple_animal/hostile/winter/snowman/ranged
 	maxHealth = 50
@@ -79,7 +77,9 @@
 	icon_dead = "santa-dead"
 
 /mob/living/simple_animal/hostile/winter/santa/death(gibbed)
-	..()
+	. = ..()
+	if(!.)
+		return
 	if(death_message)
 		visible_message(death_message)
 	if(next_stage)
@@ -133,11 +133,13 @@
 	melee_damage_upper = 30		//that's gonna leave a mark, for sure
 
 /mob/living/simple_animal/hostile/winter/santa/stage_4/death(gibbed)
+	. = ..()
+	if(!.)
+		return
 	to_chat(world, "<span class='notice'><hr></span>")
 	to_chat(world, "<span class='notice'>THE FAT MAN HAS FALLEN!</span>")
 	to_chat(world, "<span class='notice'>SANTA CLAUS HAS BEEN DEFEATED!</span>")
 	to_chat(world, "<span class='notice'><hr></span>")
-	..()
 	var/obj/item/grenade/clusterbuster/xmas/X = new /obj/item/grenade/clusterbuster/xmas(get_turf(src))
 	var/obj/item/grenade/clusterbuster/xmas/Y = new /obj/item/grenade/clusterbuster/xmas(get_turf(src))
 	X.prime()

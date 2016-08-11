@@ -790,7 +790,6 @@
 	flags = NODROP
 	has_sensor = 0 // HUNKE
 
-
 /obj/item/clothing/under/victdress
 	name = "black victorian dress"
 	desc = "A victorian style dress, fancy!"
@@ -832,3 +831,10 @@
 	item_state = "medicalgown"
 	item_color = "medicalgown"
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO
+
+/obj/item/clothing/under/burial
+	name = "burial garments"
+	desc = "Traditional burial garments from the early 22nd century."
+	icon_state = "burial"
+	item_state = "burial"
+	item_color = "burial"

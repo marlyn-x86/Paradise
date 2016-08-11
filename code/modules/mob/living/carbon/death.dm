@@ -1,4 +1,7 @@
 /mob/living/carbon/death(gibbed)
+	. = ..(gibbed)
+	if(!.)
+		return
 	SetLoseBreath(0)
 	med_hud_set_health()
 	med_hud_set_status()

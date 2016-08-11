@@ -31,10 +31,12 @@
 	..()
 
 /mob/living/simple_animal/hostile/poison/terror_spider/white/death(gibbed)
+	. = ..()
+	if(!.)
+		return
 	if(!hasdied)
 		if(spider_uo71)
 			UnlockBlastDoors("UO71_Bridge")
-	..()
 
 /mob/living/simple_animal/hostile/poison/terror_spider/white/spider_specialattack(mob/living/carbon/human/L, poisonable)
 	if(!poisonable)

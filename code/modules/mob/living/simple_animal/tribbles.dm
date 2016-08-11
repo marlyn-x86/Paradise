@@ -80,7 +80,9 @@ var/global/totaltribbles = 0   //global variable so it updates for all tribbles,
 
 
 /mob/living/simple_animal/tribble/death(gibbed) // Gotta make sure to remove tribbles from the list on death
-	..()
+	. = ..()
+	if(!.)
+		return
 	totaltribbles -= 1
 
 

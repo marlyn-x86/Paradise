@@ -24,32 +24,32 @@
 
 /mob/living/silicon/robot/dust()
 	death(1)
-	var/atom/movable/overlay/animation = null
 	notransform = 1
 	canmove = 0
 	icon = null
 	invisibility = 101
+	if(mmi)
+		qdel(mmi)	//Delete the MMI first so that it won't go popping out.
+	dead_mob_list -= src
+	spawn(15)
+		if(src)
+			qdel(src)
 
+/mob/living/silicon/robot/dust_animation()
+	var/atom/movable/overlay/animation = null
 	animation = new(loc)
 	animation.icon_state = "blank"
 	animation.icon = 'icons/mob/mob.dmi'
 	animation.master = src
-
 	flick("dust-r", animation)
 	new /obj/effect/decal/remains/robot(loc)
-	if(mmi)		qdel(mmi)	//Delete the MMI first so that it won't go popping out.
-
-	dead_mob_list -= src
 	spawn(15)
 		if(animation)	qdel(animation)
-		if(src)			qdel(src)
-
 
 /mob/living/silicon/robot/death(gibbed)
-	if(stat == DEAD)	return
-	if(!gibbed)
-		emote("deathgasp")
-	stat = DEAD
+	. = ..()
+	if(!.)
+		return
 	update_canmove()
 	if(camera)
 		camera.status = 0
@@ -67,5 +67,3 @@
 	if(mind)	mind.store_memory("Time of death: [station_time_timestamp("hh:mm:ss", timeofdeath)]", 0)
 
 	sql_report_cyborg_death(src)
-
-	return ..(gibbed)

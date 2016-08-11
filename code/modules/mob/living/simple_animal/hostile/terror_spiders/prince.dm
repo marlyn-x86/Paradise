@@ -36,10 +36,12 @@
 	thickweb_action.Grant(src)
 
 /mob/living/simple_animal/hostile/poison/terror_spider/prince/death(gibbed)
+	. = ..()
+	if(!.)
+		return
 	if(!hasdied)
 		if(spider_uo71)
 			UnlockBlastDoors("UO71_SciStorage")
-	..()
 
 /mob/living/simple_animal/hostile/poison/terror_spider/prince/spider_specialattack(mob/living/carbon/human/L)
 	if(prob(15))

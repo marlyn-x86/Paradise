@@ -203,7 +203,7 @@
 
 /mob/living/simple_animal/bot/death(gibbed)
 	explode()
-	..()
+	. = ..()
 
 /mob/living/simple_animal/bot/proc/explode()
 	qdel(src)

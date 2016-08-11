@@ -1,4 +1,11 @@
 /mob/living/death(gibbed)
+	. = ..(gibbed)
+	if(!.)
+		return
+
+	if(!gibbed && deathgasp_on_death)
+		emote("deathgasp")
+
 	blinded = max(blinded, 1)
 
 	if(suiciding)
@@ -16,5 +23,7 @@
 
 	med_hud_set_health()
 	med_hud_set_status()
+	if(mind && mind.devilinfo) // Expand this into a general-purpose death-response system when appropriate
+		mind.devilinfo.beginResurrectionCheck(src)
 
 	..(gibbed)

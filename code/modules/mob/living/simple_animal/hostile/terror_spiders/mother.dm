@@ -33,6 +33,9 @@
 	ventsmash_action.Grant(src)
 
 /mob/living/simple_animal/hostile/poison/terror_spider/mother/death(gibbed)
+	. = ..()
+	if(!.)
+		return
 	var/always_stillborn = FALSE
 	if(spider_awaymission && !is_away_level(z))
 		always_stillborn = TRUE
@@ -49,7 +52,6 @@
 			S.immediate_ventcrawl = 1
 		visible_message("<span class='userdanger'>[src] breaks apart, the many spiders on its back scurrying everywhere!</span>")
 		degenerate = 1
-	..()
 
 /mob/living/simple_animal/hostile/poison/terror_spider/mother/Destroy()
 	canspawn = 0
