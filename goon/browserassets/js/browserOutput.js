@@ -39,6 +39,8 @@ var opts = {
 	'highlightTerms': [],
 	'highlightLimit': 5,
 	'highlightColor': '#FFFF00', //The color of the highlighted message
+	'persistentHighlight': [],
+	'tempHighlight': [],
 	'pingDisabled': false, //Has the user disabled the ping counter
 
 	//Ping display
@@ -113,6 +115,11 @@ function highlightTerms(el) {
 			element.mark(opts.highlightTerms[i], {"element" : "span", "each" : setHighlightColor});
 		}
 	}
+}
+
+function rebuildHighlights()
+{
+	opts.highlightTerms = persistentHighlight.concat(opts.tempHighlight)
 }
 
 //Send a message to the client
@@ -215,7 +222,7 @@ function output(message, flag) {
 		message = linkify(message);
 	}
 
-	opts.messageCount++;	
+	opts.messageCount++;
 
 	//Actually append the message
 	var entry = document.createElement('div');
@@ -389,6 +396,10 @@ function ehjaxCallback(data) {
 			}
 			output(message, 'preventLink');
 		}
+		else if (data.addTempHighlight) {
+			opts.tempHighlight.push(data.addTempHighlight);
+			rebuildHighlights();
+		}
 	}
 }
 
@@ -514,7 +525,9 @@ $(function() {
 		if (actualTerms) {
 			actualTerms = actualTerms.substring(0, actualTerms.length - 2);
 			output('<span class="internal boldnshit">Loaded highlight strings of: ' + actualTerms+'</span>', 'internal');
-			opts.highlightTerms = savedTerms;
+			opts.persistentHighlight = savedTerms;
+			// Updates `opts.highlightTerms`
+			rebuildHighlights()
 		}
 	}
 	if (savedConfig.shighlightColor) {
@@ -606,7 +619,7 @@ $(function() {
 		}
 
 		e.preventDefault()
-		
+
 		var k = e.which;
 		var command; // Command to execute through winset.
 
@@ -827,7 +840,7 @@ $(function() {
 		if ($('.popup .highlightTerm').is(':visible')) {return;}
 		var termInputs = '';
 		for (var i = 0; i < opts.highlightLimit; i++) {
-			termInputs += '<div><input type="text" name="highlightTermInput'+i+'" id="highlightTermInput'+i+'" class="highlightTermInput'+i+'" maxlength="255" value="'+(opts.highlightTerms[i] ? opts.highlightTerms[i] : '')+'" /></div>';
+			termInputs += '<div><input type="text" name="highlightTermInput'+i+'" id="highlightTermInput'+i+'" class="highlightTermInput'+i+'" maxlength="255" value="'+(opts.persistentHighlight[i] ? opts.persistentHighlight[i] : '')+'" /></div>';
 		}
 		var popupContent = '<div class="head">String Highlighting</div>' +
 			'<div class="highlightPopup" id="highlightPopup">' +
@@ -858,15 +871,16 @@ $(function() {
 			if (term) {
 				term = term.trim();
 				if (term === '') {
-					opts.highlightTerms[count] = null;
+					opts.persistentHighlight[count] = null;
 				} else {
-					opts.highlightTerms[count] = term.toLowerCase();
+					opts.persistentHighlight[count] = term.toLowerCase();
 				}
 			} else {
-				opts.highlightTerms[count] = null;
+				opts.persistentHighlight[count] = null;
 			}
 			count++;
 		}
+		rebuildHighlights()
 
 		var color = $('#highlightColor').val();
 		color = color.trim();
@@ -878,7 +892,7 @@ $(function() {
 		var $popup = $('#highlightPopup').closest('.popup');
 		$popup.remove();
 
-		setCookie('highlightterms', JSON.stringify(opts.highlightTerms), 365);
+		setCookie('highlightterms', JSON.stringify(opts.persistentHighlight), 365);
 		setCookie('highlightcolor', opts.highlightColor, 365);
 	});
 

@@ -1474,3 +1474,12 @@ But you can call procs that are of type /mob/living/carbon/human/proc/ for that 
 		return
 
 	error_cache.showTo(usr)
+
+/client/verb/add_to_highlight()
+	set category = "Debug"
+	set name = "Add a highlight"
+	set desc = "Add a highlight"
+
+	var/word = input("Yeah", "Yeah", "banana") as text
+	chatOutput.addHighlight(word)
+	to_chat(src, "[word] added to highlights")

@@ -116,6 +116,10 @@ var/list/chatResources = list(
 		data = json_encode(data)
 	C << output("[data]", "[window]:ehjaxCallback")
 
+/datum/chatOutput/proc/addHighlight(word)
+	var/list/highlightdata = list()
+	highlightdata["addTempHighlight"] = word
+	ehjax_send(data = json_encode(highlightdata))
 
 /datum/chatOutput/proc/sendClientData()
 	var/list/deets = list("clientData" = list())
