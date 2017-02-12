@@ -128,7 +128,8 @@ var/world_topic_spam_protect_time = world.timeofday
 			if(C.holder)
 				if(C.holder.fakekey)
 					continue	//so stealthmins aren't revealed by the hub
-				admin_count++
+				if(check_rights_for(C, R_BAN) && !C.afk())
+					admin_count++
 				admins += list(list(C.key, C.holder.rank))
 			s["player[player_count]"] = C.key
 			player_count++
