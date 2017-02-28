@@ -2,25 +2,25 @@
 	var/name = "Naked"
 	var/collect_not_del = FALSE
 
-	var/uniform = null
-	var/suit = null
-	var/back = null
-	var/belt = null
-	var/gloves = null
-	var/shoes = null
-	var/head = null
-	var/mask = null
-	var/l_ear = null
-	var/r_ear = null
-	var/glasses = null
-	var/id = null
-	var/l_pocket = null
-	var/r_pocket = null
-	var/suit_store = null
-	var/l_hand = null
-	var/r_hand = null
-	var/pda = null
-	var/internals_slot = null //ID of slot containing a gas tank
+	var/obj/item/uniform = null
+	var/obj/item/suit = null
+	var/obj/item/back = null
+	var/obj/item/belt = null
+	var/obj/item/gloves = null
+	var/obj/item/shoes = null
+	var/obj/item/head = null
+	var/obj/item/mask = null
+	var/obj/item/l_ear = null
+	var/obj/item/r_ear = null
+	var/obj/item/glasses = null
+	var/obj/item/id = null
+	var/obj/item/l_pocket = null
+	var/obj/item/r_pocket = null
+	var/obj/item/suit_store = null
+	var/obj/item/l_hand = null
+	var/obj/item/r_hand = null
+	var/obj/item/pda = null
+	var/obj/item/internals_slot = null //ID of slot containing a gas tank
 	var/list/backpack_contents = list() // In the list(path=count,otherpath=count) format
 
 

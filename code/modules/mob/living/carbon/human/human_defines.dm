@@ -23,7 +23,7 @@ var/global/default_martial_art = new/datum/martial_art
 	var/underwear = "Nude"	//Which underwear the player wants
 	var/undershirt = "Nude"	//Which undershirt the player wants
 	var/socks = "Nude" //Which socks the player wants
-	var/backbag = 2		//Which backpack type the player has chosen. Nothing, Satchel or Backpack.
+	var/backbag = GBACKPACK		//Which backpack type the player has chosen. Nothing, Satchel or Backpack.
 
 	//Equipment slots
 	var/obj/item/w_uniform = null

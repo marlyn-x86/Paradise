@@ -10,6 +10,7 @@
 	minimal_player_age = 30
 	exp_requirements = 1200
 	exp_type = EXP_TYPE_CREW
+	outfit = /datum/outfit/job/ai
 
 /datum/job/ai/equip(mob/living/carbon/human/H)
 	if(!H)
@@ -31,6 +32,7 @@
 	exp_requirements = 300
 	exp_type = EXP_TYPE_CREW
 	alt_titles = list("Android", "Robot")
+	outfit = /datum/outfit/job/cyborg
 
 /datum/job/cyborg/equip(mob/living/carbon/human/H)
 	if(!H)

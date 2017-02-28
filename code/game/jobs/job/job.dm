@@ -112,6 +112,14 @@
 /datum/job/proc/is_position_available()
 	return (current_positions < total_positions) || (total_positions == -1)
 
+/datum/job/proc/apply_preview_icon(icon/base_icon, backbag, fat)
+	if(!outfit)
+		return
+	var/datum/outfit/O = new outfit
+	O.generate_preview_overlay(base_icon, backbag, fat)
+	qdel(O)
+
+
 /datum/outfit/job
 	name = "Standard Gear"
 	collect_not_del = TRUE // we don't want anyone to lose their job shit
@@ -127,9 +135,9 @@
 
 	var/list/implants = null
 
-	var/backpack = /obj/item/weapon/storage/backpack
-	var/satchel = /obj/item/weapon/storage/backpack/satchel_norm
-	var/dufflebag = /obj/item/weapon/storage/backpack/duffel
+	var/obj/item/backpack = /obj/item/weapon/storage/backpack
+	var/obj/item/satchel = /obj/item/weapon/storage/backpack/satchel_norm
+	var/obj/item/dufflebag = /obj/item/weapon/storage/backpack/duffel
 	var/box = /obj/item/weapon/storage/box/survival
 
 	var/tmp/list/gear_leftovers = list()

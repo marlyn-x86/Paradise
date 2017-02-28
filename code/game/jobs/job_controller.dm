@@ -49,6 +49,14 @@ var/global/datum/controller/occupations/job_master
 		SetupOccupations()
 	return name_occupations[rank]
 
+/datum/controller/occupations/proc/GetJobByID(rank_id, department)
+	if(!occupations.len)
+		SetupOccupations()
+	for(var/i in name_occupations)
+		var/datum/job/J = name_occupations[i]
+		if(department == J.department_flag && rank_id == J.flag)
+			return J
+
 /datum/controller/occupations/proc/GetJobType(jobtype)
 	if(!occupations.len)
 		SetupOccupations()
