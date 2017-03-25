@@ -35,15 +35,15 @@
 	inv_box.slot_id = slot_l_hand
 	static_inventory += inv_box
 
-	using = new /obj/screen/inventory()
+	using = new /obj/screen/swap_hand()
 	using.name = "hand"
 	using.icon = ui_style
-	using.icon_state = "swap_1_m"
+	using.icon_state = "swap_1"
 	using.screen_loc = ui_swaphand1
 	using.layer = 19
 	static_inventory += using
 
-	using = new /obj/screen/inventory()
+	using = new /obj/screen/swap_hand()
 	using.name = "hand"
 	using.icon = ui_style
 	using.icon_state = "swap_2"

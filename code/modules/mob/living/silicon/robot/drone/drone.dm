@@ -229,7 +229,7 @@
 		var/obj/item/weapon/gripper/G = locate(/obj/item/weapon/gripper) in module
 		if(G) G.drop_item()
 
-	..(gibbed)
+	. = ..(gibbed)
 
 
 //CONSOLE PROCS

@@ -113,11 +113,13 @@
 	return ..()
 
 /mob/living/simple_animal/parrot/death(gibbed)
+	. = ..()
+	if(!.)
+		return
 	if(held_item)
 		held_item.loc = src.loc
 		held_item = null
 	walk(src,0)
-	..()
 
 /mob/living/simple_animal/parrot/Stat()
 	..()

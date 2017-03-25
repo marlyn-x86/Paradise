@@ -461,6 +461,9 @@
 	stat(null, "Health: [round((health / maxHealth) * 100)]%")
 
 /mob/living/simple_animal/death(gibbed)
+	.	= ..()
+	if(!.)
+		return
 	if(nest)
 		nest.spawned_mobs -= src
 		nest = null
@@ -483,7 +486,6 @@
 		stat = DEAD
 		density = 0
 		lying = 1
-	..()
 
 /mob/living/simple_animal/ex_act(severity)
 	..()

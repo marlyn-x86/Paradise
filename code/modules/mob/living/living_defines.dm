@@ -61,3 +61,5 @@
 	var/list/say_log = list() //a log of what we've said, plain text, no spans or junk, essentially just each individual "message"
 	// Set this when you want to stash a mob somewhere but not check if it can breathe or anything
 	var/deactivate_life = FALSE
+
+	var/deathgasp_on_death = FALSE

@@ -122,6 +122,9 @@
 	return 1
 
 /mob/living/carbon/gib()
+	. = death(1)
+	if(!.)
+		return
 	for(var/obj/item/organ/internal/I in internal_organs)
 		if(isturf(loc))
 			I.remove(src)
@@ -134,7 +137,6 @@
 			src.stomach_contents.Remove(M)
 		M.forceMove(get_turf(src))
 		visible_message("<span class='danger'>[M] bursts out of [src]!</span>")
-	. = ..()
 
 /mob/living/carbon/electrocute_act(shock_damage, obj/source, siemens_coeff = 1, override = 0, tesla_shock = 0)
 	if(status_flags & GODMODE)	//godmode

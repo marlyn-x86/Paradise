@@ -33,6 +33,9 @@
 
 
 /mob/living/simple_animal/hostile/poison/terror_spider/purple/death(gibbed)
+	. = ..()
+	if(!.)
+		return
 	if(spider_myqueen)
 		var/mob/living/simple_animal/hostile/poison/terror_spider/queen/Q = spider_myqueen
 		if(Q.stat != DEAD && !Q.ckey)
@@ -41,7 +44,6 @@
 					degenerate = 1
 					Q.DoLayTerrorEggs(/mob/living/simple_animal/hostile/poison/terror_spider/purple,1,0)
 					visible_message("<span class='notice'>[src] chitters in the direction of [Q]!</span>")
-	. = ..()
 
 /mob/living/simple_animal/hostile/poison/terror_spider/purple/spider_specialattack(mob/living/carbon/human/L, poisonable)
 	if(cycles_noqueen < 6 && prob(10))

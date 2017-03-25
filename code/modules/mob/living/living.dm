@@ -391,12 +391,7 @@
 
 	restore_all_organs()
 	surgeries.Cut() //End all surgeries.
-	if(stat == DEAD)
-		dead_mob_list -= src
-		living_mob_list += src
-		timeofdeath = 0
-
-	stat = CONSCIOUS
+	update_revive()
 	update_fire()
 	regenerate_icons()
 	if(human_mob)

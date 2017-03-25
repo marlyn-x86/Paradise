@@ -4,6 +4,7 @@
 	voice_name = "unknown"
 	icon = 'icons/mob/human.dmi'
 	icon_state = "body_m_s"
+	deathgasp_on_death = TRUE
 
 	//why are these here and not in human_defines.dm
 	//var/list/hud_list[10]
@@ -1310,7 +1311,6 @@
 	restore_all_organs() //Rejuvenate and reset all existing organs.
 	check_and_regenerate_organs(src) //Regenerate limbs and organs only if they're really missing.
 	surgeries.Cut() //End all surgeries.
-	update_revive()
 
 	if(species.name != "Skeleton" && (SKELETON in mutations))
 		mutations.Remove(SKELETON)
@@ -2197,4 +2197,3 @@
 /mob/living/carbon/human/fakefireextinguish()
 	overlays_standing[FIRE_LAYER] = null
 		update_icons()
-

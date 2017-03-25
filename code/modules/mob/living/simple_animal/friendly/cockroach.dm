@@ -23,8 +23,8 @@
 
 /mob/living/simple_animal/cockroach/death(gibbed)
 	if(ticker.cinematic) //If the nuke is going off, then cockroaches are invincible. Keeps the nuke from killing them, cause cockroaches are immune to nukes.
-		return
-	..()
+		return 0
+	. = ..()
 
 /mob/living/simple_animal/cockroach/Crossed(var/atom/movable/AM)
 	if(isliving(AM))

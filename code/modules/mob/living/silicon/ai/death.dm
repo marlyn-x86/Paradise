@@ -1,5 +1,6 @@
 /mob/living/silicon/ai/death(gibbed)
-	if(stat == DEAD)
+	. = ..()
+	if(!.)
 		return
 	stat = DEAD
 	if(custom_sprite == 1)//check for custom AI sprite, defaulting to blue screen if no.
@@ -45,5 +46,3 @@
 
 	timeofdeath = world.time
 	if(mind)	mind.store_memory("Time of death: [worldtime2text(timeofdeath)]", 0)
-
-	return ..(gibbed)

@@ -827,6 +827,6 @@
 		var/turf/simulated/wall/W = target
 		user.visible_message("<span class='danger'>[user] blasts \the [target] with \the [src]!</span>")
 		playsound(target, 'sound/magic/Disintegrate.ogg', 100, 1)
-		W.take_damage(120)
+		W.devastate_wall(TRUE)
 		return 1
 	..()

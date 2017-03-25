@@ -1,5 +1,7 @@
 /mob/living/carbon/human/gib()
-	death(1)
+	. = death(1)
+	if(!.)
+		return
 	var/atom/movable/overlay/animation = null
 	notransform = 1
 	canmove = 0
@@ -50,7 +52,9 @@
 		if(src)			qdel(src)
 
 /mob/living/carbon/human/dust()
-	death(1)
+	. = death(1)
+	if(!.)
+		return
 	notransform = 1
 	canmove = 0
 	icon = null
@@ -72,7 +76,7 @@
 	new species.remains_type(get_turf(src))
 	spawn(15)
 		if(animation)	qdel(animation)
-	
+
 
 
 /mob/living/carbon/human/melt()
@@ -96,13 +100,11 @@
 		if(src)			qdel(src)
 
 /mob/living/carbon/human/death(gibbed)
-	if(stat == DEAD)	return
+	. = ..(gibbed)
+	if(!.)
+		return
 	if(healths)		healths.icon_state = "health5"
 
-	if(!gibbed)
-		emote("deathgasp") //let the world KNOW WE ARE DEAD
-
-	stat = DEAD
 	SetDizzy(0)
 	SetJitter(0)
 	heart_attack = 0
@@ -145,10 +147,6 @@
 
 	if(wearing_rig)
 		wearing_rig.notify_ai("<span class='danger'>Warning: user death event. Mobility control passed to integrated intelligence system.</span>")
-	if(mind && mind.devilinfo)
-		spawn(0)
-			mind.devilinfo.beginResurrectionCheck(src)
-	return ..(gibbed)
 
 /mob/living/carbon/human/update_revive()
 	..()

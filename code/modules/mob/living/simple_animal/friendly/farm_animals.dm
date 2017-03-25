@@ -248,7 +248,9 @@ var/global/chicken_count = 0
 	chicken_count += 1
 
 /mob/living/simple_animal/chicken/death(gibbed)
-	..(gibbed)
+	. = ..(gibbed)
+	if(!.)
+		return
 	chicken_count -= 1
 
 /mob/living/simple_animal/chicken/attackby(obj/item/O, mob/user, params)

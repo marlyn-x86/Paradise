@@ -2,6 +2,8 @@
 //added different sort of gibs and animations. N
 /mob/proc/gib()
 	death(1)
+	if(stat != DEAD)
+		return
 	var/atom/movable/overlay/animation = null
 	notransform = 1
 	canmove = 0
@@ -30,6 +32,8 @@
 //Dusting robots does not eject the MMI, so it's a bit more powerful than gib() /N
 /mob/proc/dust()
 	death(1)
+	if(stat != DEAD)
+		return
 	icon = null
 	invisibility = 101
 	dust_animation()
@@ -50,10 +54,12 @@
 	new /obj/effect/decal/cleanable/ash(loc)
 	spawn(15)
 		if(animation)	qdel(animation)
-	
+
 
 /mob/proc/melt()
 	death(1)
+	if(stat != DEAD)
+		return
 	var/atom/movable/overlay/animation = null
 	notransform = 1
 	canmove = 0
@@ -76,6 +82,8 @@
 		if(src)			qdel(src)
 
 /mob/proc/death(gibbed)
+	if(stat == DEAD || status_flags & GODMODE)
+		return 0 // Didn't cause transition from living->dead
 
 	//Makes it so gib/dust/melt all unbuckle their victims from anything they may be buckled to to avoid breaking beds/chairs/etc
 	if(gibbed && buckled)
@@ -88,8 +96,10 @@
 
 	timeofdeath = world.time
 
+	stat = DEAD
+
 	living_mob_list -= src
 	dead_mob_list += src
 	if(client)
 		respawnable_list += src
-	return ..(gibbed)
+	return TRUE

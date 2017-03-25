@@ -81,6 +81,9 @@
 					to_chat(src, "<span class='notice'>You have [canlay] eggs available to lay.</span>")
 
 /mob/living/simple_animal/hostile/poison/terror_spider/queen/death(gibbed)
+	. = ..()
+	if(!.)
+		return
 	if(!hasdied)
 		SetHiveCommand(0, 15) // Hive becomes very aggressive.
 		if(spider_uo71)
@@ -91,7 +94,6 @@
 				P.visible_message("<span class='danger'>\The [src] writhes in pain!</span>")
 				to_chat(P,"<span class='userdanger'>\The [src] has died. Without her hivemind link, purple terrors like yourself cannot survive more than a few minutes!</span>")
 				P.degenerate = 1
-	..()
 
 /mob/living/simple_animal/hostile/poison/terror_spider/queen/Retaliate()
 	..()

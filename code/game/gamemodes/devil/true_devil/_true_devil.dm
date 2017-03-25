@@ -73,12 +73,9 @@
 
 
 /mob/living/carbon/true_devil/death(gibbed)
-	stat = DEAD
-	..(gibbed)
+	. = ..(gibbed)
 	drop_l_hand()
 	drop_r_hand()
-	spawn (0)
-		mind.devilinfo.beginResurrectionCheck(src)
 
 
 /mob/living/carbon/true_devil/examine(mob/user)

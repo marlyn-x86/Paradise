@@ -32,7 +32,7 @@
 		qdel(mmi)	//Delete the MMI first so that it won't go popping out.
 	dead_mob_list -= src
 	spawn(15)
-		if(src)			
+		if(src)
 			qdel(src)
 
 /mob/living/silicon/robot/dust_animation()
@@ -47,10 +47,9 @@
 		if(animation)	qdel(animation)
 
 /mob/living/silicon/robot/death(gibbed)
-	if(stat == DEAD)	return
-	if(!gibbed)
-		emote("deathgasp")
-	stat = DEAD
+	. = ..()
+	if(!.)
+		return
 	update_canmove()
 	if(camera)
 		camera.status = 0
@@ -68,5 +67,3 @@
 	if(mind)	mind.store_memory("Time of death: [worldtime2text(timeofdeath)]", 0)
 
 	sql_report_cyborg_death(src)
-
-	return ..(gibbed)

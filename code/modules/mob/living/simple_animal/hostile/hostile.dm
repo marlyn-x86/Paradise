@@ -291,6 +291,9 @@
 //////////////END HOSTILE MOB TARGETTING AND AGGRESSION////////////
 
 /mob/living/simple_animal/hostile/death(gibbed)
+	. = ..(gibbed)
+	if(!.)
+		return
 	LoseTarget()
 	..(gibbed)
 

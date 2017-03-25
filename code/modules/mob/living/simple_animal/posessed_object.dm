@@ -46,8 +46,10 @@
 
 
 /mob/living/simple_animal/possessed_object/death(gibbed)
+	. = ..()
+	if(!.)
+		return
 	var/mob/dead/observer/ghost = ghostize(1)
-	..()
 
 	if(gibbed) // Leave no trace.
 		ghost.timeofdeath = world.time

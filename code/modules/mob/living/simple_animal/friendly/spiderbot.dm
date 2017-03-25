@@ -208,13 +208,15 @@
 	..()
 
 /mob/living/simple_animal/spiderbot/death(gibbed)
+	. = ..()
+	if(!.)
+		return
 	if(camera)
 		camera.status = 0
 
 	if(held_item)
 		held_item.forceMove(src.loc)
 		held_item = null
-	..()
 
 //Cannibalized from the parrot mob. ~Zuhayr
 

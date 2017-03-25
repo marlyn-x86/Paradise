@@ -151,6 +151,13 @@ var/global/list/lawlorify = list (
 /proc/randomdevilbanish()
 	return pick(BANISH_WATER, BANISH_COFFIN, BANISH_FORMALDYHIDE, BANISH_RUNES, BANISH_CANDLES, BANISH_DESTRUCTION, BANISH_FUNERAL_GARB)
 
+/datum/devilinfo/proc/link_with_mob(mob/living/L)
+	if(istype(L, /mob/living/carbon/human))
+		var/mob/living/carbon/human/H = L
+		humanform = H.dna.Clone()
+	owner = L.mind
+	give_base_spells(1)
+
 /datum/devilinfo/proc/add_soul(datum/mind/soul)
 	if(soulsOwned.Find(soul))
 		return
@@ -176,8 +183,8 @@ var/global/list/lawlorify = list (
 
 /datum/devilinfo/proc/remove_soul(datum/mind/soul)
 	if(soulsOwned.Remove(soul))
-		check_regression()
 		to_chat(owner.current,"<span class='warning'>You feel as though a soul has slipped from your grasp.</span>")
+		check_regression()
 		update_hud()
 
 /datum/devilinfo/proc/check_regression()
@@ -348,10 +355,14 @@ var/global/list/lawlorify = list (
 	owner.AddSpell(new /obj/effect/proc_holder/spell/targeted/sintouch/ascended(null))
 
 /datum/devilinfo/proc/beginResurrectionCheck(mob/living/body)
+	set waitfor = FALSE
+	if(owner.current != body)
+		body = owner.current
+	// This proc sleeps, we don't want it holding up death calls
 	if(SOULVALUE>0)
-		to_chat(owner.current,"<span class='userdanger'>Your body has been damaged to the point that you may no longer use it.  At the cost of some of your power, you will return to life soon.  Remain in your body.</span>")
+		to_chat(owner.current,"<span class='userdanger'>Your body has been damaged to the point that you may no longer use it.  At the cost of some of your power, you will return to life soon.</span>")
 		sleep(DEVILRESURRECTTIME)
-		if (!body ||  body.stat == DEAD)
+		if(!body ||  body.stat == DEAD)
 			if(SOULVALUE>0)
 				if(check_banishment(body))
 					to_chat(owner.current,"<span class='userdanger'>Unfortunately, the mortals have finished a ritual that prevents your resurrection.</span>")
@@ -444,8 +455,16 @@ var/global/list/lawlorify = list (
 				return -1
 		currentMob.change_mob_type( /mob/living/carbon/human, targetturf, null, 1)
 		var/mob/living/carbon/human/H = owner.current
-		// TODO: Make this an outfit
-		give_summon_contract()
+		if(humanform)
+			H.set_species(humanform.species)
+			H.dna = humanform.Clone()
+
+			H.dna.UpdateSE()
+			H.dna.UpdateUI()
+
+			H.sync_organ_dna(1) // It's literally a fresh body as you can get, so all organs properly belong to it
+			H.UpdateAppearance()
+
 		H.equipOutfit(/datum/outfit/devil_lawyer)
 		if(SOULVALUE >= BLOOD_THRESHOLD)
 			increase_blood_lizard()
@@ -477,5 +496,29 @@ var/global/list/lawlorify = list (
 	name = "Devil Lawyer"
 	uniform = /obj/item/clothing/under/lawyer/black
 	shoes = /obj/item/clothing/shoes/laceup
+	back = /obj/item/weapon/storage/backpack
 	l_hand = /obj/item/weapon/storage/briefcase
 	l_pocket = /obj/item/weapon/pen
+	l_ear = /obj/item/device/radio/headset
+
+	id = /obj/item/weapon/card/id
+
+/datum/outfit/job/centcom/response_team/imprint_idcard(mob/living/carbon/human/H)
+
+/datum/outfit/devil_lawyer/post_equip(mob/living/carbon/human/H, visualsOnly = FALSE)
+	var/obj/item/weapon/card/id/W = H.wear_id
+	if(!istype(W))
+		return
+	var/name_to_use = H.real_name
+	if(H.mind && H.mind.devilinfo)
+		// Having hell create an ID for you causes its risks
+		name_to_use = H.mind.devilinfo.truename
+
+	W.name = "[name_to_use]'s ID Card (Lawyer)"
+	W.registered_name = name_to_use
+	W.assignment = "Lawyer"
+	W.rank = W.assignment
+	W.age = H.age
+	W.sex = capitalize(H.gender)
+	W.access = list(access_maint_tunnels, access_syndicate, access_external_airlocks)
+	W.photo = get_id_photo(H)
