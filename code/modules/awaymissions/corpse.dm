@@ -299,7 +299,7 @@
 	corpseuniform = /obj/item/clothing/under/color/grey
 	corpseshoes = /obj/item/clothing/shoes/combat
 
-/obj/effect/landmark/corpse/living/
+/obj/effect/landmark/corpse/living
 	createDead = FALSE
 
 /obj/effect/landmark/corpse/living/demonicFriend

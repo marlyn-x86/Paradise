@@ -82,13 +82,14 @@
 	if(!user.client)
 		return
 	var/mob/living/carbon/human/new_char = new(get_turf(src))
-	client.prefs.copy_to(new_char)
+	user.client.prefs.copy_to(new_char)
 	if(user.mind)
 		user.mind.active = 1
 		user.mind.transfer_to(new_char)
 
 /obj/structure/respawner/newbody/proc/makeBody()
-	return new var/mob/living/carbon/human(get_turf(src))
+	var/mob/living/carbon/human/H = new (get_turf(src))
+	return H
 
 /obj/structure/ghost_beacon
 	name = "ethereal beacon"
