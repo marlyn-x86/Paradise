@@ -41,3 +41,30 @@
 		if(!C.client)
 			continue
 		C.client.view = input("Select view range:", "Range", 4) in ranges
+
+/obj/effect/proc_holder/spell/targeted/summon_friend
+	name = "Summon Friend"
+	desc = "The reward for selling your soul."
+	invocation_type = "none"
+	include_user = 1
+	range = -1
+	clothes_req = 0
+	charge_max = 50
+	cooldown_min = 10
+	action_icon_state = "sacredflame"
+	var/mob/living/friend
+	var/obj/structure/demonic_friend_beacon/friendShell
+
+/obj/effect/proc_holder/spell/targeted/summon_friend/cast(list/targets, mob/user = usr)
+	if(!qdeleted(friend) && friend)
+		to_chat(friend, "<span class='userdanger'>Your master has deemed you a poor friend.  Your durance in hell will now resume.</span>")
+		friend.dust(TRUE)
+		qdel(friendShell)
+		return
+	if(!qdeleted(friendShell) && friendShell)
+		qdel(friendShell)
+		return
+	for(var/C in targets)
+		var/mob/living/L = C
+		friendShell = new(L.loc)
+		friendShell.initialize(L.mind, src)

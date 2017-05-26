@@ -4,6 +4,7 @@
 #define CONTRACT_MAGIC "magic"
 #define CONTRACT_REVIVE "revive"
 #define CONTRACT_KNOWLEDGE "knowledge"
+#define	CONTRACT_FRIEND "friendship"
 #define CONTRACT_UNWILLING "unwilling"
 
 #define BANE_SALT "salt"
