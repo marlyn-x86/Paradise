@@ -65,14 +65,30 @@
 	icon_state = "borgcharger1(old)"
 	anchored = 1
 	density = 1
+	var/message = "Are you sure you want to spawn like this?\n(If you do this, you won't be able to be cloned!)"
 
 /obj/structure/respawner/attack_ghost(mob/dead/observer/user as mob)
-	var/response = alert(user, "Are you sure you want to spawn like this?\n(If you do this, you won't be able to be cloned!)","Respawn?","Yes","No")
+	var/response = alert(user, message,"Respawn?","Yes","No")
 	if(response == "Yes")
 		user.forceMove(get_turf(src))
 		log_admin("[key_name(user)] was incarnated by a respawner machine.")
-		message_admins("[key_name_admin(user)] was incarnated by a respawner machine.")
-		user.incarnate_ghost()
+		message_admins("[key_name_admin(user)] was incarnated by [src]")
+		incarnate(user)
+
+/obj/structure/respawner/proc/incarnate(mob/dead/observer/user)
+	user.incarnate_ghost()
+
+/obj/structure/respawner/newbody/incarnate(mob/dead/observer/user)
+	if(!user.client)
+		return
+	var/mob/living/carbon/human/new_char = new(get_turf(src))
+	client.prefs.copy_to(new_char)
+	if(user.mind)
+		user.mind.active = 1
+		user.mind.transfer_to(new_char)
+
+/obj/structure/respawner/newbody/proc/makeBody()
+	return new var/mob/living/carbon/human(get_turf(src))
 
 /obj/structure/ghost_beacon
 	name = "ethereal beacon"

@@ -30,7 +30,7 @@
 	var/contractName
 
 /datum/objective/devil/soulquality/New()
-	contractType = pick(CONTRACT_POWER, CONTRACT_WEALTH, CONTRACT_PRESTIGE, CONTRACT_MAGIC, CONTRACT_REVIVE, CONTRACT_KNOWLEDGE)
+	contractType = pick(CONTRACT_POWER, CONTRACT_WEALTH, CONTRACT_PRESTIGE, CONTRACT_MAGIC, CONTRACT_REVIVE, CONTRACT_KNOWLEDGE, CONTRACT_FRIEND)
 	target_amount = pick(1,2)
 	switch(contractType)
 		if(CONTRACT_POWER)
@@ -45,6 +45,8 @@
 			contractName = "of revival"
 		if(CONTRACT_KNOWLEDGE)
 			contractName = "for knowledge"
+		if(CONTRACT_FRIEND)
+			contractName = "for friendship"
 	update_explanation_text()
 
 /datum/objective/devil/soulquality/update_explanation_text()
