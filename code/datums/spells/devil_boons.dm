@@ -53,7 +53,7 @@
 	cooldown_min = 10
 	action_icon_state = "sacredflame"
 	var/mob/living/friend
-	var/obj/structure/respawner/newbody/demonic/friendShell
+	var/obj/structure/demonic_friend_beacon/friendShell
 
 /obj/effect/proc_holder/spell/targeted/summon_friend/cast(list/targets, mob/user = usr)
 	if(!qdeleted(friend) && friend)

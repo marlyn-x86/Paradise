@@ -28,7 +28,6 @@
 	var/coffin = 0
 	var/brute_damage = 0
 	var/oxy_damage = 0
-	var/createDead = TRUE
 
 /obj/effect/landmark/corpse/initialize()
 	if(istype(src,/obj/effect/landmark/corpse/clown))
@@ -39,11 +38,10 @@
 /obj/effect/landmark/corpse/proc/createCorpse() //Creates a mob and checks for gear in each slot before attempting to equip it.
 	var/mob/living/carbon/human/human/M = new /mob/living/carbon/human/human (src.loc)
 	M.real_name = src.name
-	if(createDead)
-		M.death(1) //Kills the new mob
-		M.adjustOxyLoss(oxy_damage)
-		M.adjustBruteLoss(brute_damage)
-		M.timeofdeath = timeofdeath
+	M.death(1) //Kills the new mob
+	M.adjustOxyLoss(oxy_damage)
+	M.adjustBruteLoss(brute_damage)
+	M.timeofdeath = timeofdeath
 	if(mob_species)
 		M.set_species(mob_species)
 	if(corpseuniform)
@@ -94,7 +92,6 @@
 		var/obj/structure/closet/coffin/sarcophagus/sarc = locate(/obj/structure/closet/coffin/sarcophagus) in loc
 		if(sarc) M.loc = sarc
 	qdel(src)
-	return M
 
 // I'll work on making a list of corpses people request for maps, or that I think will be commonly used. Syndicate operatives for example.
 /obj/effect/landmark/corpse/damaged
@@ -298,15 +295,3 @@
 	mob_species = "abductor"
 	corpseuniform = /obj/item/clothing/under/color/grey
 	corpseshoes = /obj/item/clothing/shoes/combat
-
-/obj/effect/landmark/corpse/living
-	createDead = FALSE
-
-/obj/effect/landmark/corpse/living/demonicFriend
-	corpseuniform = /obj/item/clothing/under/assistantformal
-	corpseshoes = /obj/item/clothing/shoes/laceup
-	corpsepocket1 = /obj/item/device/radio/off
-	corpseback = /obj/item/weapon/storage/backpack
-	corpseid = 1
-	corpseidjob = "Superfriend"
-	corpseidaccess = "Assistant"
