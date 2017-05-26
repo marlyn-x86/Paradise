@@ -66,4 +66,5 @@
 		return
 	for(var/C in targets)
 		var/mob/living/L = C
-		friendShell = new(L.loc, L.mind, src)
+		friendShell = new(L.loc)
+		friendShell.initialize(L.mind, src)
