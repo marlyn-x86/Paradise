@@ -45,7 +45,7 @@
 
 // Whether the mob is able to see
 /mob/living/has_vision()
-	return !(eye_blind || (disabilities & BLIND) || stat)
+	return !(eye_blind || (disabilities & BLIND) || stat == UNCONSCIOUS)
 
 // Whether the mob is capable of talking
 /mob/living/can_speak()
