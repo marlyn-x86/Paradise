@@ -24,7 +24,7 @@
 		if(dont_remove_slot)
 			non_primary = 1
 		else
-			replaced.remove(M, special = 1)
+			qdel(replaced.remove(M, special = 1))
 
 	owner = M
 
