@@ -34,7 +34,7 @@
 
 	var/obj/effect/countdown/clonepod/countdown
 
-	var/list/brine_types = list("corazone", "salbutamol", "hydrocodone")
+	var/list/brine_types = list("corazone", "salbutamol", "hydrocodone", "spaceacillin")
 	var/list/missing_organs
 	var/organs_number = 0
 
