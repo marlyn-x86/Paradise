@@ -1488,7 +1488,8 @@
 			to_chat(usr, "This will only work on /mob/dead/observer")
 		log_admin("[key_name(G)] was incarnated by [key_name(src.owner)]")
 		message_admins("[key_name_admin(G)] was incarnated by [key_name_admin(src.owner)]")
-		G.incarnate_ghost()
+		var/new_char = G.incarnate_ghost()
+		show_player_panel(new_char)
 
 	else if(href_list["togmutate"])
 		if(!check_rights(R_SPAWN))	return
