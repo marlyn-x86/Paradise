@@ -1,19 +1,24 @@
+
+
 /turf/unsimulated/beach
 	name = "Beach"
 	icon = 'icons/misc/beach.dmi'
 	var/water_overlay_image = null
 	mouse_opacity = 0
-	
+	var/static/list/beach_water_overlays = list()
+
 /turf/unsimulated/beach/New()
 	..()
 	if(water_overlay_image)
-		overlays += image("icon"='icons/misc/beach.dmi',"icon_state"= water_overlay_image,"layer"=MOB_LAYER+0.1)
+		if(!(water_overlay_image in beach_water_overlays))
+			beach_water_overlays[water_overlay_image] = image("icon"='icons/misc/beach.dmi',"icon_state"= water_overlay_image,"layer"=MOB_LAYER+0.1)
+		overlays += beach_water_overlays[water_overlay_image]
 
 /turf/unsimulated/beach/sand
 	name = "Sand"
 	icon_state = "desert"
 	mouse_opacity = 1
-	
+
 /turf/unsimulated/beach/sand/New()			//adds some aesthetic randomness to the beach sand
 	icon_state = pick("desert", "desert0", "desert1", "desert2", "desert3", "desert4")
 	..()
