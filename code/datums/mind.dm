@@ -1601,6 +1601,7 @@
 		S.charge_counter = delay
 		spawn(0)
 			S.start_recharge()
+		S.updateButtonIcon()
 
 /datum/mind/proc/get_ghost(even_if_they_cant_reenter)
 	for(var/mob/dead/observer/G in dead_mob_list)
