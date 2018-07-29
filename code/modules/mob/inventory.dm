@@ -108,6 +108,11 @@
 	else
 		return drop_r_hand()
 
+// tg's "temporarilyRemoveItemFromInventory", a wrapper around `unEquip` for certain
+// situations to make the purpose more clear
+/mob/proc/temporarilyRemoveItemFromInventory(obj/item/I, force)
+	return unEquip(I, force)
+
 //Here lie unEquip and before_item_take, already forgotten and not missed.
 
 /mob/proc/canUnEquip(obj/item/I, force)
@@ -143,7 +148,6 @@
 			I.layer = initial(I.layer)
 			I.plane = initial(I.plane)
 	return 1
-
 
 //Attemps to remove an object on a mob.  Will not move it to another area or such, just removes from the mob.
 /mob/proc/remove_from_mob(var/obj/O)

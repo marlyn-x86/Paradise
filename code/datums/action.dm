@@ -410,6 +410,15 @@
 	name = "View Storage"
 
 
+/datum/action/item_action/storage_gather_mode
+	name = "Switch gathering mode"
+	desc = "Switches the gathering mode of a storage object."
+	button_icon_state = "storage_gather_switch"
+
+/datum/action/item_action/storage_gather_mode/Trigger()
+	GET_COMPONENT_FROM(STR, /datum/component/storage, target)
+	STR.gather_mode_switch(owner)
+
 //Preset for spells
 /datum/action/spell_action
 	check_flags = 0

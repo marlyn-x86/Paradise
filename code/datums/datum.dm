@@ -2,6 +2,7 @@
 	var/gc_destroyed //Time when this object was destroyed.
 	var/list/active_timers  //for SStimer
 	var/list/datum_components //for /datum/components
+	var/list/comp_lookup
 	var/var_edited = FALSE //Warranty void if seal is broken
 
 	var/tmp/unique_datum_id = null

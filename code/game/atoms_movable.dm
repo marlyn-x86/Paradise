@@ -138,7 +138,10 @@
 				return
 		A.Bumped(src)
 
-/atom/movable/proc/forceMove(atom/destination)
+/atom/movable/proc/moveToNullspace()
+	return doMove(null)
+
+/atom/movable/proc/doMove(atom/destination)
 	var/turf/old_loc = loc
 	loc = destination
 
@@ -163,6 +166,13 @@
 		L.source_atom.update_light()
 
 	return 1
+
+/atom/movable/proc/forceMove(atom/destination)
+	. = FALSE
+	if(destination)
+		. = doMove(destination)
+	else
+		CRASH("No valid destination passed into forceMove")
 
 /mob/living/forceMove(atom/destination)
 	if(buckled)

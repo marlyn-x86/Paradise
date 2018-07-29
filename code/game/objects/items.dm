@@ -96,6 +96,13 @@ var/global/image/fire_overlay = image("icon" = 'icons/goonstation/effects/fire.d
 	var/trip_any = FALSE
 	var/trip_walksafe = TRUE
 	var/trip_tiles = 0
+	
+	var/reach = 1 //In tiles, how far this weapon can reach; 1 for adjacent, which is default
+
+	//Tooltip vars
+	var/force_string //string form of an item's force. Edit this var only to set a custom force string
+	var/last_force_string_check = 0
+	var/tip_timer
 
 /obj/item/New()
 	..()
@@ -107,6 +114,11 @@ var/global/image/fire_overlay = image("icon" = 'icons/goonstation/effects/fire.d
 			hitsound = 'sound/items/welder.ogg'
 		if(damtype == "brute")
 			hitsound = "swing_hit"
+
+/obj/item/Initialize(mapload)
+	if(force_string)
+		flags |= FORCE_STRING_OVERRIDE
+	return ..()
 
 /obj/item/Destroy()
 	flags &= ~DROPDEL	//prevent reqdels
@@ -325,10 +337,13 @@ var/global/image/fire_overlay = image("icon" = 'icons/goonstation/effects/fire.d
 		A.Remove(user)
 	if(flags & DROPDEL)
 		qdel(src)
+	flags &= ~IN_INVENTORY
+	SEND_SIGNAL(src, COMSIG_ITEM_DROPPED,user)
 
 // called just as an item is picked up (loc is not yet changed)
 /obj/item/proc/pickup(mob/user)
-	return
+	SEND_SIGNAL(src, COMSIG_ITEM_PICKUP, user)
+	flags |= IN_INVENTORY
 
 // called when this item is removed from a storage item, which is passed on as S. The loc variable is already set to the new destination before this is called.
 /obj/item/proc/on_exit_storage(obj/item/storage/S as obj)
@@ -352,6 +367,7 @@ var/global/image/fire_overlay = image("icon" = 'icons/goonstation/effects/fire.d
 		var/datum/action/A = X
 		if(item_action_slot_check(slot, user)) //some items only give their actions buttons when in a specific slot.
 			A.Grant(user)
+	flags |= IN_INVENTORY
 
 /obj/item/proc/item_action_slot_check(slot, mob/user)
 	return 1
@@ -509,6 +525,7 @@ var/global/image/fire_overlay = image("icon" = 'icons/goonstation/effects/fire.d
 	if(callback) //call the original callback
 		. = callback.Invoke()
 	throw_speed = initial(throw_speed) //explosions change this.
+	flags &= ~IN_INVENTORY
 
 /obj/item/proc/pwr_drain()
 	return 0 // Process Kill
@@ -555,3 +572,39 @@ var/global/image/fire_overlay = image("icon" = 'icons/goonstation/effects/fire.d
 
 /obj/item/attack_hulk(mob/living/carbon/human/user)
 	return FALSE
+
+/obj/item/proc/set_force_string()
+	switch(force)
+		if(0 to 4)
+			force_string = "very low"
+		if(4 to 7)
+			force_string = "low"
+		if(7 to 10)
+			force_string = "medium"
+		if(10 to 11)
+			force_string = "high"
+		if(11 to 20) //12 is the force of a toolbox
+			force_string = "robust"
+		if(20 to 25)
+			force_string = "very robust"
+		else
+			force_string = "exceptionally robust"
+	last_force_string_check = force
+
+/obj/item/proc/openTip(location, control, params, user)
+	if(last_force_string_check != force && !(flags & FORCE_STRING_OVERRIDE))
+		set_force_string()
+	if(!(flags & FORCE_STRING_OVERRIDE))
+		openToolTip(user,src,params,title = name,content = "[desc]<br>[force ? "<b>Force:</b> [force_string]" : ""]",theme = "")
+	else
+		openToolTip(user,src,params,title = name,content = "[desc]<br><b>Force:</b> [force_string]",theme = "")
+
+/obj/item/MouseEntered(location, control, params)
+	if((flags & IN_INVENTORY) && usr.client.prefs.enable_tips && !QDELETED(src))
+		var/timedelay = usr.client.prefs.tip_delay/100
+		var/user = usr
+		tip_timer = addtimer(CALLBACK(src, .proc/openTip, location, control, params, user), timedelay, TIMER_STOPPABLE)//timer takes delay in deciseconds, but the pref is in milliseconds. dividing by 100 converts it.
+
+/obj/item/MouseExited()
+	deltimer(tip_timer)//delete any in-progress timer if the mouse is moved off the item before it finishes
+	closeToolTip(usr)

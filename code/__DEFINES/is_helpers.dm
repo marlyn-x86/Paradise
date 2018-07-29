@@ -12,6 +12,8 @@
 
 //Objects
 
+#define isitem(A) (istype(A, /obj/item))
+
 #define ismecha(A) (istype(A, /obj/mecha))
 
 #define is_cleanable(A) (istype(A, /obj/effect/decal/cleanable) || istype(A, /obj/effect/rune)) //if something is cleanable
@@ -74,8 +76,20 @@ GLOBAL_LIST_INIT(glass_sheet_types, typecacheof(list(
 
 #define isslime(A)		(istype((A), /mob/living/carbon/slime))
 
+//Silicon mobs
+#define issilicon(A) (istype(A, /mob/living/silicon))
+
+#define issiliconoradminghost(A) (istype(A, /mob/living/silicon) || IsAdminGhost(A))
+
+#define iscyborg(A) (istype(A, /mob/living/silicon/robot))
+
+#define isdrone(A) (istype(A, /mob/living/silicon/robot/drone))
+
+#define isAI(A) (istype(A, /mob/living/silicon/ai))
+
+#define ispAI(A) (istype(A, /mob/living/silicon/pai))
+
 // Misc
 #define isclient(A) istype(A, /client)
 #define isradio(A) istype(A, /obj/item/radio)
 #define ispill(A) istype(A, /obj/item/reagent_containers/food/pill)
-

@@ -10,6 +10,8 @@
 #define CONDUCT					32		// conducts electricity (metal etc.)
 #define ABSTRACT				64		// for all things that are technically items but used for various different stuff, made it 128 because it could conflict with other flags other way
 #define ON_BORDER				128		// item has priority to check when entering or leaving
+#define IN_INVENTORY			256		//is this item equipped into an inventory slot or hand of a mob? used for tooltips
+#define FORCE_STRING_OVERRIDE	512 	// used for tooltips
 
 #define EARBANGPROTECT			1024
 

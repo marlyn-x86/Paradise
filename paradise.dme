@@ -251,6 +251,8 @@
 #include "code\datums\cache\powermonitor.dm"
 #include "code\datums\components\_component.dm"
 #include "code\datums\components\material_container.dm"
+#include "code\datums\components\storage\storage.dm"
+#include "code\datums\components\storage\concrete\_concrete.dm"
 #include "code\datums\diseases\_disease.dm"
 #include "code\datums\diseases\_MobProcs.dm"
 #include "code\datums\diseases\anxiety.dm"

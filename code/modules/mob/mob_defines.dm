@@ -80,6 +80,7 @@
 	var/obj/item/r_hand = null//Living
 	var/obj/item/back = null//Human/Monkey
 	var/obj/item/tank/internal = null//Human/Monkey
+	// FIXME axe this when the storage component is ready
 	var/obj/item/storage/s_active = null//Carbon
 	var/obj/item/clothing/mask/wear_mask = null//Carbon
 
@@ -200,3 +201,5 @@
 	var/list/tkgrabbed_objects = list() // Assoc list of items to TK grabs
 
 	var/forced_look = null // This can either be a numerical direction or a soft object reference (UID). It makes the mob always face towards the selected thing.
+
+	var/datum/component/storage/active_storage = null
