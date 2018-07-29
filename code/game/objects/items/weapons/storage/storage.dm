@@ -535,6 +535,9 @@
 		content_list.len++
 		content_list[content_list.len] = AM.serialize()
 	return data
+		
+/obj/item/storage/AllowDrop()
+	return TRUE
 
 /obj/item/storage/deserialize(list/data)
 	if(isnum(data["slots"]))

@@ -130,7 +130,9 @@
 		_removal_reset(AM)
 		AM.forceMove(new_location)
 		//We don't want to call this if the item is being destroyed
-		AM.on_exit_storage(src)
+		if(isitem(AM))
+			var/obj/item/I = AM
+			I.on_exit_storage(src)
 	else
 		//Being destroyed, just move to nullspace now (so it's not in contents for the icon update)
 		AM.moveToNullspace()
