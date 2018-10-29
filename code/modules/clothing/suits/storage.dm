@@ -1,40 +1,31 @@
 /obj/item/clothing/suit/storage
-	var/obj/item/storage/internal/pockets
+	var/pockets_type = /datum/component/storage/concrete/pockets
 
-/obj/item/clothing/suit/storage/New()
-	..()
-	pockets = new/obj/item/storage/internal(src)
-	pockets.storage_slots = 2	//two slots
-	pockets.max_w_class = WEIGHT_CLASS_SMALL		//fit only pocket sized items
-	pockets.max_combined_w_class = 4
+/obj/item/clothing/suit/storage/ComponentInitialize()
+	. = ..()
+	AddComponent(pockets_type)
 
-/obj/item/clothing/suit/storage/Destroy()
-	QDEL_NULL(pockets)
-	return ..()
-
-/obj/item/clothing/suit/storage/attack_hand(mob/user as mob)
-	if(pockets.handle_attack_hand(user))
-		..(user)
-
-/obj/item/clothing/suit/storage/MouseDrop(obj/over_object as obj)
-	if(pockets.handle_mousedrop(usr, over_object))
-		..(over_object)
-
-/obj/item/clothing/suit/storage/attackby(obj/item/W as obj, mob/user as mob, params)
-	..()
-	return pockets.attackby(W, user, params)
+/obj/item/clothing/suit/storage/ex_act(severity)
+	for(var/atom/A in contents)
+		A.ex_act(severity)
+		CHECK_TICK
+	. = ..()
 
 /obj/item/clothing/suit/storage/emp_act(severity)
-	pockets.emp_act(severity)
-	..()
+	if(!isliving(loc))
+		for(var/atom/A in contents)
+			A.emp_act(severity)
+	. = ..()
 
 /obj/item/clothing/suit/storage/hear_talk(mob/M, var/msg)
-	pockets.hear_talk(M, msg)
-	..()
+	for(var/atom/A in contents)
+		A.hear_talk(M, msg)
+	. = ..()
 
 /obj/item/clothing/suit/storage/hear_message(mob/M, var/msg)
-	pockets.hear_message(M, msg)
-	..()
+	for(var/atom/A in contents)
+		A.hear_message(M, msg)
+	. = ..()
 
 /obj/item/clothing/suit/storage/proc/return_inv()
 
@@ -52,9 +43,34 @@
 
 /obj/item/clothing/suit/storage/serialize()
 	var/list/data = ..()
-	data["pockets"] = pockets.serialize()
+	var/list/content_list = list()
+	GET_COMPONENT(STR, /datum/component/storage)
+	data["content"] = content_list
+	data["slots"] = STR.max_items
+	data["max_w_class"] = STR.max_w_class
+	data["max_c_w_class"] = STR.max_combined_w_class
+	for(var/thing in contents)
+		var/atom/movable/AM = thing
+		// This code does not watch out for infinite loops
+		// But then again a tesseract would destroy the server anyways
+		// Also I wish I could just insert a list instead of it reading it the wrong way
+		content_list.len++
+		content_list[content_list.len] = AM.serialize()
 	return data
 
+//FIXME: Storage deserialization should be based on component in the future
 /obj/item/clothing/suit/storage/deserialize(list/data)
-	qdel(pockets)
-	pockets = list_to_object(data["pockets"], src)
+	GET_COMPONENT(STR, /datum/component/storage)
+	if(isnum(data["slots"]))
+		STR.max_items = data["slots"]
+	if(isnum(data["max_w_class"]))
+		STR.max_w_class = data["max_w_class"]
+	if(isnum(data["max_c_w_class"]))
+		STR.max_combined_w_class = data["max_c_w_class"]
+	for(var/thing in data["content"])
+		if(islist(thing))
+			list_to_object(thing, src)
+		else if(thing == null)
+			log_runtime(EXCEPTION("Null entry found in storage/deserialize."), src)
+		else
+			log_runtime(EXCEPTION("Non-list thing found in storage/deserialize."), src, list("Thing: [thing]"))

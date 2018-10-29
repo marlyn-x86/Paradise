@@ -86,12 +86,17 @@
 	desc = "A quiver for holding arrows."
 	icon_state = "quiver"
 	item_state = "quiver"
-	storage_slots = 20
-	can_hold = list(
-		/obj/item/ammo_casing/caseless/arrow
-		)
 
-/obj/item/storage/backpack/quiver/full/New()
-	..()
-	for(var/i in 1 to storage_slots)
+/obj/item/storage/backpack/quiver/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.can_hold = typecacheof(list(
+		/obj/item/ammo_casing/caseless/arrow
+	))
+	STR.max_items = 20
+	STR.display_numerical_stacking = TRUE
+
+/obj/item/storage/backpack/quiver/full/PopulateContents()
+	GET_COMPONENT(STR, /datum/component/storage)
+	for(var/i in 1 to STR.max_items)
 		new /obj/item/ammo_casing/caseless/arrow(src)

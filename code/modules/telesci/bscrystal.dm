@@ -1,5 +1,5 @@
 // Bluespace crystals, used in telescience and when crushed it will blink you to a random turf.
-/obj/item/ore/bluespace_crystal
+/obj/item/stack/ore/bluespace_crystal
 	name = "bluespace crystal"
 	desc = "A glowing bluespace crystal, not much is known about how they work. It looks very delicate."
 	icon = 'icons/obj/telescience.dmi'

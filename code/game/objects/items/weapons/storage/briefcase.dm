@@ -9,11 +9,12 @@
 	throw_speed = 2
 	throw_range = 4
 	w_class = WEIGHT_CLASS_BULKY
-	max_w_class = WEIGHT_CLASS_NORMAL
-	max_combined_w_class = 21
 	attack_verb = list("bashed", "battered", "bludgeoned", "thrashed", "whacked")
 	burn_state = FLAMMABLE
 	burntime = 20
 
-/obj/item/storage/briefcase/New()
-	..()
+/obj/item/storage/briefcase/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_w_class = WEIGHT_CLASS_NORMAL
+	STR.max_combined_w_class = 7 * WEIGHT_CLASS_NORMAL

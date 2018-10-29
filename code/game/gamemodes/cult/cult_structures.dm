@@ -283,11 +283,16 @@ var/list/blacklisted_pylon_turfs = typecacheof(list(
 
 /obj/item/storage/box/cult
 	name = "Dark Forge Cache"
-	can_hold = list("/obj/item/clothing/suit/space/cult", "/obj/item/clothing/head/helmet/space/cult")
-	max_w_class = WEIGHT_CLASS_NORMAL
 
-/obj/item/storage/box/cult/New()
-	..()
+/obj/item/storage/box/cult/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.can_hold = typecacheof(list(
+		/obj/item/clothing/suit/space/cult,
+		/obj/item/clothing/head/helmet/space/cult
+	))
+	STR.max_w_class = WEIGHT_CLASS_NORMAL
+
+/obj/item/storage/box/cult/PopulateContents()
 	new /obj/item/clothing/suit/space/cult(src)
 	new /obj/item/clothing/head/helmet/space/cult(src)
-	return

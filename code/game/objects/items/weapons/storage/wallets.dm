@@ -1,12 +1,19 @@
 /obj/item/storage/wallet
 	name = "leather wallet"
 	desc = "Made from genuine leather, it is of the highest quality."
-	storage_slots = 10
 	icon = 'icons/obj/wallets.dmi'
 	icon_state = "wallet"
 	w_class = WEIGHT_CLASS_SMALL
 	burn_state = FLAMMABLE
-	can_hold = list(
+	slot_flags = SLOT_ID
+
+	var/obj/item/card/id/front_id = null
+
+/obj/item/storage/wallet/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_items = 10
+	var/static/list/can_hold = typecacheof(list(
 		/obj/item/stack/spacecash,
 		/obj/item/card,
 		/obj/item/clothing/mask/cigarette,
@@ -25,11 +32,9 @@
 		/obj/item/photo,
 		/obj/item/reagent_containers/dropper,
 		/obj/item/screwdriver,
-		/obj/item/stamp)
-	slot_flags = SLOT_ID
-
-	var/obj/item/card/id/front_id = null
-
+		/obj/item/stamp
+	))
+	STR.can_hold = can_hold
 
 /obj/item/storage/wallet/remove_from_storage(obj/item/W as obj, atom/new_location)
 	. = ..(W, new_location)
@@ -74,8 +79,7 @@
 	else
 		return ..()
 
-/obj/item/storage/wallet/random/New()
-	..()
+/obj/item/storage/wallet/random/PopulateContents()
 	var/item1_type = pick(/obj/item/stack/spacecash,
 		/obj/item/stack/spacecash/c10,
 		/obj/item/stack/spacecash/c100,
@@ -90,13 +94,12 @@
 		/obj/item/stack/spacecash/c1000)
 	var/item3_type = pick( /obj/item/coin/silver, /obj/item/coin/silver, /obj/item/coin/gold, /obj/item/coin/iron, /obj/item/coin/iron, /obj/item/coin/iron )
 
-	spawn(2)
-		if(item1_type)
-			new item1_type(src)
-		if(item2_type)
-			new item2_type(src)
-		if(item3_type)
-			new item3_type(src)
+	if(item1_type)
+		new item1_type(src)
+	if(item2_type)
+		new item2_type(src)
+	if(item3_type)
+		new item3_type(src)
 
 //////////////////////////////////////
 //			Color Wallets			//
@@ -105,10 +108,14 @@
 /obj/item/storage/wallet/color
 	name = "cheap wallet"
 	desc = "A cheap wallet from the arcade."
-	storage_slots = 5		//smaller storage than normal wallets
 
-/obj/item/storage/wallet/color/New()
-	..()
+/obj/item/storage/wallet/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_items = 5		//smaller storage than normal wallets
+
+/obj/item/storage/wallet/color/Initialize()
+	. = ..()
 	if(!item_color)
 		var/color_wallet = pick(subtypesof(/obj/item/storage/wallet/color))
 		new color_wallet(src.loc)

@@ -14,7 +14,7 @@
 	icon_state = "firstaid"
 	throw_speed = 2
 	throw_range = 8
-	var/empty = 0
+	var/empty = FALSE
 	req_one_access =list(access_medical, access_robotics) //Access and treatment are utilized for medbots.
 	var/treatment_brute = "salglu_solution"
 	var/treatment_oxy = "salbutamol"
@@ -24,7 +24,6 @@
 	var/med_bot_skin = null
 	var/syndicate_aligned = FALSE
 
-
 /obj/item/storage/firstaid/fire
 	name = "fire first-aid kit"
 	desc = "A medical kit that contains several medical patches and pills for treating burns. Contains one epinephrine syringe for emergency use and a health analyzer."
@@ -32,39 +31,36 @@
 	item_state = "firstaid-ointment"
 	med_bot_skin = "ointment"
 
-	New()
-		..()
-		if(empty) return
+/obj/item/storage/firstaid/fire/Initialize()
+	. = ..()
+	icon_state = pick("ointment","firefirstaid")
 
-		icon_state = pick("ointment","firefirstaid")
-
-		new /obj/item/reagent_containers/food/pill/patch/silver_sulf( src )
-		new /obj/item/reagent_containers/food/pill/patch/silver_sulf( src )
-		new /obj/item/reagent_containers/food/pill/patch/silver_sulf( src )
-		new /obj/item/reagent_containers/food/pill/patch/silver_sulf( src )
-		new /obj/item/healthanalyzer( src )
-		new /obj/item/reagent_containers/hypospray/autoinjector( src )
-		new /obj/item/reagent_containers/food/pill/salicylic( src )
+/obj/item/storage/firstaid/fire/PopulateContents()
+	if(empty)
 		return
+	for(var/i in 1 to 4)
+		new /obj/item/reagent_containers/food/pill/patch/silver_sulf(src)
+	new /obj/item/healthanalyzer(src)
+	new /obj/item/reagent_containers/hypospray/autoinjector(src)
+	new /obj/item/reagent_containers/food/pill/salicylic(src)
 
 /obj/item/storage/firstaid/fire/empty
-	empty = 1
+	empty = TRUE
 
 /obj/item/storage/firstaid/regular
 	desc = "A general medical kit that contains medical patches for both brute damage and burn damage. Also contains an epinephrine syringe for emergency use and a health analyzer"
 	icon_state = "firstaid"
 
-	New()
-		..()
-		if(empty) return
-		new /obj/item/reagent_containers/food/pill/patch/styptic( src )
-		new /obj/item/reagent_containers/food/pill/patch/styptic( src )
-		new /obj/item/reagent_containers/food/pill/salicylic( src )
-		new /obj/item/reagent_containers/food/pill/patch/silver_sulf( src )
-		new /obj/item/reagent_containers/food/pill/patch/silver_sulf( src )
-		new /obj/item/healthanalyzer( src )
-		new /obj/item/reagent_containers/hypospray/autoinjector( src )
+/obj/item/storage/firstaid/regular/PopulateContents()
+	if(empty)
 		return
+	for(var/i in 1 to 2)
+		new /obj/item/reagent_containers/food/pill/patch/styptic(src)
+	new /obj/item/reagent_containers/food/pill/salicylic(src)
+	for(var/i in 1 to 2)
+		new /obj/item/reagent_containers/food/pill/patch/silver_sulf(src)
+	new /obj/item/healthanalyzer(src)
+	new /obj/item/reagent_containers/hypospray/autoinjector(src)
 
 /obj/item/storage/firstaid/toxin
 	name = "toxin first aid kit"
@@ -73,23 +69,23 @@
 	item_state = "firstaid-toxin"
 	med_bot_skin = "tox"
 
-	New()
-		..()
-		if(empty) return
+/obj/item/storage/firstaid/toxin/Initialize()
+	. = ..()
 
-		icon_state = pick("antitoxin","antitoxfirstaid","antitoxfirstaid2","antitoxfirstaid3")
+	icon_state = pick("antitoxin","antitoxfirstaid","antitoxfirstaid2","antitoxfirstaid3")
 
-		new /obj/item/reagent_containers/syringe/charcoal( src )
-		new /obj/item/reagent_containers/syringe/charcoal( src )
-		new /obj/item/reagent_containers/syringe/charcoal( src )
-		new /obj/item/reagent_containers/food/pill/charcoal( src )
-		new /obj/item/reagent_containers/food/pill/charcoal( src )
-		new /obj/item/reagent_containers/food/pill/charcoal( src )
-		new /obj/item/healthanalyzer( src )
+/obj/item/storage/firstaid/toxin/PopulateContents()
+	if(empty)
 		return
 
+	for(var/i in 1 to 3)
+		new /obj/item/reagent_containers/syringe/charcoal(src)
+	for(var/i in 1 to 3)
+		new /obj/item/reagent_containers/food/pill/charcoal(src)
+	new /obj/item/healthanalyzer(src)
+
 /obj/item/storage/firstaid/toxin/empty
-	empty = 1
+	empty = TRUE
 
 /obj/item/storage/firstaid/o2
 	name = "oxygen deprivation first aid kit"
@@ -98,18 +94,15 @@
 	item_state = "firstaid-o2"
 	med_bot_skin = "o2"
 
-	New()
-		..()
-		if(empty) return
-		new /obj/item/reagent_containers/food/pill/salbutamol( src )
-		new /obj/item/reagent_containers/food/pill/salbutamol( src )
-		new /obj/item/reagent_containers/food/pill/salbutamol( src )
-		new /obj/item/reagent_containers/food/pill/salbutamol( src )
-		new /obj/item/healthanalyzer( src )
+/obj/item/storage/firstaid/o2/PopulateContents()
+	if(empty)
 		return
+	for(var/i in 1 to 4)
+		new /obj/item/reagent_containers/food/pill/salbutamol(src)
+	new /obj/item/healthanalyzer(src)
 
 /obj/item/storage/firstaid/o2/empty
-	empty = 1
+	empty = TRUE
 
 /obj/item/storage/firstaid/brute
 	name = "brute trauma treatment kit"
@@ -118,23 +111,22 @@
 	item_state = "firstaid-brute"
 	med_bot_skin = "brute"
 
-	New()
-		..()
-		if(empty) return
+/obj/item/storage/firstaid/brute/Initialize()
+	. = ..()
+	icon_state = pick("brute","brute2")
 
-		icon_state = pick("brute","brute2")
-
-		new /obj/item/reagent_containers/food/pill/patch/styptic(src)
-		new /obj/item/reagent_containers/food/pill/patch/styptic(src)
-		new /obj/item/reagent_containers/food/pill/patch/styptic(src)
-		new /obj/item/reagent_containers/food/pill/patch/styptic(src)
-		new /obj/item/healthanalyzer(src)
-		new /obj/item/reagent_containers/hypospray/autoinjector(src)
-		new /obj/item/stack/medical/bruise_pack(src)
+/obj/item/storage/firstaid/brute/PopulateContents()
+	if(empty)
 		return
 
+	for(var/i in 1 to 4)
+		new /obj/item/reagent_containers/food/pill/patch/styptic(src)
+	new /obj/item/healthanalyzer(src)
+	new /obj/item/reagent_containers/hypospray/autoinjector(src)
+	new /obj/item/stack/medical/bruise_pack(src)
+
 /obj/item/storage/firstaid/brute/empty
-	empty = 1
+	empty = TRUE
 
 /obj/item/storage/firstaid/adv
 	name = "advanced first-aid kit"
@@ -143,61 +135,75 @@
 	item_state = "firstaid-advanced"
 	med_bot_skin = "adv"
 
-/obj/item/storage/firstaid/adv/New()
-	..()
+/obj/item/storage/firstaid/adv/PopulateContents()
 	if(empty)
 		return
 	new /obj/item/stack/medical/bruise_pack(src)
-	new /obj/item/stack/medical/bruise_pack/advanced(src)
-	new /obj/item/stack/medical/bruise_pack/advanced(src)
-	new /obj/item/stack/medical/ointment/advanced(src)
-	new /obj/item/stack/medical/ointment/advanced(src)
+	for(var/i in 1 to 2)
+		new /obj/item/stack/medical/bruise_pack/advanced(src)
+	for(var/i in 1 to 2)
+		new /obj/item/stack/medical/ointment/advanced(src)
 	new /obj/item/reagent_containers/hypospray/autoinjector(src)
 	new /obj/item/healthanalyzer(src)
 
 /obj/item/storage/firstaid/adv/empty
-	empty = 1
+	empty = TRUE
 
 /obj/item/storage/firstaid/tactical
 	name = "first-aid kit"
 	icon_state = "bezerk"
 	desc = "I hope you've got insurance."
-	max_w_class = WEIGHT_CLASS_NORMAL
 	treatment_oxy = "perfluorodecalin"
 	treatment_brute = "bicaridine"
 	treatment_fire = "kelotane"
 	treatment_tox = "charcoal"
-	req_one_access =list(access_syndicate)
+	req_one_access = list(access_syndicate)
 	med_bot_skin = "bezerk"
 	syndicate_aligned = TRUE
 
-/obj/item/storage/firstaid/tactical/New()
-	..()
-	if(empty) return
+/obj/item/storage/firstaid/tactical/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_w_class = WEIGHT_CLASS_NORMAL
+
+/obj/item/storage/firstaid/tactical/PopulateContents()
+	if(empty)
+		return
 	new /obj/item/reagent_containers/hypospray/combat(src)
-	new /obj/item/reagent_containers/food/pill/patch/synthflesh(src) // Because you ain't got no time to look at what damage dey taking yo
-	new /obj/item/reagent_containers/food/pill/patch/synthflesh(src)
-	new /obj/item/reagent_containers/food/pill/patch/synthflesh(src)
-	new /obj/item/reagent_containers/food/pill/patch/synthflesh(src)
+	for(var/i in 1 to 4)
+		new /obj/item/reagent_containers/food/pill/patch/synthflesh(src) // Because you ain't got no time to look at what damage dey taking yo
 	new /obj/item/defibrillator/compact/combat/loaded(src)
 	new /obj/item/clothing/glasses/hud/health/night(src)
-	return
 
 /obj/item/storage/firstaid/tactical/empty
-	empty =1
+	empty = TRUE
 
 /obj/item/storage/firstaid/surgery
 	name = "field surgery kit"
 	icon_state = "duffel-med"
 	desc = "A kit for surgery in the field."
-	max_w_class = WEIGHT_CLASS_BULKY
-	max_combined_w_class = 21
-	storage_slots = 10
-	can_hold = list(/obj/item/roller,/obj/item/bonesetter,/obj/item/bonegel, /obj/item/scalpel, /obj/item/hemostat,
-		/obj/item/cautery, /obj/item/retractor, /obj/item/FixOVein, /obj/item/surgicaldrill, /obj/item/circular_saw)
 
-/obj/item/storage/firstaid/surgery/New()
-	..()
+/obj/item/storage/firstaid/surgery/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_w_class = WEIGHT_CLASS_BULKY
+	STR.max_combined_w_class = 21
+	STR.max_items = 10
+	var/static/list/can_hold = typecacheof(list(
+		/obj/item/roller,
+		/obj/item/bonesetter,
+		/obj/item/bonegel,
+		/obj/item/scalpel,
+		/obj/item/hemostat,
+		/obj/item/cautery,
+		/obj/item/retractor,
+		/obj/item/FixOVein,
+		/obj/item/surgicaldrill,
+		/obj/item/circular_saw
+	))
+	STR.can_hold = can_hold
+
+/obj/item/storage/firstaid/surgery/PopulateContents()
 	new /obj/item/roller(src)
 	new /obj/item/bonesetter(src)
 	new /obj/item/bonegel(src)
@@ -219,29 +225,36 @@
 	icon = 'icons/obj/chemical.dmi'
 	item_state = "contsolid"
 	w_class = WEIGHT_CLASS_SMALL
-	can_hold = list(/obj/item/reagent_containers/food/pill, /obj/item/dice, /obj/item/paper)
-	allow_quick_gather = 1
-	use_to_pickup = 1
-	storage_slots = 14
-	display_contents_with_number = 1
 	var/base_name = ""
 	var/label_text = ""
 
-/obj/item/storage/pill_bottle/New()
-	..()
+/obj/item/storage/pill_bottle/Initialize()
+	. = ..()
 	base_name = name
 
+/obj/item/storage/pill_bottle/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.click_gather = TRUE
+	STR.allow_quick_gather = TRUE
+	STR.display_numerical_stacking = TRUE
+	STR.max_items = 14
+	var/static/list/can_hold = typecacheof(list(/obj/item/reagent_containers/food/pill, /obj/item/dice, /obj/item/paper))
+	STR.can_hold = can_hold
+
+// do we even need this
 /obj/item/storage/pill_bottle/MouseDrop(obj/over_object as obj) //Quick pillbottle fix. -Agouri
 	if(ishuman(usr)) //Can monkeys even place items in the pocket slots? Leaving this in just in case~
 		var/mob/M = usr
-		if(!( istype(over_object, /obj/screen) ))
+		if(!( istype(over_object, /obj/screen/inventory/hand) ))
 			return ..()
+		var/obj/screen/inventory/hand/hnd = over_object
 		if((!( M.restrained() ) && !( M.stat ) /*&& M.pocket == src*/))
-			switch(over_object.name)
-				if("r_hand")
+			switch(hnd.slot_id)
+				if(slot_r_hand)
 					M.unEquip(src)
 					M.put_in_r_hand(src)
-				if("l_hand")
+				if(slot_l_hand)
 					M.unEquip(src)
 					M.put_in_l_hand(src)
 			src.add_fingerprint(usr)
@@ -275,27 +288,15 @@
 	name = "Pill bottle (Charcoal)"
 	desc = "Contains pills used to counter toxins."
 
-	New()
-		..()
-		new /obj/item/reagent_containers/food/pill/charcoal( src )
-		new /obj/item/reagent_containers/food/pill/charcoal( src )
-		new /obj/item/reagent_containers/food/pill/charcoal( src )
-		new /obj/item/reagent_containers/food/pill/charcoal( src )
-		new /obj/item/reagent_containers/food/pill/charcoal( src )
-		new /obj/item/reagent_containers/food/pill/charcoal( src )
-		new /obj/item/reagent_containers/food/pill/charcoal( src )
+/obj/item/storage/pill_bottle/charcoal/PopulateContents()
+	for(var/i in 1 to 7)
+		new /obj/item/reagent_containers/food/pill/charcoal(src)
+
 
 /obj/item/storage/pill_bottle/painkillers
 	name = "Pill Bottle (Salicylic Acid)"
 	desc = "Contains various pills for minor pain relief."
 
-/obj/item/storage/pill_bottle/painkillers/New()
-	..()
-	new /obj/item/reagent_containers/food/pill/salicylic(src)
-	new /obj/item/reagent_containers/food/pill/salicylic(src)
-	new /obj/item/reagent_containers/food/pill/salicylic(src)
-	new /obj/item/reagent_containers/food/pill/salicylic(src)
-	new /obj/item/reagent_containers/food/pill/salicylic(src)
-	new /obj/item/reagent_containers/food/pill/salicylic(src)
-	new /obj/item/reagent_containers/food/pill/salicylic(src)
-	new /obj/item/reagent_containers/food/pill/salicylic(src)
+/obj/item/storage/pill_bottle/painkillers/PopulateContents()
+	for(var/i in 1 to 7)
+		new /obj/item/reagent_containers/food/pill/salicylic(src)

@@ -4,8 +4,6 @@
 /obj/item/storage/backpack/shared
 	name = "paradox bag"
 	desc = "Somehow, it's in two places at once."
-	max_combined_w_class = 60
-	max_w_class = WEIGHT_CLASS_NORMAL
 
 //External
 /obj/item/shared_storage
@@ -20,14 +18,22 @@
 	name = "paradox bag"
 	desc = "Somehow, it's in two places at once."
 
-/obj/item/shared_storage/red/New()
-	..()
-	if(!bag)
-		var/obj/item/storage/backpack/shared/S = new(src)
-		var/obj/item/shared_storage/blue = new(loc)
+/obj/item/shared_storage/red/Initialize()
+	. = ..()
+	var/datum/component/storage/STR = AddComponent(/datum/component/storage/concrete)
+	STR.max_w_class = WEIGHT_CLASS_NORMAL
+	STR.max_combined_w_class = 60
+	STR.max_items = 21
+	new /obj/item/shared_storage/blue(drop_location(), STR)
 
-		bag = S
-		blue.bag = S
+/obj/item/shared_storage/blue/Initialize(mapload, datum/component/storage/concrete/master)
+	. = ..()
+	if(!istype(master))
+		return INITIALIZE_HINT_QDEL
+	var/datum/component/storage/STR = AddComponent(/datum/component/storage, master)
+	STR.max_w_class = WEIGHT_CLASS_NORMAL
+	STR.max_combined_w_class = 60
+	STR.max_items = 21
 
 /obj/item/shared_storage/attackby(obj/item/W, mob/user, params)
 	if(bag)

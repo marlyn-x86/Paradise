@@ -6,20 +6,25 @@
 	icon_state = "RPED"
 	item_state = "RPED"
 	w_class = WEIGHT_CLASS_HUGE
-	can_hold = list(/obj/item/stock_parts)
-	storage_slots = 50
-	use_to_pickup = 1
-	allow_quick_gather = 1
-	allow_quick_empty = 1
-	collection_mode = 1
-	display_contents_with_number = 1
-	max_w_class = WEIGHT_CLASS_NORMAL
-	max_combined_w_class = 100
 	var/works_from_distance = 0
 	var/primary_sound = 'sound/items/rped.ogg'
 	var/alt_sound = null
 	toolspeed = 1
 	usesound = 'sound/items/rped.ogg'
+
+/obj/item/storage/part_replacer/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	var/static/list/can_hold = typecacheof(list(/obj/item/stock_parts))
+	STR.can_hold = can_hold
+	STR.click_gather = TRUE
+	STR.allow_quick_gather = TRUE
+	STR.allow_quick_empty = TRUE
+	STR.display_numerical_stacking = TRUE
+	STR.max_items = 50
+	STR.max_w_class = WEIGHT_CLASS_NORMAL
+	STR.max_combined_w_class = 100
+
 
 /obj/item/storage/part_replacer/afterattack(obj/machinery/T as obj, mob/living/carbon/human/user as mob, flag, params)
 	if(flag)
@@ -36,14 +41,18 @@
 	desc = "A version of the RPED that allows for replacement of parts and scanning from a distance, along with higher capacity for parts."
 	icon_state = "BS_RPED"
 	w_class = WEIGHT_CLASS_NORMAL
-	storage_slots = 400
-	max_w_class = WEIGHT_CLASS_NORMAL
-	max_combined_w_class = 800
 	works_from_distance = 1
 	primary_sound = 'sound/items/PSHOOM.ogg'
 	alt_sound = 'sound/items/PSHOOM_2.ogg'
 	usesound = 'sound/items/PSHOOM.ogg'
 	toolspeed = 0.5
+
+/obj/item/storage/part_replacer/bluespace/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.storage_slots = 400
+	STR.max_w_class = WEIGHT_CLASS_NORMAL
+	STR.max_combined_w_class = 800
 
 /obj/item/storage/part_replacer/proc/play_rped_sound()
 	//Plays the sound for RPED exchanging or installing parts.

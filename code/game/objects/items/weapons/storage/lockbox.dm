@@ -4,15 +4,19 @@
 	icon_state = "lockbox+l"
 	item_state = "syringe_kit"
 	w_class = WEIGHT_CLASS_BULKY
-	max_w_class = WEIGHT_CLASS_NORMAL
-	max_combined_w_class = 14 //The sum of the w_classes of all the items in this storage item.
-	storage_slots = 4
 	req_access = list(access_armory)
 	var/locked = 1
 	var/broken = 0
 	var/icon_locked = "lockbox+l"
 	var/icon_closed = "lockbox"
 	var/icon_broken = "lockbox+b"
+
+/obj/item/storage/lockbox/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_w_class = WEIGHT_CLASS_NORMAL
+	STR.max_items = 4
+	STR.max_combined_w_class = 14
 
 /obj/item/storage/lockbox/attackby(obj/item/W as obj, mob/user as mob, params)
 	if(istype(W, /obj/item/card/id) || istype(W, /obj/item/pda))
@@ -74,29 +78,32 @@
 /obj/item/storage/lockbox/large
 	name = "Large lockbox"
 	desc = "A large lockbox"
-	max_w_class = WEIGHT_CLASS_BULKY
-	max_combined_w_class = 4 //The sum of the w_classes of all the items in this storage item.
-	storage_slots = 1
+
+/obj/item/storage/lockbox/large/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_w_class = WEIGHT_CLASS_BULKY
+	STR.max_items = 1
+	STR.max_combined_w_class = WEIGHT_CLASS_BULKY * 1
 
 /obj/item/storage/lockbox/mindshield
 	name = "Lockbox (Mindshield Implants)"
 	req_access = list(access_security)
 
-/obj/item/storage/lockbox/mindshield/New()
-	..()
-	new /obj/item/implantcase/mindshield(src)
-	new /obj/item/implantcase/mindshield(src)
-	new /obj/item/implantcase/mindshield(src)
+/obj/item/storage/lockbox/mindshield/PopulateContents()
+	for(var/i in 1 to 3)
+		new /obj/item/implantcase/mindshield(src)
 	new /obj/item/implanter/mindshield(src)
+
 
 /obj/item/storage/lockbox/clusterbang
 	name = "lockbox (clusterbang)"
 	desc = "You have a bad feeling about opening this."
 	req_access = list(access_security)
 
-/obj/item/storage/lockbox/clusterbang/New()
-	..()
+/obj/item/storage/lockbox/clusterbang/PopulateContents()
 	new /obj/item/grenade/clusterbuster(src)
+
 
 /obj/item/storage/lockbox/medal
 	name = "medal box"
@@ -104,22 +111,24 @@
 	icon_state = "medalbox+l"
 	item_state = "syringe_kit"
 	w_class = WEIGHT_CLASS_NORMAL
-	max_w_class = WEIGHT_CLASS_SMALL
-	max_combined_w_class = 20
-	storage_slots = 12
 	req_access = list(access_captain)
 	icon_locked = "medalbox+l"
 	icon_closed = "medalbox"
 	icon_broken = "medalbox+b"
 
-/obj/item/storage/lockbox/medal/New()
-	..()
+/obj/item/storage/lockbox/medal/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_w_class = WEIGHT_CLASS_SMALL
+	STR.max_combined_w_class = 20
+	STR.max_items = 12
+
+/obj/item/storage/lockbox/medal/PopulateContents()
 	new /obj/item/clothing/accessory/medal/gold/heroism(src)
 	new /obj/item/clothing/accessory/medal/silver/security(src)
 	new /obj/item/clothing/accessory/medal/silver/valor(src)
 	new /obj/item/clothing/accessory/medal/nobel_science(src)
 	new /obj/item/clothing/accessory/medal/bronze_heart(src)
-	new /obj/item/clothing/accessory/medal/conduct(src)
-	new /obj/item/clothing/accessory/medal/conduct(src)
-	new /obj/item/clothing/accessory/medal/conduct(src)
+	for(var/i in 1 to 3)
+		new /obj/item/clothing/accessory/medal/conduct(src)
 	new /obj/item/clothing/accessory/medal/gold/captain(src)

@@ -244,8 +244,12 @@
 		flick(icon_gib, src)
 	if(butcher_results)
 		for(var/path in butcher_results)
-			for(var/i = 1; i <= butcher_results[path];i++)
-				new path(src.loc)
+			var/amount = butcher_results[path]
+			if(ispath(path, /obj/item/stack))
+				new(path, amount)
+			else
+				for(var/i in 1 to amount)
+					new path(src.loc)
 	..()
 
 

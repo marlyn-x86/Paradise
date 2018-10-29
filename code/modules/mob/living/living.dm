@@ -928,8 +928,12 @@
 		return
 	if(butcher_results)
 		for(var/path in butcher_results)
-			for(var/i = 1, i <= butcher_results[path], i++)
-				new path(loc)
+			var/amount = butcher_results[path]
+			if(ispath(path, /obj/item/stack))
+				new path(loc, amount)
+			else
+				for(var/i in 1 to amount)
+					new path(loc)
 			butcher_results.Remove(path) //In case you want to have things like simple_animals drop their butcher results on gib, so it won't double up below.
 		visible_message("<span class='notice'>[user] butchers [src].</span>")
 		gib()

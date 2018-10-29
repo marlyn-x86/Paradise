@@ -1,0 +1,18 @@
+[ ] ensure "Robotize" works on:
+	- IPCs
+	- Humans
+	without causing weirdness
+
+[ ] xenobiology slime surgery
+
+[ ] make sure there's no regression in the `organs_internal` surgeries
+
+[ ] use `p_their` where appropriate
+
+[ ] make sure dethrall surgery works OK
+
+[ ] abductors
+
+[ ] test interaction with augments?
+
+[ ] Make surgery computer cooperate

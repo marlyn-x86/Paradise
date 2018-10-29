@@ -19,13 +19,11 @@
 	desc = "To be applied to the head repeatedly."
 	icon_state ="bible"
 
-/obj/item/storage/bible/booze/New()
-	..()
-	new /obj/item/reagent_containers/food/drinks/cans/beer(src)
-	new /obj/item/reagent_containers/food/drinks/cans/beer(src)
-	new /obj/item/stack/spacecash(src)
-	new /obj/item/stack/spacecash(src)
-	new /obj/item/stack/spacecash(src)
+/obj/item/storage/bible/booze/PopulateContents()
+	for(var/i in 1 to 2)
+		new /obj/item/reagent_containers/food/drinks/cans/beer(src)
+	for(var/i in 1 to 3)
+		new /obj/item/stack/spacecash(src)
 //BS12 EDIT
  // All cult functionality moved to Null Rod
 /obj/item/storage/bible/proc/bless(mob/living/carbon/M as mob)

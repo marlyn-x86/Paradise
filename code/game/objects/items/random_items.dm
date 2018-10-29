@@ -128,10 +128,9 @@
 	name = "unlabelled pillbottle"
 	desc = "The sheer recklessness of this bottle's existence astounds you."
 
-/obj/item/storage/pill_bottle/random_meds/New()
-	..()
-	var/i = 1
-	while(i < storage_slots)
+/obj/item/storage/pill_bottle/random_meds/PopulateContents()
+	GET_COMPONENT(STR, /datum/component/storage)
+	for(var/i in 1 to STR.max_items)
 		var/list/possible_medicines = standard_medicines.Copy()
 		if(prob(50))
 			possible_medicines += rare_medicines.Copy()
@@ -144,7 +143,6 @@
 			P.reagents.add_reagent(R, rand(2, 5)*10)
 		P.name = "Unlabelled Pill"
 		P.desc = "Something about this pill entices you to try it, against your better judgement."
-		i++
 	pixel_x = rand(-10, 10)
 	pixel_y = rand(-10, 10)
 

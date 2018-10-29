@@ -35,9 +35,12 @@
 /obj/item/storage/box/nanomob_booster_pack
 	name = "Nano-Mob Hunter Trading Card Booster Pack"
 	desc = "Contains 6 random Nano-Mob Hunter Trading Cards. May contain a holographic card!"
-	can_hold = list(/obj/item/nanomob_card)
 
-/obj/item/storage/box/nanomob_booster_pack/New()
-	..()
+/obj/item/storage/box/nanomob_booster_pack/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.can_hold = typecacheof(list(/obj/item/nanomob_card))
+
+/obj/item/storage/box/nanomob_booster_pack/PopulateContents()
 	for(var/i in 1 to 6)
 		new /obj/item/nanomob_card/booster(src)

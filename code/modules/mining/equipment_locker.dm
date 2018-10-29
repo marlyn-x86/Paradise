@@ -787,12 +787,15 @@
 	name = "Drone Kit"
 	desc = "A boxed kit that includes one mining drone cube and a welding tool with an increased capacity."
 	icon_state = "implant"
-	max_w_class = WEIGHT_CLASS_NORMAL
-	storage_slots = 2
-	can_hold = list(/obj/item/mining_drone_cube, /obj/item/weldingtool/hugetank)
 
-/obj/item/storage/box/drone_kit/New()
-	..()
+/obj/item/storage/box/drone_kit/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_items = 2
+	STR.max_w_class = WEIGHT_CLASS_NORMAL
+	STR.can_hold = typecacheof(list(/obj/item/mining_drone_cube, /obj/item/weldingtool/hugetank))
+
+/obj/item/storage/box/drone_kit/PopulateContents()
 	new /obj/item/mining_drone_cube(src)
 	new /obj/item/weldingtool/hugetank(src)
 

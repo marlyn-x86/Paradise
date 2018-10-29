@@ -12,15 +12,19 @@
 	righthand_file = 'icons/mob/inhands/clothing_righthand.dmi'
 	w_class = WEIGHT_CLASS_BULKY
 	slot_flags = SLOT_BACK	//ERROOOOO
-	max_w_class = WEIGHT_CLASS_NORMAL
-	max_combined_w_class = 21
-	storage_slots = 21
 	burn_state = FLAMMABLE
 	burntime = 20
 	species_fit = list("Vox")
 	sprite_sheets = list(
 		"Vox" = 'icons/mob/species/vox/back.dmi'
 		)
+
+/obj/item/storage/backpack/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_combined_w_class = 21
+	STR.max_w_class = WEIGHT_CLASS_NORMAL
+	STR.max_items = 21
 
 /obj/item/storage/backpack/attackby(obj/item/W as obj, mob/user as mob, params)
 	playsound(src.loc, "rustle", 50, 1, -5)
@@ -35,35 +39,11 @@
 	desc = "A backpack that opens into a localized pocket of Blue Space."
 	origin_tech = "bluespace=5;materials=4;engineering=4;plasmatech=5"
 	icon_state = "holdingpack"
-	max_w_class = WEIGHT_CLASS_HUGE
-	max_combined_w_class = 35
 	burn_state = FIRE_PROOF
 	flags_2 = NO_MAT_REDEMPTION_2
-	cant_hold = list(/obj/item/storage/backpack/holding)
+	component_type = /datum/component/storage/concrete/bag_of_holding
 
-/obj/item/storage/backpack/holding/New()
-	..()
-	return
-
-/obj/item/storage/backpack/holding/attackby(obj/item/W, mob/user, params)
-	if(istype(W, /obj/item/storage/backpack/holding))
-		var/response = alert(user, "Are you sure you want to put the bag of holding inside another bag of holding?","Are you sure you want to die?","Yes","No")
-		if(response == "Yes")
-			user.visible_message("<span class='warning'>[user] grins as [user.p_they()] begin[user.p_s()] to put a Bag of Holding into a Bag of Holding!</span>", "<span class='warning'>You begin to put the Bag of Holding into the Bag of Holding!</span>")
-			if(do_after(user, 30, target=src))
-				investigate_log("has become a singularity. Caused by [user.key]","singulo")
-				user.visible_message("<span class='warning'>[user] erupts in evil laughter as [user.p_they()] put[user.p_s()] the Bag of Holding into another Bag of Holding!</span>", "<span class='warning'>You can't help but laugh wildly as you put the Bag of Holding into another Bag of Holding, complete darkness surrounding you.</span>","<span class='warning'> You hear the sound of scientific evil brewing! </span>")
-				qdel(W)
-				var/obj/singularity/singulo = new /obj/singularity(get_turf(user))
-				singulo.energy = 300 //To give it a small boost
-				message_admins("[key_name_admin(user)] detonated a bag of holding <A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[x];Y=[y];Z=[z]'>JMP</a>)")
-				log_game("[key_name(user)] detonated a bag of holding")
-				qdel(src)
-			else
-				user.visible_message("After careful consideration, [user] has decided that putting a Bag of Holding inside another Bag of Holding would not yield the ideal outcome.","You come to the realization that this might not be the greatest idea.")
-	else
-		. = ..()
-
+// FIXME this should be implemented on the storage component
 /obj/item/storage/backpack/holding/singularity_act(current_size)
 	var/dist = max((current_size - 2),1)
 	explosion(src.loc,(dist),(dist*2),(dist*4))
@@ -75,8 +55,12 @@
 	icon_state = "giftbag0"
 	item_state = "giftbag"
 	w_class = WEIGHT_CLASS_BULKY
-	max_w_class = WEIGHT_CLASS_NORMAL
-	max_combined_w_class = 400 // can store a ton of shit!
+
+/obj/item/storage/backpack/santabag/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_w_class = WEIGHT_CLASS_NORMAL
+	STR.max_combined_w_class = 400
 
 /obj/item/storage/backpack/cultpack
 	name = "trophy rack"
@@ -167,10 +151,9 @@
 	desc = "An NT Deluxe satchel, with the finest quality leather and the company logo in a thin gold stitch"
 	icon_state = "nt_deluxe"
 
-/obj/item/storage/backpack/satchel/withwallet
-	New()
-		..()
-		new /obj/item/storage/wallet/random( src )
+/obj/item/storage/backpack/satchel/withwallet/PopulateContents()
+	. = ..()
+	new /obj/item/storage/wallet/random( src )
 
 /obj/item/storage/backpack/satchel_norm
 	name = "satchel"
@@ -230,9 +213,13 @@
 	desc = "A very slim satchel that can easily fit into tight spaces."
 	icon_state = "satchel-flat"
 	w_class = WEIGHT_CLASS_NORMAL //Can fit in backpacks itself.
-	max_combined_w_class = 15
 	level = 1
-	cant_hold = list(/obj/item/storage/backpack/satchel_flat) //muh recursive backpacks
+
+/obj/item/storage/backpack/satchel_flat/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_combined_w_class = 15
+	STR.cant_hold = typecacheof(list(/obj/item/storage/backpack/satchel_flat))
 
 /obj/item/storage/backpack/satchel_flat/hide(var/intact)
 	if(intact)
@@ -258,8 +245,12 @@
 	desc = "A large grey duffelbag designed to hold more items than a regular bag."
 	icon_state = "duffel"
 	item_state = "duffel"
-	max_combined_w_class = 30
 	slowdown = 1
+
+/obj/item/storage/backpack/duffel/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_combined_w_class = 30
 
 /obj/item/storage/backpack/duffel/syndie
 	name = "suspicious looking duffelbag"
@@ -267,8 +258,12 @@
 	icon_state = "duffel-syndi"
 	item_state = "duffel-syndimed"
 	origin_tech = "syndicate=1"
-	silent = 1
 	slowdown = 0
+
+/obj/item/storage/backpack/duffel/syndie/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.silent = TRUE
 
 /obj/item/storage/backpack/duffel/syndie/med
 	name = "suspicious duffelbag"
@@ -285,8 +280,7 @@
 /obj/item/storage/backpack/duffel/syndie/ammo/loaded
 	desc = "A large duffelbag, packed to the brim with Bulldog shotgun ammo."
 
-/obj/item/storage/backpack/duffel/syndie/ammo/loaded/New()
-	..()
+/obj/item/storage/backpack/duffel/syndie/ammo/loaded/PopulateContents()
 	new /obj/item/ammo_box/magazine/m12g(src)
 	new /obj/item/ammo_box/magazine/m12g(src)
 	new /obj/item/ammo_box/magazine/m12g(src)
@@ -303,8 +297,7 @@
 	icon_state = "duffel-syndimed"
 	item_state = "duffel-syndimed"
 
-/obj/item/storage/backpack/duffel/syndie/surgery/New()
-	..()
+/obj/item/storage/backpack/duffel/syndie/surgery/PopulateContents()
 	new /obj/item/scalpel(src)
 	new /obj/item/hemostat(src)
 	new /obj/item/retractor(src)
@@ -325,7 +318,6 @@
 	item_state = "duffel-syndimed"
 
 /obj/item/storage/backpack/duffel/syndie/surgery_fake/New()
-	..()
 	new /obj/item/scalpel(src)
 	new /obj/item/hemostat(src)
 	new /obj/item/retractor(src)

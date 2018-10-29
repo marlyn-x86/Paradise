@@ -36,10 +36,7 @@
 	projectiletype = /obj/item/projectile/kinetic
 	projectilesound = 'sound/weapons/Gunshot4.ogg'
 	speak_emote = list("states")
-	wanted_objects = list(/obj/item/ore/diamond, /obj/item/ore/gold, /obj/item/ore/silver,
-						  /obj/item/ore/plasma,  /obj/item/ore/uranium,    /obj/item/ore/iron,
-						  /obj/item/ore/bananium, /obj/item/ore/tranquillite, /obj/item/ore/glass,
-						  /obj/item/ore/titanium)
+	wanted_objects = subtypesof(/obj/item/stack/ore)
 	healable = 0
 	var/mode = MINEDRONE_COLLECT
 	var/light_on = 0

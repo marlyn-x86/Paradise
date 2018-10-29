@@ -482,12 +482,9 @@ BLIND     // can't see anything
 						A.UpdateButtonIcon()
 			else
 				if(user.canUnEquip(src)) //Checks to see if the item can be unequipped. If so, lets shred. Otherwise, struggle and fail.
-					if(contents) //If the suit's got any storage capability...
-						for(var/obj/item/O in contents) //AVOIDING ITEM LOSS. Check through everything that's stored in the jacket and see if one of the items is a pocket.
-							if(istype(O, /obj/item/storage/internal)) //If it's a pocket...
-								if(O.contents) //Check to see if the pocket's got anything in it.
-									for(var/obj/item/I in O.contents) //Dump the pocket out onto the floor below the user.
-										user.unEquip(I,1)
+					GET_COMPONENT(STR, /datum/component/storage)
+					if(STR) //If the suit's got any storage capability...
+						STR.do_quick_empty(get_turf(user)) //AVOIDING ITEM LOSS. Dump the pocket out onto the floor below the user.
 
 					user.visible_message("<span class='warning'>[user] bellows, [pick("shredding", "ripping open", "tearing off")] [user.p_their()] jacket in a fit of rage!</span>","<span class='warning'>You accidentally [pick("shred", "rend", "tear apart")] [src] with your [pick("excessive", "extreme", "insane", "monstrous", "ridiculous", "unreal", "stupendous")] [pick("power", "strength")]!</span>")
 					user.unEquip(src)

@@ -278,15 +278,15 @@
 	desc = "Contains inflatable walls and doors."
 	icon_state = "inf_box"
 	item_state = "syringe_kit"
-	max_combined_w_class = 21
 	w_class = WEIGHT_CLASS_NORMAL
 
-/obj/item/storage/briefcase/inflatable/New()
-	..()
-	new /obj/item/inflatable/door(src)
-	new /obj/item/inflatable/door(src)
-	new /obj/item/inflatable/door(src)
-	new /obj/item/inflatable(src)
-	new /obj/item/inflatable(src)
-	new /obj/item/inflatable(src)
-	new /obj/item/inflatable(src)
+/obj/item/storage/briefcase/inflatable/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_combined_w_class = 7 * WEIGHT_CLASS_NORMAL
+
+/obj/item/storage/briefcase/inflatable/PopulateContents()
+	for(var/i in 1 to 3)
+		new /obj/item/inflatable/door(src)
+	for(var/i in 1 to 4)
+		new /obj/item/inflatable(src)

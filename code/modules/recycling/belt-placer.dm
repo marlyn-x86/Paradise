@@ -4,15 +4,20 @@
 	icon_state = "belt_placer"
 	item_state = "belt_placer"
 	w_class = WEIGHT_CLASS_BULKY //Because belts are large things, you know?
-	can_hold = list(/obj/item/conveyor_construct)
 	flags = CONDUCT
-	max_w_class = WEIGHT_CLASS_BULKY
-	max_combined_w_class = 28 //7 belts
-	allow_quick_gather = TRUE
-	allow_quick_empty = TRUE
-	display_contents_with_number = TRUE
-	use_to_pickup = TRUE
 	origin_tech = "engineering=1"
+
+/obj/item/storage/conveyor/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_w_class = WEIGHT_CLASS_BULKY
+	STR.max_combined_w_class = 7 * WEIGHT_CLASS_BULKY //7 belts
+	STR.allow_big_nesting = TRUE
+	STR.click_gather = TRUE
+	STR.display_numerical_stacking = TRUE
+	STR.allow_quick_gather = TRUE
+	STR.allow_quick_empty = TRUE
+	STR.can_hold = typecacheof(list(/obj/item/conveyor_construct))
 
 /obj/item/storage/conveyor/bluespace
 	name = "bluespace conveyor belt placer"
@@ -20,9 +25,13 @@
 	icon_state = "bluespace_belt_placer"
 	item_state = "bluespace_belt_placer"
 	w_class = WEIGHT_CLASS_NORMAL
-	storage_slots = 50
-	max_combined_w_class = 200 //50 belts
 	origin_tech = "engineering=2;bluespace=1"
+
+/obj/item/storage/conveyor/bluespace/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_items = 50
+	STR.max_combined_w_class = 50 * WEIGHT_CLASS_BULKY
 
 /obj/item/storage/conveyor/attackby(obj/item/I, mob/user, params) //So we can link belts en masse
 	if(istype(I, /obj/item/conveyor_switch_construct))

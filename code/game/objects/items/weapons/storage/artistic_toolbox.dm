@@ -36,30 +36,30 @@
 			to_chat(user, "<i><b><font face = Tempus Sans ITC>His Grace accepts thee, spread His will! All who look close to the Enlightened may share His gifts.</font></b></i>")
 			original_owner = user
 			return
-	..()
+	. = ..()
 
 /obj/item/storage/toolbox/green/memetic/attackby(obj/item/I, mob/user)
 	if(activated)
 		if(istype(I, /obj/item/grab/))
 			var/obj/item/grab/G = I
 			if(!G.affecting)
-				return
+				return FALSE
 			if(!user.HasDisease(new /datum/disease/memetic_madness(0)))
 				to_chat(user, "<span class='warning'>You can't seem to find the latch to open this.</span>")
-				return
+				return FALSE
 			if(!ishuman(G.affecting) || issmall(G.affecting))
 				to_chat(user, "<span class='warning'>His Grace will not accept such a meager offering!</span>")
-				return
+				return FALSE
 			if(!mindless_override)
 				if(G.affecting.mind == null && G.affecting.ckey == null)
 					to_chat(user, "<span class='warning'>His Grace will not accept a soulless shell for an offering!</span>")
-					return
+					return FALSE
 			if(!G.affecting.stat && !G.affecting.restrained() && !G.affecting.weakened)
 				to_chat(user, "<span class='warning'>They're moving too much to feed to His Grace!</span>")
-				return
+				return FALSE
 			user.visible_message("<span class='userdanger'>[user] is trying to feed [G.affecting] to [src]!</span>")
 			if(!do_mob(user, G.affecting, 30))
-				return
+				return FALSE
 			G.affecting.forceMove(src)
 			user.visible_message("<span class='userdanger'>[user] has fed [G.affecting] to [src]!</span>")
 
@@ -69,9 +69,9 @@
 			to_chat(user, "<i><b><font face = Tempus Sans ITC>You have done well...</font></b></i>")
 			force += 5
 			throwforce += 5
-			return
+			return TRUE
 
-	..()
+	. = ..()
 
 /obj/item/storage/toolbox/green/memetic/proc/consume(mob/M)
 	if(!M)

@@ -5,47 +5,32 @@
 	item_color = "webbing"
 	slot = "utility"
 	var/slots = 3
-	var/obj/item/storage/internal/hold
 	actions_types = list(/datum/action/item_action/accessory/storage)
 	w_class = WEIGHT_CLASS_NORMAL // so it doesn't fit in pockets
 
-/obj/item/clothing/accessory/storage/New()
-	..()
-	hold = new/obj/item/storage/internal(src)
-	hold.storage_slots = slots
-
-/obj/item/clothing/accessory/storage/Destroy()
-	QDEL_NULL(hold)
-	return ..()
-
-/obj/item/clothing/accessory/storage/attack_hand(mob/user as mob)
-	if(has_suit)	//if we are part of a suit
-		hold.open(user)
-		return
-
-	if(hold.handle_attack_hand(user))	//otherwise interact as a regular storage item
-		..(user)
+/obj/item/clothing/accessory/storage/ComponentInitialize()
+	. = ..()
+	var/datum/component/storage/STR = LoadComponent(/datum/component/storage/concrete)
+	STR.max_items = slots
 
 /obj/item/clothing/accessory/storage/MouseDrop(obj/over_object as obj)
 	if(has_suit)
 		return
-
-	if(hold.handle_mousedrop(usr, over_object))
-		..(over_object)
-
-/obj/item/clothing/accessory/storage/attackby(obj/item/W as obj, mob/user as mob, params)
-	return hold.attackby(W, user, params)
+	return ..()
 
 /obj/item/clothing/accessory/storage/emp_act(severity)
-	hold.emp_act(severity)
+	for(var/atom/A in contents)
+		A.emp_act(severity)
 	..()
 
 /obj/item/clothing/accessory/storage/hear_talk(mob/M, var/msg, verb, datum/language/speaking)
-	hold.hear_talk(M, msg, verb, speaking)
+	for(var/atom/A in contents)
+		A.hear_talk(M, msg, verb, speaking)
 	..()
 
 /obj/item/clothing/accessory/storage/hear_message(mob/M, var/msg, verb, datum/language/speaking)
-	hold.hear_message(M, msg)
+	for(var/atom/A in contents)
+		A.hear_message(M, msg)
 	..()
 
 /obj/item/clothing/accessory/storage/proc/return_inv()
@@ -63,14 +48,14 @@
 	return L
 
 /obj/item/clothing/accessory/storage/attack_self(mob/user as mob)
+	GET_COMPONENT(STR, /datum/component/storage)
 	if(has_suit)	//if we are part of a suit
-		hold.open(user)
+		STR.open(user)
 	else
 		to_chat(user, "<span class='notice'>You empty [src].</span>")
 		var/turf/T = get_turf(src)
-		hold.hide_from(usr)
-		for(var/obj/item/I in hold.contents)
-			hold.remove_from_storage(I, T)
+		STR.close(user)
+		STR.do_quick_empty(get_turf(user))
 		src.add_fingerprint(user)
 
 /obj/item/clothing/accessory/storage/webbing
@@ -104,10 +89,12 @@
 	item_color = "unathiharness2"
 	slots = 2
 
-/obj/item/clothing/accessory/storage/knifeharness/New()
-	..()
-	hold.max_combined_w_class = 4
-	hold.can_hold = list(/obj/item/hatchet/unathiknife, /obj/item/kitchen/knife)
+/obj/item/clothing/accessory/storage/knifeharness/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_combined_w_class = 4
+	STR.can_hold = typecacheof(list(/obj/item/hatchet/unathiknife, /obj/item/kitchen/knife))
 
-	new /obj/item/hatchet/unathiknife(hold)
-	new /obj/item/hatchet/unathiknife(hold)
+/obj/item/clothing/accessory/storage/knifeharness/PopulateContents()
+	new /obj/item/hatchet/unathiknife(src)
+	new /obj/item/hatchet/unathiknife(src)

@@ -24,8 +24,12 @@
 	var/emagged = 0
 	var/open = 0
 	w_class = WEIGHT_CLASS_NORMAL
-	max_w_class = WEIGHT_CLASS_SMALL
-	max_combined_w_class = 14
+
+/obj/item/storage/secure/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_w_class = WEIGHT_CLASS_SMALL
+	STR.max_combined_w_class = 14
 
 /obj/item/storage/secure/examine(mob/user)
 	if(..(user, 1))
@@ -138,19 +142,19 @@
 				code = "ERROR"
 		else
 			if((href_list["type"] == "R") && (emagged == 0) && (!l_setshort))
-				locked = 1
+				GET_COMPONENT(STR, /datum/component/storage)
+				STR.locked = TRUE
+				locked = TRUE // FIXME remove this later
 				overlays = null
 				code = null
-				close(usr)
+				STR.close(usr)
 			else
 				code += text("[]", href_list["type"])
 				if(length(code) > 5)
 					code = "ERROR"
 		add_fingerprint(usr)
-		for(var/mob/M in viewers(1, loc))
-			if((M.client && M.machine == src))
-				attack_self(M)
-			return
+		GET_COMPONENT(STR, /datum/component/storage)
+		STR.refresh_mob_views()
 	return
 
 /obj/item/storage/secure/can_be_inserted(obj/item/W as obj, stop_messages = 0)
@@ -181,47 +185,32 @@
 	throw_speed = 2
 	throw_range = 4
 	w_class = WEIGHT_CLASS_BULKY
-	max_w_class = WEIGHT_CLASS_NORMAL
-	max_combined_w_class = 21
 	attack_verb = list("bashed", "battered", "bludgeoned", "thrashed", "whacked")
 
-/obj/item/storage/secure/briefcase/New()
-	..()
-	handle_item_insertion(new /obj/item/paper, 1)
-	handle_item_insertion(new /obj/item/pen, 1)
+/obj/item/storage/secure/briefcase/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_combined_w_class = 21
+	STR.max_w_class = WEIGHT_CLASS_NORMAL
 
-/obj/item/storage/secure/briefcase/attack_hand(mob/user as mob)
-	if((loc == user) && (locked == 1))
-		to_chat(usr, "<span class='warning'>[src] is locked and cannot be opened!</span>")
-	else if((loc == user) && !locked)
-		playsound(loc, "rustle", 50, 1, -5)
-		if(user.s_active)
-			user.s_active.close(user) //Close and re-open
-		show_to(user)
-	else
-		..()
-		for(var/mob/M in range(1))
-			if(M.s_active == src)
-				close(M)
-		orient2hud(user)
-	add_fingerprint(user)
-	return
+/obj/item/storage/secure/briefcase/PopulateContents()
+	new /obj/item/paper(src)
+	new /obj/item/pen(src)
 
 //Syndie variant of Secure Briefcase. Contains space cash, slightly more robust.
 /obj/item/storage/secure/briefcase/syndie
 	force = 15
 
-/obj/item/storage/secure/briefcase/syndie/New()
-	..()
-	for(var/i = 0, i < storage_slots - 2, i++)
-		handle_item_insertion(new /obj/item/stack/spacecash/c1000, 1)
+/obj/item/storage/secure/briefcase/syndie/PopulateContents()
+	GET_COMPONENT(STR, /datum/component/storage)
+	for(var/i = 0, i < STR.max_items - 2, i++)
+		new /obj/item/stack/spacecash/c1000(src)
 
-/obj/item/storage/secure/briefcase/reaper/New()
-	..()
-	handle_item_insertion(new /obj/item/gun/energy/kinetic_accelerator/crossbow, 1)
-	handle_item_insertion(new /obj/item/gun/projectile/revolver/mateba, 1)
-	handle_item_insertion(new /obj/item/ammo_box/a357, 1)
-	handle_item_insertion(new /obj/item/grenade/plastic/c4, 1)
+/obj/item/storage/secure/briefcase/reaper/PopulateContents()
+	new /obj/item/gun/energy/kinetic_accelerator/crossbow(src)
+	new /obj/item/gun/projectile/revolver/mateba(src)
+	new /obj/item/ammo_box/a357(src)
+	new /obj/item/grenade/plastic/c4(src)
 
 
 // -----------------------------
@@ -237,15 +226,18 @@
 	icon_sparking = "safespark"
 	force = 8
 	w_class = WEIGHT_CLASS_HUGE
-	max_w_class = 8
 	anchored = 1
 	density = 0
-	cant_hold = list(/obj/item/storage/secure/briefcase)
 
-/obj/item/storage/secure/safe/New()
-	..()
-	handle_item_insertion(new /obj/item/paper, 1)
-	handle_item_insertion(new /obj/item/pen, 1)
+/obj/item/storage/secure/safe/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_w_class = 8
+	STR.cant_hold = typecacheof(list(/obj/item/storage/secure/briefcase))
+
+/obj/item/storage/secure/safe/PopulateContents()
+	new /obj/item/paper(src)
+	new /obj/item/pen(src)
 
 /obj/item/storage/secure/safe/attack_hand(mob/user as mob)
 	return attack_self(user)

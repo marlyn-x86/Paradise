@@ -13,17 +13,20 @@
  *		Cigarette Box
  */
 
-/obj/item/storage/fancy/
+/obj/item/storage/fancy
 	icon = 'icons/obj/food/containers.dmi'
 	icon_state = "donutbox6"
 	name = "donut box"
 	burn_state = FLAMMABLE
 	var/icon_type = "donut"
 
+/obj/item/storage/fancy/Initialize()
+	. = ..()
+	update_icon()
+
 /obj/item/storage/fancy/update_icon(var/itemremoved = 0)
 	var/total_contents = src.contents.len - itemremoved
 	src.icon_state = "[src.icon_type]box[total_contents]"
-	return
 
 /obj/item/storage/fancy/examine(mob/user)
 	if(!..(user, 1))
@@ -46,13 +49,16 @@
 	icon_state = "donutbox6"
 	icon_type = "donut"
 	name = "donut box"
-	storage_slots = 6
-	can_hold = list(/obj/item/reagent_containers/food/snacks/donut)
 
+/obj/item/storage/fancy/donut_box/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_items = 6
+	STR.can_hold = typecacheof(list(/obj/item/reagent_containers/food/snacks/donut))
 
-/obj/item/storage/fancy/donut_box/New()
-	..()
-	for(var/i = 1 to storage_slots)
+/obj/item/storage/fancy/donut_box/PopulateContents()
+	GET_COMPONENT(STR, /datum/component/storage)
+	for(var/i in 1 to STR.max_items)
 		new /obj/item/reagent_containers/food/snacks/donut(src)
 
 /*
@@ -63,14 +69,17 @@
 	icon_state = "eggbox"
 	icon_type = "egg"
 	name = "egg box"
-	storage_slots = 12
-	can_hold = list(/obj/item/reagent_containers/food/snacks/egg)
 
-/obj/item/storage/fancy/egg_box/New()
-	..()
-	for(var/i=1; i <= storage_slots; i++)
+/obj/item/storage/fancy/egg_box/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_items = 12
+	STR.can_hold = typecacheof(list(/obj/item/reagent_containers/food/snacks/egg))
+
+/obj/item/storage/fancy/egg_box/PopulateContents()
+	GET_COMPONENT(STR, /datum/component/storage)
+	for(var/i in 1 to STR.max_items)
 		new /obj/item/reagent_containers/food/snacks/egg(src)
-	return
 
 /*
  * Candle Box
@@ -83,26 +92,28 @@
 	icon_state = "candlebox5"
 	icon_type = "candle"
 	item_state = "candlebox5"
-	storage_slots = 5
 	throwforce = 2
 	slot_flags = SLOT_BELT
 
+/obj/item/storage/fancy/candle_box/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_items = 5
 
-/obj/item/storage/fancy/candle_box/full/New()
-	..()
-	for(var/i=1; i <= storage_slots; i++)
+/obj/item/storage/fancy/candle_box/full/PopulateContents()
+	GET_COMPONENT(STR, /datum/component/storage)
+	for(var/i in 1 to STR.max_items)
 		new /obj/item/candle(src)
-	return
+
 
 /obj/item/storage/fancy/candle_box/eternal
 	name = "Eternal Candle pack"
 	desc = "A pack of red candles made with a special wax."
 
-/obj/item/storage/fancy/candle_box/eternal/New()
-	..()
-	for(var/i=1; i <= storage_slots; i++)
+/obj/item/storage/fancy/candle_box/eternal/PopulateContents()
+	GET_COMPONENT(STR, /datum/component/storage)
+	for(var/i in 1 to STR.max_items)
 		new /obj/item/candle/eternal(src)
-	return
 
 /*
  * Crayon Box
@@ -114,21 +125,23 @@
 	icon = 'icons/obj/crayons.dmi'
 	icon_state = "crayonbox"
 	w_class = WEIGHT_CLASS_SMALL
-	storage_slots = 6
 	icon_type = "crayon"
-	can_hold = list(
-		/obj/item/toy/crayon
-	)
 
-/obj/item/storage/fancy/crayons/New()
-	..()
+/obj/item/storage/fancy/crayons/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_items = 6
+	STR.can_hold = typecacheof(list(
+		/obj/item/toy/crayon
+	))
+
+/obj/item/storage/fancy/crayons/PopulateContents()
 	new /obj/item/toy/crayon/red(src)
 	new /obj/item/toy/crayon/orange(src)
 	new /obj/item/toy/crayon/yellow(src)
 	new /obj/item/toy/crayon/green(src)
 	new /obj/item/toy/crayon/blue(src)
 	new /obj/item/toy/crayon/purple(src)
-	update_icon()
 
 /obj/item/storage/fancy/crayons/update_icon()
 	overlays = list() //resets list
@@ -141,11 +154,11 @@
 		switch(W:colourName)
 			if("mime")
 				to_chat(usr, "This crayon is too sad to be contained in this box.")
-				return
+				return FALSE
 			if("rainbow")
 				to_chat(usr, "This crayon is too powerful to be contained in this box.")
-				return
-	..()
+				return FALSE
+	return ..()
 
 ////////////
 //CIG PACK//
@@ -159,38 +172,42 @@
 	w_class = WEIGHT_CLASS_SMALL
 	throwforce = 2
 	slot_flags = SLOT_BELT
-	storage_slots = 6
-	max_combined_w_class = 6
-	can_hold = list(/obj/item/clothing/mask/cigarette,
-		/obj/item/lighter,
-		/obj/item/match)
-	cant_hold = list(/obj/item/clothing/mask/cigarette/cigar,
-		/obj/item/clothing/mask/cigarette/pipe,
-		/obj/item/lighter/zippo)
 	icon_type = "cigarette"
 	var/list/unlaced_cigarettes = list() // Cigarettes that haven't received reagents yet
 	var/default_reagents = list("nicotine" = 15) // List of reagents to pre-generate for each cigarette
 	var/cigarette_type = /obj/item/clothing/mask/cigarette
 
-/obj/item/storage/fancy/cigarettes/New()
-	..()
-	create_reagents(30 * storage_slots)//so people can inject cigarettes without opening a packet, now with being able to inject the whole one
+/obj/item/storage/fancy/cigarettes/Initialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	create_reagents(30 * STR.max_items)//so people can inject cigarettes without opening a packet, now with being able to inject the whole one
 	reagents.set_reacting(FALSE)
-	for(var/i = 1 to storage_slots)
+
+/obj/item/storage/fancy/cigarettes/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_items = 6
+	STR.max_combined_w_class = 6
+	STR.can_hold = typecacheof(list(/obj/item/clothing/mask/cigarette, /obj/item/lighter))
+	STR.cant_hold = typecacheof(list(
+		/obj/item/clothing/mask/cigarette/cigar,
+		/obj/item/clothing/mask/cigarette/pipe,
+		/obj/item/lighter/zippo))
+
+/obj/item/storage/fancy/cigarettes/PopulateContents()
+	GET_COMPONENT(STR, /datum/component/storage)
+	for(var/i = 1 to STR.max_items)
 		var/obj/item/clothing/mask/cigarette/C = new cigarette_type(src)
 		unlaced_cigarettes += C
 		for(var/R in default_reagents)
 			reagents.add_reagent(R, default_reagents[R])
 
-
 /obj/item/storage/fancy/cigarettes/Destroy()
 	QDEL_NULL(reagents)
 	return ..()
 
-
 /obj/item/storage/fancy/cigarettes/update_icon()
 	icon_state = "[initial(icon_state)][contents.len]"
-	return
 
 /obj/item/storage/fancy/cigarettes/proc/lace_cigarette(var/obj/item/clothing/mask/cigarette/C as obj)
 	if(istype(C) && (C in unlaced_cigarettes)) // Only transfer reagents to each cigarette once
@@ -245,14 +262,13 @@
 	icon_state = "Dpacket"
 	item_state = "cigpacket"
 
-
 /obj/item/storage/fancy/cigarettes/syndicate
 	name = "\improper Syndicate Cigarettes"
 	desc = "A packet of six evil-looking cigarettes, A label on the packaging reads, \"Donk Co\""
 	icon_state = "robustpacket"
 	item_state = "cigpacket"
 
-/obj/item/storage/fancy/cigarettes/syndicate/New()
+/obj/item/storage/fancy/cigarettes/syndicate/Initialize()
 	..()
 	var/new_name = pick("evil", "suspicious", "ominous", "donk-flavored", "robust", "sneaky")
 	name = "[new_name] cigarette packet"
@@ -326,13 +342,17 @@
 	w_class = WEIGHT_CLASS_TINY
 	icon = 'icons/obj/cigarettes.dmi'
 	icon_state = "cig_paper_pack"
-	storage_slots = 10
 	icon_type = "rolling paper"
-	can_hold = list(/obj/item/rollingpaper)
 
-/obj/item/storage/fancy/rollingpapers/New()
-	..()
-	for(var/i in 1 to storage_slots)
+/obj/item/storage/fancy/rollingpapers/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.can_hold = typecacheof(list(/obj/item/rollingpaper))
+	STR.max_items = 10
+
+/obj/item/storage/fancy/rollingpapers/PopulateContents()
+	GET_COMPONENT(STR, /datum/component/storage)
+	for(var/i in 1 to STR.max_items)
 		new /obj/item/rollingpaper(src)
 
 /obj/item/storage/fancy/rollingpapers/update_icon()
@@ -349,31 +369,39 @@
 	icon_state = "vialbox6"
 	icon_type = "vial"
 	name = "vial storage box"
-	storage_slots = 6
-	can_hold = list(/obj/item/reagent_containers/glass/beaker/vial)
 
+/obj/item/storage/fancy/vials/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_items = 6
+	STR.can_hold = typecacheof(list(/obj/item/reagent_containers/glass/beaker/vial))
 
-/obj/item/storage/fancy/vials/New()
-	..()
-	for(var/i=1; i <= storage_slots; i++)
+/obj/item/storage/fancy/vials/PopulateContents()
+	GET_COMPONENT(STR, /datum/component/storage)
+	for(var/i=1; i <= STR.max_items; i++)
 		new /obj/item/reagent_containers/glass/beaker/vial(src)
-	return
 
+
+// hey this isn't a fancy storage object
 /obj/item/storage/lockbox/vials
 	name = "secure vial storage box"
 	desc = "A locked box for keeping things away from children."
 	icon = 'icons/obj/vialbox.dmi'
 	icon_state = "vialbox0"
 	item_state = "syringe_kit"
-	max_w_class = WEIGHT_CLASS_NORMAL
-	can_hold = list(/obj/item/reagent_containers/glass/beaker/vial)
-	max_combined_w_class = 14 //The sum of the w_classes of all the items in this storage item.
-	storage_slots = 6
 	req_access = list(access_virology)
 
-/obj/item/storage/lockbox/vials/New()
-	..()
+/obj/item/storage/lockbox/vials/Initialize()
+	. = ..()
 	update_icon()
+
+/obj/item/storage/lockbox/vials/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_w_class = WEIGHT_CLASS_NORMAL
+	STR.max_items = 6
+	STR.max_combined_w_class = 14
+	STR.can_hold = typecacheof(list(/obj/item/reagent_containers/glass/beaker/vial))
 
 /obj/item/storage/lockbox/vials/update_icon(var/itemremoved = 0)
 	var/total_contents = src.contents.len - itemremoved
@@ -392,7 +420,7 @@
 	update_icon()
 
 
-
+// wtf is this doing in "fancy"??
 ///Aquatic Starter Kit
 
 /obj/item/storage/firstaid/aquatic_kit
@@ -406,8 +434,7 @@
 /obj/item/storage/firstaid/aquatic_kit/full
 	desc = "It's a starter kit for an acquarium; includes 1 tank brush, 1 egg scoop, 1 fish net, and 1 container of fish food."
 
-/obj/item/storage/firstaid/aquatic_kit/full/New()
-	..()
+/obj/item/storage/firstaid/aquatic_kit/full/PopulateContents()
 	new /obj/item/egg_scoop(src)
 	new /obj/item/fish_net(src)
 	new /obj/item/tank_brush(src)

@@ -9,13 +9,16 @@
 	burntime = 20
 	max_integrity = 100
 	w_class = WEIGHT_CLASS_BULKY
-	max_w_class = WEIGHT_CLASS_NORMAL
-	storage_slots = 40
-	max_combined_w_class = 40
-	can_hold = list(/obj/item/coin, /obj/item/stack/spacecash)
 
-/obj/item/storage/bag/money/vault/New()
-	..()
+/obj/item/storage/bag/money/ComponentInitialize()
+	. = ..()
+	GET_COMPONENT(STR, /datum/component/storage)
+	STR.max_w_class = WEIGHT_CLASS_NORMAL
+	STR.max_items = 40
+	STR.max_combined_w_class = 40
+	var/static/list/can_hold = typecacheof(list(/obj/item/coin, /obj/item/stack/spacecash))
+
+/obj/item/storage/bag/money/vault/PopulateContents()
 	new /obj/item/coin/silver(src)
 	new /obj/item/coin/silver(src)
 	new /obj/item/coin/silver(src)
